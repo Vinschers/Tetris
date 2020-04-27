@@ -210,21 +210,6 @@ WndProc proc hWin   :DWORD,
         invoke  TextOut, hdc, 40, 40, ADDR MSG3, eax
 
         invoke EndPaint, hWin, ADDR ps
-    .elseif uMsg == WM_CLOSE
-    ; -------------------------------------------------------------------
-    ; This is the place where various requirements are performed before
-    ; the application exits to the operating system such as deleting
-    ; resources and testing if files have been saved. You have the option
-    ; of returning ZERO if you don't wish the application to close which
-    ; exits the WndProc procedure without passing this message to the
-    ; default window processing done by the operating system.
-    ; -------------------------------------------------------------------
-        szText TheText,"Please Confirm Exit"
-        invoke MessageBox,hWin,ADDR TheText,ADDR szDisplayName,MB_YESNO
-        .if eax == IDNO
-            return 0
-        .endif
-
     .elseif uMsg == WM_DESTROY
     ; ----------------------------------------------------------------
     ; This message MUST be processed to cleanly exit the application.
