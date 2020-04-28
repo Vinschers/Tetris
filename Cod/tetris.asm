@@ -15,6 +15,12 @@ matriz struct
     largura     BYTE    ?
 matriz ends
 
+tetrimino struct
+    tipo    BYTE    ?
+    posicao BYTE    ?
+    mat     matriz  <>
+tetrimino ends
+
 
 .data?
     hitpoint POINT <>
@@ -37,8 +43,10 @@ matriz ends
 
     MouseClick      db 0 ; 0 = no click yet
     txt             dd 100,0
-    mat             matriz <>
-    vet             db 0,1,0,1,1,1,0,0,0
+    mapa            matriz <>
+    vet             db  1,0,0,1,1,1,0,0,0
+    vetMapa         db  200 dup(0)
+    bloco           tetrimino <>
 
 .code   ; parte do codigo
 
@@ -61,9 +69,13 @@ WndProc proc hWin   :DWORD,
     mov hHeap, eax
 
     .if uMsg == WM_CREATE
-        mov mat.ponteiro, OFFSET vet
-        mov mat.altura, 3
-        mov mat.largura, 3
+        mov bloco.mat.ponteiro, OFFSET vet
+        mov bloco.mat.altura, 3
+        mov bloco.mat.largura, 3
+
+        mov mapa.ponteiro, OFFSET vetMapa
+        mov mapa.altura, 20
+        mov mapa.largura, 10
 
     ;; lparam da mensagem traz as posições x e y do mouse
     .elseif uMsg == WM_LBUTTONDOWN

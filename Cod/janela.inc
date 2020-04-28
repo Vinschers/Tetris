@@ -97,3 +97,19 @@ ExitLoop:
     return msg.wParam
 
 WinMain endp
+
+
+;ax -> coluna
+;resto -> linha
+getPixel proc pos:BYTE
+    xor eax, eax
+    xor edx, edx
+    mov al, pos
+    mov ecx, 10
+    div ecx
+    add eax, 10
+    add edx, 10
+    shl eax, 16
+    mov ax, dx
+    ret
+getPixel endp
