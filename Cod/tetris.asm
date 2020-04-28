@@ -9,19 +9,31 @@ WndProc PROTO :DWORD,:DWORD,:DWORD,:DWORD
 TopXY PROTO   :DWORD,:DWORD
 
 
+matriz struct
+    ponteiro    DWORD   ?
+    altura      BYTE    ?
+    largura     BYTE    ?
+matriz ends
+
+
 .data?
     hitpoint POINT <>
     posx  dd ?
     posy  dd ?
+    
 
 
 .data   ; area de dados já inicializados.
-    szDisplayName db "Tetris",0 
-    CommandLine   dd 0  ; parametros passados pela linha de comando (ponteiro)
-    hWnd          dd 0  ; Handle principal do programa no windows
-    hInstance     dd 0  ; instancia do programa
+    szDisplayName   db "Tetris",0 
+    CommandLine     dd 0  ; parametros passados pela linha de comando (ponteiro)
+    hWnd            dd 0  ; Handle principal do programa no windows
+    hInstance       dd 0  ; instancia do programa
+    hHeap           dd 0
 
-    MouseClick    db 0 ; 0 = no click yet
+    MouseClick      db 0 ; 0 = no click yet
+    txt             dd 100,0
+    mat             matriz <>
+    vet             db 0,1,0,1,1,1,0,0,0
 
 .code   ; parte do codigo
 
@@ -107,9 +119,6 @@ WinMain proc hInst     :DWORD,
 
     mov   hWnd,eax  ; copy return value into handle DWORD
 
-    invoke LoadMenu,hInst,600                 ; load resource menu
-    invoke SetMenu,hWnd,eax                   ; set it to main window
-
     invoke ShowWindow,hWnd,SW_SHOWNORMAL      ; display the window
     invoke UpdateWindow,hWnd                  ; update the display
 
@@ -140,6 +149,9 @@ WndProc proc hWin   :DWORD,
 
     LOCAL hdc:HDC
     LOCAL ps:PAINTSTRUCT
+
+    invoke GetProcessHeap
+    mov hHeap, eax
 ; -------------------------------------------------------------------------
 ; Message are sent by the operating system to an application through the
 ; WndProc proc. Each message can have additional values associated with it
@@ -147,32 +159,10 @@ WndProc proc hWin   :DWORD,
 ; can be passed to an application is determined by the message.
 ; -------------------------------------------------------------------------
 
-    .if uMsg == WM_COMMAND
-    ;----------------------------------------------------------------------
-    ; The WM_COMMAND message is sent by menus, buttons and toolbar buttons.
-    ; Processing the wParam parameter of it is the method of obtaining the
-    ; control's ID number so that the code for each operation can be
-    ; processed. NOTE that the ID number is in the LOWORD of the wParam
-    ; passed with the WM_COMMAND message. There may be some instances where
-    ; an application needs to seperate the high and low words of wParam.
-    ; ---------------------------------------------------------------------
-    
-    ;======== menu commands ========
-
-        .if wParam == 1000
-            invoke SendMessage,hWin,WM_SYSCOMMAND,SC_CLOSE,NULL
-        .elseif wParam == 1900
-            szText TheMsg,"Assembler, Pure & Simple"
-            invoke MessageBox,hWin,ADDR TheMsg,ADDR szDisplayName,MB_OK
-
-        .elseif wParam == 1001
-            szText msg2,"Aula de Assembler Cotuca 2020"
-            invoke MessageBox,hWin,ADDR msg2,ADDR szDisplayName,MB_YESNOCANCEL
-        .endif
-
-    ;====== end menu commands ======
-
-    .elseif uMsg == WM_CREATE
+    .if uMsg == WM_CREATE
+        mov mat.ponteiro, OFFSET vet
+        mov mat.altura, 3
+        mov mat.largura, 3
     ; --------------------------------------------------------------------
     ; This message is sent to WndProc during the CreateWindowEx function
     ; call and is processed before it returns. This is used as a position
@@ -208,6 +198,23 @@ WndProc proc hWin   :DWORD,
         szText MSG3,"Assembler, Pure & Simple"
         invoke  lstrlen, ADDR MSG3
         invoke  TextOut, hdc, 40, 40, ADDR MSG3, eax
+        
+        push OFFSET mat
+        mov ecx, hWin
+        push ecx
+        call strMatriz
+
+        showmsg eax
+
+        push OFFSET mat
+        call rotacionarMatriz
+
+        push OFFSET mat
+        mov ecx, hWin
+        push ecx
+        call strMatriz
+
+        showmsg eax
 
         invoke EndPaint, hWin, ADDR ps
     .elseif uMsg == WM_DESTROY
@@ -254,5 +261,7 @@ TopXY proc wDim:DWORD, sDim:DWORD
 TopXY endp
 
 ; ########################################################################
+
+include matriz.inc
 
 end start

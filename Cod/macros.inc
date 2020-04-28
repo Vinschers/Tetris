@@ -91,6 +91,15 @@
     ENDM
 
     showmsg MACRO msg
-        string titulo,"Debug"
-        invoke MessageBox,hWin,msg,ADDR titulo,MB_OK
+        push eax
+        push ebx
+        push ecx
+        push edx
+        push esi
+        invoke MessageBox,hWin,msg, NULL, MB_OK
+        pop esi
+        pop edx
+        pop ecx
+        pop ebx
+        pop eax
     ENDM
