@@ -1,8 +1,8 @@
 criarMatriz proc
     invoke HeapAlloc, hHeap, 8, sizeof matriz
-    (matriz ptr[eax]).ponteiro = 0
-    (matriz ptr[eax]).altura = 0
-    (matriz ptr[eax]).largura = 0
+    mov (matriz ptr[eax]).ponteiro, 0
+    mov (matriz ptr[eax]).altura, 0
+    mov (matriz ptr[eax]).largura, 0
     ret
 criarMatriz endp
 

@@ -18,13 +18,17 @@ matriz ends
 
 .data?
     hitpoint POINT <>
+    rect     RECT  <>
     posx  dd ?
     posy  dd ?
     
 
 
 .data   ; area de dados já inicializados.
-    szDisplayName   db "Tetris",0 
+    szDisplayName   db "Tetris", 0 
+    proxPecaTxt     db "Proxima Peca", 0
+    pecaSeguradaTxt db "Peca Segurada", 0
+    pontuacaoTxt    db "Pontuacao", 0
     CommandLine     dd 0  ; parametros passados pela linha de comando (ponteiro)
     hWnd            dd 0  ; Handle principal do programa no windows
     hInstance       dd 0  ; instancia do programa
@@ -95,8 +99,8 @@ WinMain proc hInst     :DWORD,
     ; Centre window at following size
     ;================================
 
-    mov Wwd, 500
-    mov Wht, 350
+    mov Wwd, 630
+    mov Wht, 700
 
     invoke GetSystemMetrics,SM_CXSCREEN ; get screen width in pixels
     invoke TopXY,Wwd,eax
@@ -190,31 +194,54 @@ WndProc proc hWin   :DWORD,
     .elseif uMsg == WM_PAINT
         invoke BeginPaint, hWin, ADDR ps
         mov    hdc, eax
+        mov rect.top, 10
+        mov rect.bottom, 640
+        mov rect.left, 10
+        mov rect.right, 330 
+
+        invoke  Rectangle, hdc, rect.left, rect.top, rect.right, rect.bottom  
+
+        invoke  lstrlen, ADDR pecaSeguradaTxt
+        invoke  TextOut, hdc, 400, 20, ADDR pecaSeguradaTxt, eax
+
+        mov rect.top, 50
+        mov rect.bottom, 200
+        mov rect.left, 390
+        mov rect.right, 580 
+        invoke  Rectangle, hdc, rect.left, rect.top, rect.right, rect.bottom  
+
+
+        invoke  lstrlen, ADDR proxPecaTxt
+        invoke  TextOut, hdc, 400, 250, ADDR proxPecaTxt, eax
+
+        mov rect.top, 280
+        mov rect.bottom, 450
+        mov rect.left, 390
+        mov rect.right, 580 
+        invoke  Rectangle, hdc, rect.left, rect.top, rect.right, rect.bottom  
+
+        invoke  lstrlen, ADDR pontuacaoTxt
+        invoke  TextOut, hdc, 400, 480, ADDR pontuacaoTxt, eax
+
         .if MouseClick
-            invoke  lstrlen, ADDR szDisplayName
-            invoke  TextOut, hdc, posx, posy, ADDR szDisplayName, eax
         .endif
         
-        szText MSG3,"Assembler, Pure & Simple"
-        invoke  lstrlen, ADDR MSG3
-        invoke  TextOut, hdc, 40, 40, ADDR MSG3, eax
-        
-        push OFFSET mat
-        mov ecx, hWin
-        push ecx
-        call strMatriz
+        ;push OFFSET mat
+        ;mov ecx, hWin
+        ;push ecx
+        ;call strMatriz
 
-        showmsg eax
+        ;showmsg eax
 
-        push OFFSET mat
-        call rotacionarMatriz
+        ;push OFFSET mat
+        ;call rotacionarMatriz
 
-        push OFFSET mat
-        mov ecx, hWin
-        push ecx
-        call strMatriz
+        ;push OFFSET mat
+        ;mov ecx, hWin
+        ;push ecx
+        ;call strMatriz
 
-        showmsg eax
+        ;showmsg eax
 
         invoke EndPaint, hWin, ADDR ps
     .elseif uMsg == WM_DESTROY
