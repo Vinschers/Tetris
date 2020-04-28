@@ -48,6 +48,14 @@ tetrimino ends
     vetMapa         db  200 dup(0)
     bloco           tetrimino <>
 
+    ThreadDescer 	  dd 0
+	ExitCode 	  dd 0
+	hThread 	  dd 0
+	hEventStart   dd 0
+
+.const
+    WM_DESCER equ WM_USER+100h
+
 .code   ; parte do codigo
 
 start:  ; o programa  deve ser escrito entre start e end start
@@ -80,7 +88,7 @@ WndProc proc hWin   :DWORD,
         mov eax, OFFSET ThreadProcDescer
         invoke CreateThread,NULL,NULL,eax,\
                             NULL, NORMAL_PRIORITY_CLASS,\
-                            ADDR ThreadID
+                            ADDR ThreadDescer
                 hThread, eax
 
 
@@ -102,8 +110,16 @@ WndProc proc hWin   :DWORD,
 
     .elseif uMsg == WM_PAINT
         invoke BeginPaint, hWin, ADDR ps
-        include gui.inc   
+        include gui.inc 
+        mov ecx, HDC
+        push ecx
+        mov ecx, hWin
+        push ecx
+        call desenharTetrimino  
         invoke EndPaint, hWin, ADDR ps
+    .elseif uMsg == WM_DESCER
+        add bloco.posicao, 10
+    .endif
     .elseif uMsg == WM_DESTROY
         invoke PostQuitMessage,NULL
         return 0 
@@ -126,8 +142,39 @@ TopXY proc wDim:DWORD, sDim:DWORD
 
 TopXY endp
 
+desenharTetrimino proc hWin:DWORD, hDC:DWORD
+    LOCAL hOld:DWORD
+    LOCAL memDC :DWORD
+
+    invoke CreateCompatibleDC,hDC
+    mov memDC, eax
+
+    invoke SelectObject,memDC,bitmap
+    mov hOld, eax 
+
+    xor eax, eax 
+    xor ebx, ebx
+    mov al, bloco.posicao
+    push eax
+    call getPixel 
+    mov bx, ax ; ebx coluna e eax linha
+    shr eax, 16
+    invoke TransparentBlt,hDC,eax,ebx,32,32,memDC,0,0,224,32,CREF_TRANSPARENT
+    invoke SelectObject,hDC,hOld
+    invoke DeleteDC,memDC
+    return 0
+desenharTetrimino endp
+
 ThreadProcDescer PROC USES ecx Param:DWORD
     ;bitmap
+    invoke WaitForSingleObject,hEventStart,100
+        .IF eax == WAIT_TIMEOUT
+            invoke PostMessage,hWnd,WM_DESCER,NULL,NULL
+            jmp ThreadProcDescer
+        .ENDIF
+
+        jmp ThreadProcDescer
+    ret
 ThreadProcDescer ENDP
 
 ; ########################################################################

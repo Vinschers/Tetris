@@ -101,10 +101,9 @@ WinMain endp
 
 ;ax -> coluna
 ;resto -> linha
-getPixel proc pos:BYTE
-    xor eax, eax
+getPixel proc pos:DWORD
     xor edx, edx
-    mov al, pos
+    mov eax, pos
     mov ecx, 10
     div ecx
     add eax, 10
