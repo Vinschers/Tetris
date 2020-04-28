@@ -44,105 +44,7 @@ matriz ends
 start:  ; o programa  deve ser escrito entre start e end start
         ; inclusive procedimentos que vão ser escritos e utilizados.
     
-    invoke GetModuleHandle, NULL ; provides the instance handle
-    mov hInstance, eax
-
-    invoke GetCommandLine        ; provides the command line address
-    mov CommandLine, eax
-
-    invoke WinMain,hInstance,NULL,CommandLine,SW_SHOWDEFAULT
-    
-    invoke ExitProcess,eax       ; cleanup & return to operating system
-    
-WinMain proc hInst     :DWORD,
-             hPrevInst :DWORD,
-             CmdLine   :DWORD,
-             CmdShow   :DWORD
-
-    ;====================
-    ; Put LOCALs on stack
-    ;====================
-
-    LOCAL wc   :WNDCLASSEX
-    LOCAL msg  :MSG
-
-    LOCAL Wwd  :DWORD
-    LOCAL Wht  :DWORD
-    LOCAL Wtx  :DWORD
-    LOCAL Wty  :DWORD
-
-    szText szClassName,"Basica_Class"
-
-    ;==================================================
-    ; Fill WNDCLASSEX structure with required variables
-    ;==================================================
-
-    mov wc.cbSize,         sizeof WNDCLASSEX
-    mov wc.style,          CS_HREDRAW or CS_VREDRAW \
-                           or CS_BYTEALIGNWINDOW
-    mov wc.lpfnWndProc,    offset WndProc      ; address of WndProc
-    mov wc.cbClsExtra,     NULL
-    mov wc.cbWndExtra,     NULL
-    m2m wc.hInstance,      hInst               ; instance handle
-    mov wc.hbrBackground,  COLOR_BTNFACE+1     ; system color
-    mov wc.lpszMenuName,   NULL
-    mov wc.lpszClassName,  offset szClassName  ; window class name
-    invoke LoadIcon,hInst,500                  ; icon ID   ; resource icon
-    mov wc.hIcon,          eax
-    invoke LoadCursor,NULL,IDC_ARROW           ; system cursor
-    mov wc.hCursor,        eax
-    mov wc.hIconSm,        0
-
-    invoke RegisterClassEx, ADDR wc     ; register the window class
-
-    ;================================
-    ; Centre window at following size
-    ;================================
-
-    mov Wwd, 630
-    mov Wht, 700
-
-    invoke GetSystemMetrics,SM_CXSCREEN ; get screen width in pixels
-    invoke TopXY,Wwd,eax
-    mov Wtx, eax
-
-    invoke GetSystemMetrics,SM_CYSCREEN ; get screen height in pixels
-    invoke TopXY,Wht,eax
-    mov Wty, eax
-
-    ; ==================================
-    ; Create the main application window
-    ; ==================================
-    invoke CreateWindowEx,WS_EX_OVERLAPPEDWINDOW,
-                          ADDR szClassName,
-                          ADDR szDisplayName,
-                          WS_OVERLAPPEDWINDOW,
-                          Wtx,Wty,Wwd,Wht,
-                          NULL,NULL,
-                          hInst,NULL
-
-    mov   hWnd,eax  ; copy return value into handle DWORD
-
-    invoke ShowWindow,hWnd,SW_SHOWNORMAL      ; display the window
-    invoke UpdateWindow,hWnd                  ; update the display
-
-    ;===================================
-    ; Loop until PostQuitMessage is sent
-    ;===================================
-
-StartLoop:
-    invoke GetMessage,ADDR msg,NULL,0,0         ; get each message
-    cmp eax, 0                                  ; exit if GetMessage()
-    je ExitLoop                                 ; returns zero
-    invoke TranslateMessage, ADDR msg           ; translate it
-    invoke DispatchMessage,  ADDR msg           ; send it to message proc
-    jmp StartLoop
-
-ExitLoop:
-
-    return msg.wParam
-
-WinMain endp
+    include janela.inc
 
 ; #########################################################################
 
@@ -156,25 +58,11 @@ WndProc proc hWin   :DWORD,
 
     invoke GetProcessHeap
     mov hHeap, eax
-; -------------------------------------------------------------------------
-; Message are sent by the operating system to an application through the
-; WndProc proc. Each message can have additional values associated with it
-; in the two parameters, wParam & lParam. The range of additional data that
-; can be passed to an application is determined by the message.
-; -------------------------------------------------------------------------
 
     .if uMsg == WM_CREATE
         mov mat.ponteiro, OFFSET vet
         mov mat.altura, 3
         mov mat.largura, 3
-    ; --------------------------------------------------------------------
-    ; This message is sent to WndProc during the CreateWindowEx function
-    ; call and is processed before it returns. This is used as a position
-    ; to start other items such as controls. IMPORTANT, the handle for the
-    ; CreateWindowEx call in the WinMain does not yet exist so the HANDLE
-    ; passed to the WndProc [ hWin ] must be used here for any controls
-    ; or child windows.
-    ; --------------------------------------------------------------------
 
     ;; lparam da mensagem traz as posições x e y do mouse
     .elseif uMsg == WM_LBUTTONDOWN
@@ -192,79 +80,15 @@ WndProc proc hWin   :DWORD,
 
 
     .elseif uMsg == WM_PAINT
-        invoke BeginPaint, hWin, ADDR ps
-        mov    hdc, eax
-        mov rect.top, 10
-        mov rect.bottom, 640
-        mov rect.left, 10
-        mov rect.right, 330 
-
-        invoke  Rectangle, hdc, rect.left, rect.top, rect.right, rect.bottom  
-
-        invoke  lstrlen, ADDR pecaSeguradaTxt
-        invoke  TextOut, hdc, 400, 20, ADDR pecaSeguradaTxt, eax
-
-        mov rect.top, 50
-        mov rect.bottom, 200
-        mov rect.left, 390
-        mov rect.right, 580 
-        invoke  Rectangle, hdc, rect.left, rect.top, rect.right, rect.bottom  
-
-
-        invoke  lstrlen, ADDR proxPecaTxt
-        invoke  TextOut, hdc, 400, 250, ADDR proxPecaTxt, eax
-
-        mov rect.top, 280
-        mov rect.bottom, 450
-        mov rect.left, 390
-        mov rect.right, 580 
-        invoke  Rectangle, hdc, rect.left, rect.top, rect.right, rect.bottom  
-
-        invoke  lstrlen, ADDR pontuacaoTxt
-        invoke  TextOut, hdc, 400, 480, ADDR pontuacaoTxt, eax
-
-        .if MouseClick
-        .endif
-        
-        ;push OFFSET mat
-        ;mov ecx, hWin
-        ;push ecx
-        ;call strMatriz
-
-        ;showmsg eax
-
-        ;push OFFSET mat
-        ;call rotacionarMatriz
-
-        ;push OFFSET mat
-        ;mov ecx, hWin
-        ;push ecx
-        ;call strMatriz
-
-        ;showmsg eax
-
+        invoke BeginPaint, hWin, ADDR ps 
+        include gui.inc   
         invoke EndPaint, hWin, ADDR ps
     .elseif uMsg == WM_DESTROY
-    ; ----------------------------------------------------------------
-    ; This message MUST be processed to cleanly exit the application.
-    ; Calling the PostQuitMessage() function makes the GetMessage()
-    ; function in the WinMain() main loop return ZERO which exits the
-    ; application correctly. If this message is not processed properly
-    ; the window disappears but the code is left in memory.
-    ; ----------------------------------------------------------------
         invoke PostQuitMessage,NULL
         return 0 
     .endif
 
     invoke DefWindowProc,hWin,uMsg,wParam,lParam
-    ; --------------------------------------------------------------------
-    ; Default window processing is done by the operating system for any
-    ; message that is not processed by the application in the WndProc
-    ; procedure. If the application requires other than default processing
-    ; it executes the code when the message is trapped and returns ZERO
-    ; to exit the WndProc procedure before the default window processing
-    ; occurs with the call to DefWindowProc().
-    ; --------------------------------------------------------------------
     ret
 
 WndProc endp
@@ -272,12 +96,6 @@ WndProc endp
 ; ########################################################################
 
 TopXY proc wDim:DWORD, sDim:DWORD
-
-    ; ----------------------------------------------------
-    ; This procedure calculates the top X & Y co-ordinates
-    ; for the CreateWindowEx call in the WinMain procedure
-    ; ----------------------------------------------------
-
     shr sDim, 1      ; divide screen dimension by 2
     shr wDim, 1      ; divide window dimension by 2
     mov eax, wDim    ; copy window dimension into eax
