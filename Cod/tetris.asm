@@ -1,5 +1,5 @@
 include cabecalho.inc
-
+bitmap equ 111 ; definição do bitmap
 ; quaquer procedimento que for escrito 
 ; deve ter o seu prototipo descrito aqui.
 ; com em C 
@@ -21,7 +21,7 @@ matriz ends
     rect     RECT  <>
     posx  dd ?
     posy  dd ?
-    
+
 
 
 .data   ; area de dados já inicializados.
@@ -33,6 +33,7 @@ matriz ends
     hWnd            dd 0  ; Handle principal do programa no windows
     hInstance       dd 0  ; instancia do programa
     hHeap           dd 0
+    hbmp            dd 0 ; handler 
 
     MouseClick      db 0 ; 0 = no click yet
     txt             dd 100,0
@@ -80,7 +81,7 @@ WndProc proc hWin   :DWORD,
 
 
     .elseif uMsg == WM_PAINT
-        invoke BeginPaint, hWin, ADDR ps 
+        invoke BeginPaint, hWin, ADDR ps
         include gui.inc   
         invoke EndPaint, hWin, ADDR ps
     .elseif uMsg == WM_DESTROY
