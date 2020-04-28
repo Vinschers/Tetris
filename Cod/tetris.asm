@@ -1,5 +1,5 @@
 include cabecalho.inc
-
+bitmap equ 111 ; definição do bitmap
 ; quaquer procedimento que for escrito 
 ; deve ter o seu prototipo descrito aqui.
 ; com em C 
@@ -20,7 +20,7 @@ matriz ends
     hitpoint POINT <>
     posx  dd ?
     posy  dd ?
-    
+
 
 
 .data   ; area de dados já inicializados.
@@ -29,6 +29,7 @@ matriz ends
     hWnd            dd 0  ; Handle principal do programa no windows
     hInstance       dd 0  ; instancia do programa
     hHeap           dd 0
+    hbmp            dd 0 ; handler 
 
     MouseClick      db 0 ; 0 = no click yet
     txt             dd 100,0
@@ -39,7 +40,9 @@ matriz ends
 
 start:  ; o programa  deve ser escrito entre start e end start
         ; inclusive procedimentos que vão ser escritos e utilizados.
-    
+    invoke LoadBitmap, hInstance, bitmap
+    mov hbmp, eax
+
     invoke GetModuleHandle, NULL ; provides the instance handle
     mov hInstance, eax
 
