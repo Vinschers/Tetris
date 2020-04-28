@@ -77,6 +77,14 @@ WndProc proc hWin   :DWORD,
         mov mapa.altura, 20
         mov mapa.largura, 10
 
+        mov eax, OFFSET ThreadProcDescer
+        invoke CreateThread,NULL,NULL,eax,\
+                            NULL, NORMAL_PRIORITY_CLASS,\
+                            ADDR ThreadID
+                hThread, eax
+
+
+
     ;; lparam da mensagem traz as posições x e y do mouse
     .elseif uMsg == WM_LBUTTONDOWN
 
@@ -117,6 +125,10 @@ TopXY proc wDim:DWORD, sDim:DWORD
     return sDim
 
 TopXY endp
+
+ThreadProcDescer PROC USES ecx Param:DWORD
+    ;bitmap
+ThreadProcDescer ENDP
 
 ; ########################################################################
 
