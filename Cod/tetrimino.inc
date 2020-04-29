@@ -1,3 +1,50 @@
+montarTetrimino proc pTetrimino:DWORD, tipo:BYTE
+    mov eax, OFFSET mapa
+    call criarMatriz
+    mov edx, pTetrimino
+    mov (tetrimino ptr[edx]).mat, eax
+
+    xor eax, eax
+    mov al, tipo
+
+    mov edx, pTetrimino
+
+    mov (tetrimino ptr[edx]).tipo, al
+
+    mov cl, 9
+    mul cl
+    mov ecx, OFFSET pecas
+    add ecx, eax
+
+    mov eax, pTetrimino
+
+    mov edx, (tetrimino ptr[eax]).mat
+
+    mov (matriz ptr[edx]).ponteiro, ecx
+    mov (tetrimino ptr[eax]).posicao, 3
+
+    cmp tipo, 6
+    jne pecaNormal
+
+    mov (matriz ptr[edx]).largura, 4
+    mov (matriz ptr[edx]).altura, 4
+    jmp fim
+
+    pecaNormal:
+    mov (matriz ptr[edx]).largura, 3
+    mov (matriz ptr[edx]).altura, 3
+
+    fim:
+    ret
+montarTetrimino endp
+
+destruirTetrimino proc pTetrimino:DWORD
+    mov eax, pTetrimino
+    invoke GlobalFree, (matriz ptr[(tetrimino ptr[eax]).mat]).ponteiro
+    ret
+destruirTetrimino endp
+
+
 desenharTetrimino proc hWin:DWORD, hDC:DWORD
     LOCAL hOld:DWORD
     LOCAL memDC :DWORD

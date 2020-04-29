@@ -1,3 +1,11 @@
+WinMain PROTO :DWORD,:DWORD,:DWORD,:DWORD
+WndProc PROTO :DWORD,:DWORD,:DWORD,:DWORD
+TopXY PROTO   :DWORD,:DWORD
+desenharBloco PROTO :DWORD, :DWORD, :BYTE, :BYTE
+montarTetrimino PROTO :DWORD, :BYTE
+strMatriz   PROTO :DWORD, :DWORD
+
+
 matriz struct
     ponteiro    DWORD   ?
     altura      BYTE    ?
@@ -7,7 +15,7 @@ matriz ends
 tetrimino struct
     tipo    BYTE    ?
     posicao BYTE    ?
-    mat     matriz  <>
+    mat     DWORD   ?
 tetrimino ends
 
 
@@ -31,9 +39,18 @@ tetrimino ends
     hbmp            dd 0 ; handler 
 
     MouseClick      db 0 ; 0 = no click yet
-    txt             dd 100,0
+    txt             dd 97,0
+    txtb            db 97,0
     mapa            matriz <>
-    vet             db  1,0,0,1,1,1,0,0,0
+    ;todos 9 menos o ultimo (16)
+    pecas               db  1,0,0,1,1,1,0,0,0
+                        db  0,0,1,1,1,1,0,0,0
+                        db  1,1,0,1,1,0,0,0,0
+                        db  0,1,1,1,1,0,0,0,0
+                        db  0,1,0,1,1,1,0,0,0
+                        db  1,1,0,0,1,1,0,0,0
+                        db  0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0
+
     vetMapa         db  0,0,0,0,0,0,0,0,0,0,0,0
                     db  0,0,0,0,0,0,0,0,0,0,0,0
                     db  0,0,0,0,0,0,0,0,0,0,1,1

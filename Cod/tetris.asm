@@ -5,11 +5,6 @@ CREF_TRANSPARENT  EQU 0FF00FFh
 ; deve ter o seu prototipo descrito aqui.
 ; com em C 
 
-WinMain PROTO :DWORD,:DWORD,:DWORD,:DWORD
-WndProc PROTO :DWORD,:DWORD,:DWORD,:DWORD
-TopXY PROTO   :DWORD,:DWORD
-desenharBloco PROTO :DWORD, :DWORD, :BYTE, :BYTE
-
 include data.inc
 
 .code
@@ -30,17 +25,11 @@ WndProc proc hWin   :DWORD,
     mov hHeap, eax
 
     .if uMsg == WM_CREATE
-        mov bloco.mat.ponteiro, OFFSET vet
-        mov bloco.mat.altura, 3
-        mov bloco.mat.largura, 3
-
         mov mapa.ponteiro, OFFSET vetMapa
         mov mapa.altura, 26
         mov mapa.largura, 16
 
-        push OFFSET mapa
-        push hWin
-        call strMatriz
+        invoke montarTetrimino, OFFSET bloco, 6
 
         invoke CreateEvent,NULL,FALSE,FALSE,NULL
         mov    hEventStart,eax
