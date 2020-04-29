@@ -1,5 +1,6 @@
 include cabecalho.inc
 bitmap equ 111 ; definição do bitmap
+CREF_TRANSPARENT  EQU 0FF00FFh
 ; quaquer procedimento que for escrito 
 ; deve ter o seu prototipo descrito aqui.
 ; com em C 
@@ -14,6 +15,12 @@ matriz struct
     altura      BYTE    ?
     largura     BYTE    ?
 matriz ends
+
+tetrimino struct
+    tipo    BYTE    ?
+    posicao BYTE    ?
+    mat     matriz  <>
+tetrimino ends
 
 
 .data?
@@ -37,17 +44,25 @@ matriz ends
 
     MouseClick      db 0 ; 0 = no click yet
     txt             dd 100,0
-    mat             matriz <>
-    vet             db 0,1,0,1,1,1,0,0,0
+    mapa            matriz <>
+    vet             db  1,0,0,1,1,1,0,0,0
+    vetMapa         db  200 dup(0)
+    bloco           tetrimino <>
 
-.code   ; parte do codigo
+    ThreadDescer  dd 0
+	ExitCode 	  dd 0
+	hThread 	  dd 0
+	hEventStart   dd 0
+    hBmp          dd 0
 
-start:  ; o programa  deve ser escrito entre start e end start
-        ; inclusive procedimentos que vão ser escritos e utilizados.
+.const
+    WM_DESCER equ WM_USER+100h
+
+.code
+
+start:
     
-    include janela.inc
-
-; #########################################################################
+include janela.inc
 
 WndProc proc hWin   :DWORD,
              uMsg   :DWORD,
@@ -61,50 +76,84 @@ WndProc proc hWin   :DWORD,
     mov hHeap, eax
 
     .if uMsg == WM_CREATE
-        mov mat.ponteiro, OFFSET vet
-        mov mat.altura, 3
-        mov mat.largura, 3
+        mov bloco.mat.ponteiro, OFFSET vet
+        mov bloco.mat.altura, 3
+        mov bloco.mat.largura, 3
 
-    ;; lparam da mensagem traz as posições x e y do mouse
-    .elseif uMsg == WM_LBUTTONDOWN
+        mov mapa.ponteiro, OFFSET vetMapa
+        mov mapa.altura, 20
+        mov mapa.largura, 10
 
-        mov     eax, lParam
-        and     eax, 0FFFFh
-        mov     hitpoint.x, eax
-        mov     posx, eax
-        mov     eax, lParam
-        shr     eax, 16  ; desloca o registrador eax de 16 bits para a direita ->
-        mov     hitpoint.y, eax
-        mov     posy, eax
-        mov     MouseClick, TRUE
-        invoke  InvalidateRect, hWin, NULL, TRUE ; 
+        invoke CreateEvent,NULL,FALSE,FALSE,NULL
+        mov    hEventStart,eax
+
+        mov ecx, OFFSET ThreadProcDescer
+        invoke CreateThread, NULL, NULL, ecx, ADDR mapa, NORMAL_PRIORITY_CLASS, ADDR ThreadDescer
+        mov hThread, eax
 
 
     .elseif uMsg == WM_PAINT
         invoke BeginPaint, hWin, ADDR ps
-        include gui.inc   
+        mov hdc, eax
+        include gui.inc
+        mov ecx, hdc
+        push ecx
+        mov ecx, hWin
+        push ecx
+        call desenharTetrimino  
         invoke EndPaint, hWin, ADDR ps
+
+
+    .elseif uMsg == WM_DESCER
+        add bloco.posicao, 10
+        invoke InvalidateRect,hWnd,NULL,TRUE
+
     .elseif uMsg == WM_DESTROY
         invoke PostQuitMessage,NULL
-        return 0 
+        return 0
+
     .endif
 
     invoke DefWindowProc,hWin,uMsg,wParam,lParam
+
     ret
 
 WndProc endp
 
-; ########################################################################
+desenharTetrimino proc hWin:DWORD, hDC:DWORD
+    LOCAL hOld:DWORD
+    LOCAL memDC :DWORD
 
-TopXY proc wDim:DWORD, sDim:DWORD
-    shr sDim, 1      ; divide screen dimension by 2
-    shr wDim, 1      ; divide window dimension by 2
-    mov eax, wDim    ; copy window dimension into eax
-    sub sDim, eax    ; sub half win dimension from half screen dimension
+    invoke CreateCompatibleDC,hDC
+    mov memDC, eax
 
-    return sDim
+    invoke SelectObject,memDC,hBmp
+    mov hOld, eax 
 
-TopXY endp
+    xor eax, eax 
+    xor ebx, ebx
+    mov al, bloco.posicao
+    push eax
+    call getPixel
+    mov bx, ax ; ebx coluna e eax linha
+    shr eax, 16
+
+    invoke TransparentBlt, hDC, ebx, eax, 224, 32, memDC,0,0,224,32,0
+    invoke SelectObject,hDC,hOld
+    invoke DeleteDC,memDC
+    ret
+desenharTetrimino endp
+
+ThreadProcDescer PROC USES ecx Param:DWORD
+    invoke WaitForSingleObject,hEventStart, 500
+        .IF eax == WAIT_TIMEOUT
+            invoke PostMessage,hWnd,WM_DESCER,NULL,NULL
+            jmp ThreadProcDescer
+        .ENDIF
+
+        jmp ThreadProcDescer
+    ret
+ThreadProcDescer ENDP
 
 ; ########################################################################
 
