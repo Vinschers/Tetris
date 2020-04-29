@@ -56,6 +56,8 @@ strMatriz proc hWin:DWORD, pMat:DWORD
         fim:
             mov byte ptr[eax], 0
             pop eax
+            showmsg eax
+            invoke HeapFree, hHeap, NULL, eax
             ret
 strMatriz endp
 
