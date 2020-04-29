@@ -112,18 +112,3 @@ TopXY proc wDim:DWORD, sDim:DWORD
 TopXY endp
 
 
-;ax -> coluna
-;resto -> linha
-getPixel proc pos:DWORD
-    xor edx, edx
-    mov eax, pos
-    mov ecx, 10
-    div ecx
-    shl eax, 5
-    shl edx, 5
-    add eax, 11
-    add edx, 11
-    shl eax, 16
-    mov ax, dx
-    ret
-getPixel endp

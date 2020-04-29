@@ -8,6 +8,7 @@ CREF_TRANSPARENT  EQU 0FF00FFh
 WinMain PROTO :DWORD,:DWORD,:DWORD,:DWORD
 WndProc PROTO :DWORD,:DWORD,:DWORD,:DWORD
 TopXY PROTO   :DWORD,:DWORD
+desenharBloco PROTO :DWORD, :DWORD, :BYTE, :BYTE
 
 
 matriz struct
@@ -57,7 +58,13 @@ tetrimino ends
 
 .const
     WM_DESCER equ WM_USER+100h
-
+    VERDE    db 0
+    ROXO     db 1
+    AZUL     db 2
+    LARANJA  db 3
+    AMARELO  db 4
+    PRETO    db 5
+    VERMELHO db 6
 .code
 
 start:
@@ -96,11 +103,12 @@ WndProc proc hWin   :DWORD,
         invoke BeginPaint, hWin, ADDR ps
         mov hdc, eax
         include gui.inc
-        mov ecx, hdc
-        push ecx
-        mov ecx, hWin
-        push ecx
-        call desenharTetrimino  
+        ;mov ecx, hdc
+        ;push ecx
+        ;mov ecx, hWin
+        ;push ecx
+        ;call desenharTetrimino  
+        invoke desenharBloco, hWin, hdc, AZUL, bloco.posicao
         invoke EndPaint, hWin, ADDR ps
 
 
@@ -120,43 +128,7 @@ WndProc proc hWin   :DWORD,
 
 WndProc endp
 
-desenharTetrimino proc hWin:DWORD, hDC:DWORD
-    LOCAL hOld:DWORD
-    LOCAL memDC :DWORD
-
-    invoke CreateCompatibleDC,hDC
-    mov memDC, eax
-
-    invoke SelectObject,memDC,hBmp
-    mov hOld, eax 
-
-    xor eax, eax 
-    xor ebx, ebx
-    mov al, bloco.posicao
-    push eax
-    call getPixel
-    mov bx, ax ; ebx coluna e eax linha
-    shr eax, 16
-
-    invoke TransparentBlt, hDC, ebx, eax, 224, 32, memDC,0,0,224,32,0
-    invoke SelectObject,hDC,hOld
-    invoke DeleteDC,memDC
-    ret
-desenharTetrimino endp
-
-ThreadProcDescer PROC USES ecx Param:DWORD
-    invoke WaitForSingleObject,hEventStart, 500
-        .IF eax == WAIT_TIMEOUT
-            invoke PostMessage,hWnd,WM_DESCER,NULL,NULL
-            jmp ThreadProcDescer
-        .ENDIF
-
-        jmp ThreadProcDescer
-    ret
-ThreadProcDescer ENDP
-
-; ########################################################################
-
 include matriz.inc
+include tetrimino.inc
 
 end start
