@@ -58,13 +58,13 @@ tetrimino ends
 
 .const
     WM_DESCER equ WM_USER+100h
-    VERDE    db 0
-    ROXO     db 1
-    AZUL     db 2
-    LARANJA  db 3
-    AMARELO  db 4
-    PRETO    db 5
-    VERMELHO db 6
+    AZUL     db 0
+    LARANJA  db 1
+    AMARELO  db 2
+    VERDE    db 3
+    ROXO     db 4
+    VERMELHO db 5
+    CIANO    db 6
 .code
 
 start:
