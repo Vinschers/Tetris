@@ -1,5 +1,5 @@
 criarMatriz proc
-    invoke HeapAlloc, hHeap, 8, sizeof matriz
+    invoke GlobalAlloc, 0, sizeof matriz
     mov (matriz ptr[eax]).ponteiro, 0
     mov (matriz ptr[eax]).altura, 0
     mov (matriz ptr[eax]).largura, 0
@@ -56,6 +56,8 @@ strMatriz proc hWin:DWORD, pMat:DWORD
         fim:
             mov byte ptr[eax], 0
             pop eax
+            showmsg eax
+            invoke HeapFree, hHeap, NULL, eax
             ret
 strMatriz endp
 

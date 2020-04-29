@@ -5,66 +5,8 @@ CREF_TRANSPARENT  EQU 0FF00FFh
 ; deve ter o seu prototipo descrito aqui.
 ; com em C 
 
-WinMain PROTO :DWORD,:DWORD,:DWORD,:DWORD
-WndProc PROTO :DWORD,:DWORD,:DWORD,:DWORD
-TopXY PROTO   :DWORD,:DWORD
-desenharBloco PROTO :DWORD, :DWORD, :BYTE, :BYTE
 
-
-matriz struct
-    ponteiro    DWORD   ?
-    altura      BYTE    ?
-    largura     BYTE    ?
-matriz ends
-
-tetrimino struct
-    tipo    BYTE    ?
-    posicao BYTE    ?
-    mat     matriz  <>
-tetrimino ends
-
-
-.data?
-    hitpoint POINT <>
-    rect     RECT  <>
-    posx  dd ?
-    posy  dd ?
-
-
-
-.data   ; area de dados já inicializados.
-    szDisplayName   db "Tetris", 0 
-    proxPecaTxt     db "Proxima Peca", 0
-    pecaSeguradaTxt db "Peca Segurada", 0
-    pontuacaoTxt    db "Pontuacao", 0
-    CommandLine     dd 0  ; parametros passados pela linha de comando (ponteiro)
-    hWnd            dd 0  ; Handle principal do programa no windows
-    hInstance       dd 0  ; instancia do programa
-    hHeap           dd 0
-    hbmp            dd 0 ; handler 
-
-    MouseClick      db 0 ; 0 = no click yet
-    txt             dd 100,0
-    mapa            matriz <>
-    vet             db  1,0,0,1,1,1,0,0,0
-    vetMapa         db  200 dup(0)
-    bloco           tetrimino <>
-
-    ThreadDescer  dd 0
-	ExitCode 	  dd 0
-	hThread 	  dd 0
-	hEventStart   dd 0
-    hBmp          dd 0
-
-.const
-    WM_DESCER equ WM_USER+100h
-    AZUL     db 0
-    LARANJA  db 1
-    AMARELO  db 2
-    VERDE    db 3
-    ROXO     db 4
-    VERMELHO db 5
-    CIANO    db 6
+include data.inc
 .code
 
 start:
@@ -83,13 +25,11 @@ WndProc proc hWin   :DWORD,
     mov hHeap, eax
 
     .if uMsg == WM_CREATE
-        mov bloco.mat.ponteiro, OFFSET vet
-        mov bloco.mat.altura, 3
-        mov bloco.mat.largura, 3
-
         mov mapa.ponteiro, OFFSET vetMapa
-        mov mapa.altura, 20
-        mov mapa.largura, 10
+        mov mapa.altura, 26
+        mov mapa.largura, 16
+
+        invoke montarTetrimino, OFFSET bloco, 6
 
         invoke CreateEvent,NULL,FALSE,FALSE,NULL
         mov    hEventStart,eax
