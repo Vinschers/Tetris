@@ -1,3 +1,6 @@
+bitmap equ 111
+CREF_TRANSPARENT  EQU 0FF00FFh
+
 WinMain PROTO :DWORD,:DWORD,:DWORD,:DWORD
 WndProc PROTO :DWORD,:DWORD,:DWORD,:DWORD
 TopXY PROTO   :DWORD,:DWORD
@@ -5,6 +8,9 @@ desenharBloco PROTO :DWORD, :DWORD, :BYTE, :BYTE
 montarTetrimino PROTO :DWORD, :BYTE
 desenharTetrimino PROTO :DWORD, :DWORD, :DWORD
 strMatriz   PROTO :DWORD, :DWORD
+refazerTetrimino PROTO :DWORD, :BYTE
+destruirTetrimino PROTO :DWORD
+rotacionarMatriz PROTO :DWORD
 
 
 matriz struct

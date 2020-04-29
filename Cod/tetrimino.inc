@@ -1,5 +1,4 @@
 montarTetrimino proc pTetrimino:DWORD, tipo:BYTE
-    mov eax, OFFSET mapa
     call criarMatriz
     mov edx, pTetrimino
     mov (tetrimino ptr[edx]).mat, eax
@@ -44,12 +43,77 @@ destruirTetrimino proc pTetrimino:DWORD
     ret
 destruirTetrimino endp
 
-
+;P + Tcol + Tlin*16
 desenharTetrimino proc hWin:DWORD, hDC:DWORD, pTetrimino:DWORD
-    mov eax, pTetrimino
-    mov cl, (tetrimino ptr[eax]).tipo
-    mov ch, (tetrimino ptr[eax]).posicao
-    invoke desenharBloco, hWin, hDC, cl, ch
+    mov edx, pTetrimino
+    mov edx, (tetrimino ptr[edx]).mat
+
+    xor eax, eax
+    xor ecx, ecx
+    mov al, (matriz ptr[edx]).largura
+    mov cl, (matriz ptr[edx]).altura
+    mul ecx
+
+    mov edx, pTetrimino
+    mov edx, (tetrimino ptr[edx]).mat
+    mov edx, (matriz ptr[edx]).ponteiro
+
+    xor ebx, ebx
+    xor ecx, ecx
+
+    forT:
+    cmp ebx, eax
+    je fim
+
+    mov cl, byte ptr[edx]
+    cmp cl, 0
+    je cont
+
+    push eax
+    push ebx
+    push ecx
+    push edx
+
+    xor eax, eax
+    mov al, bl ;al tem o contador
+    xor ebx, ebx
+
+    mov edx, pTetrimino
+    mov edx, (tetrimino ptr[edx]).mat
+    mov bl, (matriz ptr[edx]).largura  ;bl tem a largura
+
+    xor edx, edx
+
+    div ebx   ;al tem a linha
+
+    mov esi, edx
+
+    mov ebx, 10
+    mul ebx
+
+    mov edx, esi
+
+    add al, dl
+
+    mov edx, pTetrimino
+    mov cl, (tetrimino ptr[edx]).posicao
+    add al, cl
+
+    mov cl, (tetrimino ptr[edx]).tipo
+    
+    invoke desenharBloco, hWin, hDC, cl, al
+
+    pop edx
+    pop ecx
+    pop ebx
+    pop eax
+
+    cont:
+    inc ebx
+    inc edx
+    jmp forT
+
+    fim:
     ret
 desenharTetrimino endp
 
@@ -103,6 +167,41 @@ desenharBloco proc hWin:DWORD, hDC:DWORD, cor:BYTE, posicao:BYTE
     return 0
 
 desenharBloco endp
+
+refazerTetrimino proc pTetrimino:DWORD, tipo:BYTE
+    xor eax, eax
+    mov al, tipo
+
+    mov edx, pTetrimino
+
+    mov (tetrimino ptr[edx]).tipo, al
+
+    mov cl, 9
+    mul cl
+    mov ecx, OFFSET pecas
+    add ecx, eax
+
+    mov eax, pTetrimino
+
+    mov edx, (tetrimino ptr[eax]).mat
+
+    mov (matriz ptr[edx]).ponteiro, ecx
+    mov (tetrimino ptr[eax]).posicao, 3
+
+    cmp tipo, 6
+    jne pecaNormal
+
+    mov (matriz ptr[edx]).largura, 4
+    mov (matriz ptr[edx]).altura, 4
+    jmp fim
+
+    pecaNormal:
+    mov (matriz ptr[edx]).largura, 3
+    mov (matriz ptr[edx]).altura, 3
+
+    fim:
+    ret
+refazerTetrimino endp
 
 ;ax -> coluna
 ;resto -> linha
