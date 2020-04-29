@@ -1,6 +1,6 @@
 mov    hdc, eax
 mov rect.top, 10
-mov rect.bottom, 640
+mov rect.bottom, 651
 mov rect.left, 10
 mov rect.right, 330 
 

@@ -1,13 +1,16 @@
- invoke GetModuleHandle, NULL ; provides the instance handle
-    mov hInstance, eax
+invoke GetModuleHandle, NULL ; provides the instance handle
+mov hInstance, eax
 
-    invoke GetCommandLine        ; provides the command line address
-    mov CommandLine, eax
+invoke LoadBitmap,hInstance, bitmap
+mov hBmp, eax
 
-    invoke WinMain,hInstance,NULL,CommandLine,SW_SHOWDEFAULT
-    
-    invoke ExitProcess,eax       ; cleanup & return to operating system
-    
+invoke GetCommandLine        ; provides the command line address
+mov CommandLine, eax
+
+invoke WinMain,hInstance,NULL,CommandLine,SW_SHOWDEFAULT
+
+invoke ExitProcess,eax       ; cleanup & return to operating system
+
 WinMain proc hInst     :DWORD,
              hPrevInst :DWORD,
              CmdLine   :DWORD,
@@ -98,6 +101,16 @@ ExitLoop:
 
 WinMain endp
 
+TopXY proc wDim:DWORD, sDim:DWORD
+    shr sDim, 1      ; divide screen dimension by 2
+    shr wDim, 1      ; divide window dimension by 2
+    mov eax, wDim    ; copy window dimension into eax
+    sub sDim, eax    ; sub half win dimension from half screen dimension
+
+    return sDim
+
+TopXY endp
+
 
 ;ax -> coluna
 ;resto -> linha
@@ -106,8 +119,10 @@ getPixel proc pos:DWORD
     mov eax, pos
     mov ecx, 10
     div ecx
-    add eax, 10
-    add edx, 10
+    shl eax, 5
+    shl edx, 5
+    add eax, 11
+    add edx, 11
     shl eax, 16
     mov ax, dx
     ret

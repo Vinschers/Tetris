@@ -1,5 +1,6 @@
 include cabecalho.inc
 bitmap equ 111 ; definição do bitmap
+CREF_TRANSPARENT  EQU 0FF00FFh
 ; quaquer procedimento que for escrito 
 ; deve ter o seu prototipo descrito aqui.
 ; com em C 
@@ -48,22 +49,20 @@ tetrimino ends
     vetMapa         db  200 dup(0)
     bloco           tetrimino <>
 
-    ThreadDescer 	  dd 0
+    ThreadDescer  dd 0
 	ExitCode 	  dd 0
 	hThread 	  dd 0
 	hEventStart   dd 0
+    hBmp          dd 0
 
 .const
     WM_DESCER equ WM_USER+100h
 
-.code   ; parte do codigo
+.code
 
-start:  ; o programa  deve ser escrito entre start e end start
-        ; inclusive procedimentos que vão ser escritos e utilizados.
+start:
     
-    include janela.inc
-
-; #########################################################################
+include janela.inc
 
 WndProc proc hWin   :DWORD,
              uMsg   :DWORD,
@@ -85,62 +84,41 @@ WndProc proc hWin   :DWORD,
         mov mapa.altura, 20
         mov mapa.largura, 10
 
-        mov eax, OFFSET ThreadProcDescer
-        invoke CreateThread,NULL,NULL,eax,\
-                            NULL, NORMAL_PRIORITY_CLASS,\
-                            ADDR ThreadDescer
-                hThread, eax
+        invoke CreateEvent,NULL,FALSE,FALSE,NULL
+        mov    hEventStart,eax
 
-
-
-    ;; lparam da mensagem traz as posições x e y do mouse
-    .elseif uMsg == WM_LBUTTONDOWN
-
-        mov     eax, lParam
-        and     eax, 0FFFFh
-        mov     hitpoint.x, eax
-        mov     posx, eax
-        mov     eax, lParam
-        shr     eax, 16  ; desloca o registrador eax de 16 bits para a direita ->
-        mov     hitpoint.y, eax
-        mov     posy, eax
-        mov     MouseClick, TRUE
-        invoke  InvalidateRect, hWin, NULL, TRUE ; 
+        mov ecx, OFFSET ThreadProcDescer
+        invoke CreateThread, NULL, NULL, ecx, ADDR mapa, NORMAL_PRIORITY_CLASS, ADDR ThreadDescer
+        mov hThread, eax
 
 
     .elseif uMsg == WM_PAINT
         invoke BeginPaint, hWin, ADDR ps
-        include gui.inc 
-        mov ecx, HDC
+        mov hdc, eax
+        include gui.inc
+        mov ecx, hdc
         push ecx
         mov ecx, hWin
         push ecx
         call desenharTetrimino  
         invoke EndPaint, hWin, ADDR ps
+
+
     .elseif uMsg == WM_DESCER
         add bloco.posicao, 10
-    .endif
+        invoke InvalidateRect,hWnd,NULL,TRUE
+
     .elseif uMsg == WM_DESTROY
         invoke PostQuitMessage,NULL
-        return 0 
+        return 0
+
     .endif
 
     invoke DefWindowProc,hWin,uMsg,wParam,lParam
+
     ret
 
 WndProc endp
-
-; ########################################################################
-
-TopXY proc wDim:DWORD, sDim:DWORD
-    shr sDim, 1      ; divide screen dimension by 2
-    shr wDim, 1      ; divide window dimension by 2
-    mov eax, wDim    ; copy window dimension into eax
-    sub sDim, eax    ; sub half win dimension from half screen dimension
-
-    return sDim
-
-TopXY endp
 
 desenharTetrimino proc hWin:DWORD, hDC:DWORD
     LOCAL hOld:DWORD
@@ -149,25 +127,25 @@ desenharTetrimino proc hWin:DWORD, hDC:DWORD
     invoke CreateCompatibleDC,hDC
     mov memDC, eax
 
-    invoke SelectObject,memDC,bitmap
+    invoke SelectObject,memDC,hBmp
     mov hOld, eax 
 
     xor eax, eax 
     xor ebx, ebx
     mov al, bloco.posicao
     push eax
-    call getPixel 
+    call getPixel
     mov bx, ax ; ebx coluna e eax linha
     shr eax, 16
-    invoke TransparentBlt,hDC,eax,ebx,32,32,memDC,0,0,224,32,CREF_TRANSPARENT
+
+    invoke TransparentBlt, hDC, ebx, eax, 224, 32, memDC,0,0,224,32,0
     invoke SelectObject,hDC,hOld
     invoke DeleteDC,memDC
-    return 0
+    ret
 desenharTetrimino endp
 
 ThreadProcDescer PROC USES ecx Param:DWORD
-    ;bitmap
-    invoke WaitForSingleObject,hEventStart,100
+    invoke WaitForSingleObject,hEventStart, 500
         .IF eax == WAIT_TIMEOUT
             invoke PostMessage,hWnd,WM_DESCER,NULL,NULL
             jmp ThreadProcDescer
