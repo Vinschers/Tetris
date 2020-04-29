@@ -45,27 +45,11 @@ destruirTetrimino proc pTetrimino:DWORD
 destruirTetrimino endp
 
 
-desenharTetrimino proc hWin:DWORD, hDC:DWORD
-    LOCAL hOld:DWORD
-    LOCAL memDC :DWORD
-
-    invoke CreateCompatibleDC,hDC
-    mov memDC, eax
-
-    invoke SelectObject,memDC,hBmp
-    mov hOld, eax 
-
-    xor eax, eax 
-    xor ebx, ebx
-    mov al, bloco.posicao
-    push eax
-    call getPixel
-    mov bx, ax ; ebx coluna e eax linha
-    shr eax, 16
-
-    invoke TransparentBlt, hDC, ebx, eax, 224, 32, memDC,0,0,224,32,0
-    invoke SelectObject,hDC,hOld
-    invoke DeleteDC,memDC
+desenharTetrimino proc hWin:DWORD, hDC:DWORD, pTetrimino:DWORD
+    mov eax, pTetrimino
+    mov cl, (tetrimino ptr[eax]).tipo
+    mov ch, (tetrimino ptr[eax]).posicao
+    invoke desenharBloco, hWin, hDC, cl, ch
     ret
 desenharTetrimino endp
 
@@ -93,7 +77,7 @@ desenharBloco proc hWin:DWORD, hDC:DWORD, cor:BYTE, posicao:BYTE
 
     xor eax, eax 
     xor ebx, ebx
-    mov al, bloco.posicao
+    mov al, posicao
     push eax
     call getPixel
     mov bx, ax ; ebx coluna e eax linha

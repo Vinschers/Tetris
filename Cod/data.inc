@@ -3,6 +3,7 @@ WndProc PROTO :DWORD,:DWORD,:DWORD,:DWORD
 TopXY PROTO   :DWORD,:DWORD
 desenharBloco PROTO :DWORD, :DWORD, :BYTE, :BYTE
 montarTetrimino PROTO :DWORD, :BYTE
+desenharTetrimino PROTO :DWORD, :DWORD, :DWORD
 strMatriz   PROTO :DWORD, :DWORD
 
 
@@ -43,13 +44,13 @@ tetrimino ends
     txtb            db 97,0
     mapa            matriz <>
     ;todos 9 menos o ultimo (16)
-    pecas               db  1,0,0,1,1,1,0,0,0
-                        db  0,0,1,1,1,1,0,0,0
-                        db  1,1,0,1,1,0,0,0,0
-                        db  0,1,1,1,1,0,0,0,0
-                        db  0,1,0,1,1,1,0,0,0
-                        db  1,1,0,0,1,1,0,0,0
-                        db  0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0
+    pecas               db  1,0,0,1,1,1,0,0,0 ;azul
+                        db  0,0,1,1,1,1,0,0,0 ;laranja
+                        db  1,1,0,1,1,0,0,0,0 ;amarelo
+                        db  0,1,1,1,1,0,0,0,0 ;verde
+                        db  0,1,0,1,1,1,0,0,0 ;roxo
+                        db  1,1,0,0,1,1,0,0,0 ;vermelho
+                        db  0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0 ;ciano
 
     vetMapa         db  0,0,0,0,0,0,0,0,0,0,0,0
                     db  0,0,0,0,0,0,0,0,0,0,0,0
@@ -96,10 +97,10 @@ tetrimino ends
 
 .const
     WM_DESCER equ WM_USER+100h
-    VERDE    db 0
-    ROXO     db 1
-    AZUL     db 2
-    LARANJA  db 3
-    AMARELO  db 4
-    PRETO    db 5
-    VERMELHO db 6
+    AZUL     db 0
+    LARANJA  db 1
+    AMARELO  db 2
+    VERDE    db 3
+    ROXO     db 4
+    VERMELHO db 5
+    CIANO    db 6

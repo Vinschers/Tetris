@@ -29,7 +29,8 @@ WndProc proc hWin   :DWORD,
         mov mapa.altura, 26
         mov mapa.largura, 16
 
-        invoke montarTetrimino, OFFSET bloco, 6
+        invoke montarTetrimino, OFFSET bloco, VERMELHO
+        invoke strMatriz, hWin, bloco.mat
 
         invoke CreateEvent,NULL,FALSE,FALSE,NULL
         mov    hEventStart,eax
@@ -43,12 +44,7 @@ WndProc proc hWin   :DWORD,
         invoke BeginPaint, hWin, ADDR ps
         mov hdc, eax
         include gui.inc
-        ;mov ecx, hdc
-        ;push ecx
-        ;mov ecx, hWin
-        ;push ecx
-        ;call desenharTetrimino  
-        invoke desenharBloco, hWin, hdc, AZUL, bloco.posicao
+        invoke desenharTetrimino, hWin, hdc, OFFSET bloco
         invoke EndPaint, hWin, ADDR ps
 
 
