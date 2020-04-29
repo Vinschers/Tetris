@@ -3,20 +3,44 @@
     ; #                                         Cabeçalho                                                      #
     ; ##########################################################################################################   
 
-    .386
-    .model flat, stdcall            ; 32 bit memory model
-    option casemap :none            ; case sensitive
-
-    include bitblt.inc              ; local includes for this file
-	
+	include cabecalho.inc
+    
 	b2			equ		111         ; código para link da imagem, no caso, o SPRITE
+    WinMain      PROTO :DWORD,:DWORD,:DWORD,:DWORD
+    WndProc      PROTO :DWORD,:DWORD,:DWORD,:DWORD
+    TopXY        PROTO :DWORD,:DWORD
+    FillBuffer   PROTO :DWORD,:DWORD,:BYTE
+    Paint_Proc   PROTO :DWORD,:DWORD
 
     ; possíveis variáveis para novos locais X e Y 
     ;newX db 300                
     ;newY db 100
-    tipo dd 3                       ; variável para definição do tipo, ou seja, cor da peça
 
-	CREF_TRANSPARENT  EQU 0FF00FFh  ; transparência da imagem
+    CREF_TRANSPARENT  EQU 0FF00FFh  ; transparência da imagem
+
+    .data?
+        hitpoint POINT <>
+        rect     RECT  <>
+        posx  dd ?
+        posy  dd ?
+
+    .data 
+
+        tipo dd 3                       ; variável para definição do tipo, ou seja, cor da peça
+        szDisplayName   db "Tetris", 0 
+        proxPecaTxt     db "Proxima Peca", 0
+        pecaSeguradaTxt db "Peca Segurada", 0
+        pontuacaoTxt    db "Pontuacao", 0
+        CommandLine     dd 0  ; parametros passados pela linha de comando (ponteiro)
+        hWnd            dd 0  ; Handle principal do programa no windows
+        hInstance       dd 0  ; instancia do programa
+        hHeap           dd 0
+        hBmp            dd 0 ; handler 
+
+        MouseClick      db 0 ; 0 = no click yet
+        txt             dd 100,0
+        vet             db 0,1,0,1,1,1,0,0,0
+	
 
     ; ######################################################################
     ; #          Tabela de cores e seus respectivos números:               #
@@ -25,7 +49,7 @@
     ; # verde     roxo    azul    laranja     amarelo     preto   vermelho #
     ; ######################################################################
 
-
+    ; MEU BEBE
 
 
 
@@ -34,33 +58,67 @@
     ; ##########################################################################################################   
 
     .code                   
-    start: 
+    start:
 
-    main proc 
-        call printarBloco
-    main endp
+    include janela.inc 
 
-    printarBloco proc hWin   :DWORD,
+    WndProc proc hWin   :DWORD,
              uMsg   :DWORD,
              wParam :DWORD,
              lParam :DWORD
 
-        LOCAL var    :DWORD
-        LOCAL caW    :DWORD
-        LOCAL Rct    :RECT
-        LOCAL hDC    :DWORD
-        LOCAL Ps     :PAINTSTRUCT
+    LOCAL hDC:HDC
+    LOCAL Ps:PAINTSTRUCT
 
+    invoke GetProcessHeap
+    mov hHeap, eax
+
+    .if uMsg == WM_CREATE
+
+
+    ;; lparam da mensagem traz as posições x e y do mouse
+    .elseif uMsg == WM_LBUTTONDOWN
+
+        mov     eax, lParam
+        and     eax, 0FFFFh
+        mov     hitpoint.x, eax
+        mov     posx, eax
+        mov     eax, lParam
+        shr     eax, 16  ; desloca o registrador eax de 16 bits para a direita ->
+        mov     hitpoint.y, eax
+        mov     posy, eax
+        mov     MouseClick, TRUE
+        invoke  InvalidateRect, hWin, NULL, TRUE ; 
+
+
+    .elseif uMsg == WM_PAINT
         invoke LoadBitmap,hInstance, b2
-        mov hBmp2, eax
-
+        mov hBmp, eax
         invoke BeginPaint,hWin,ADDR Ps
         mov hDC, eax
         invoke Paint_Proc,hWin,hDC      ; chamamos a função que recorta o Sprite e o exibe
         invoke EndPaint, hWin, ADDR Ps
+    .elseif uMsg == WM_DESTROY
+        invoke PostQuitMessage,NULL
+        return 0 
+    .endif
 
+    invoke DefWindowProc,hWin,uMsg,wParam,lParam
+    ret
 
-    printarBloco endp
+    WndProc endp
+
+; ########################################################################
+
+    TopXY proc wDim:DWORD, sDim:DWORD
+        shr sDim, 1      ; divide screen dimension by 2
+        shr wDim, 1      ; divide window dimension by 2
+        mov eax, wDim    ; copy window dimension into eax
+        sub sDim, eax    ; sub half win dimension from half screen dimension
+
+        return sDim
+
+    TopXY endp
 
     Paint_Proc proc hWin:DWORD, hDC:DWORD
 
@@ -70,7 +128,7 @@
         invoke CreateCompatibleDC,hDC
     
         mov memDC, eax
-	    invoke SelectObject,memDC,hBmp2  ; selecionei o novo bitmap
+	    invoke SelectObject,memDC,hBmp  ; selecionei o novo bitmap
         mov hOld, eax
 
         ; ##########################################################################################################
@@ -87,7 +145,7 @@
     
         ; ##########################################################################################################
 
-        INVOKE  TransparentBlt,hDC,3*32,30,32,284,memDC,0,256,4*32,32,CREF_TRANSPARENT    ; cortamos a imagem  
+         INVOKE  TransparentBlt,hDC,200,30,32,32,memDC,0,256,ebx,eax,CREF_TRANSPARENT    ; cortamos a imagem  
         ;pop ebx          ; retiramos da pilha o valor anterior de ebx
         invoke SelectObject,hDC,hOld
         invoke DeleteDC,memDC
