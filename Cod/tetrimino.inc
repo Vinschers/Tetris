@@ -139,7 +139,7 @@ desenharBloco proc hWin:DWORD, hDC:DWORD, cor:BYTE, posicao:BYTE
     invoke SelectObject,memDC,hBmp  ; selecionei o novo bitmap
     mov hOld, eax
 
-    xor eax, eax 
+    xor eax, eax
     xor ebx, ebx
     mov al, posicao
     push eax

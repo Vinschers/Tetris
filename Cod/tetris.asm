@@ -38,17 +38,10 @@ WndProc proc hWin   :DWORD,
         mov hdc, eax
         include gui.inc
 
-        xor eax, eax
-        mov al, bloco.posicao
-
-        cmp al, 200
-        jbe desenhar
-
-        invoke refazerTetrimino, OFFSET bloco, LARANJA
-
-        desenhar:
         invoke desenharTetrimino, hWin, hdc, OFFSET bloco
+
         invoke rotacionarMatriz, bloco.mat
+        
         invoke EndPaint, hWin, ADDR ps
 
 
