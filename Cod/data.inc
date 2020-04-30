@@ -1,29 +1,33 @@
 bitmap equ 111
 CREF_TRANSPARENT  EQU 0FF00FFh
 
-WinMain PROTO :DWORD,:DWORD,:DWORD,:DWORD
-WndProc PROTO :DWORD,:DWORD,:DWORD,:DWORD
-TopXY PROTO   :DWORD,:DWORD
-desenharBloco PROTO :DWORD, :DWORD, :BYTE, :BYTE
-montarTetrimino PROTO :DWORD, :BYTE
-desenharTetrimino PROTO :DWORD, :DWORD, :DWORD
-strMatriz   PROTO :DWORD, :DWORD
-refazerTetrimino PROTO :DWORD, :BYTE
-destruirTetrimino PROTO :DWORD
-rotacionarMatriz PROTO :DWORD
+WinMain                     PROTO   :DWORD, :DWORD, :DWORD, :DWORD
+WndProc                     PROTO   :DWORD, :DWORD, :DWORD, :DWORD
+TopXY                       PROTO   :DWORD, :DWORD
+desenharBloco               PROTO   :DWORD, :DWORD, :BYTE,  :BYTE
+montarTetrimino             PROTO   :DWORD, :BYTE
+desenharTetrimino           PROTO   :DWORD, :DWORD, :DWORD, :BYTE
+strMatriz                   PROTO   :DWORD, :DWORD
+refazerTetrimino            PROTO   :DWORD, :BYTE
+destruirTetrimino           PROTO   :DWORD
+rotacionarMatriz            PROTO   :DWORD
+desenharTela                PROTO   :DWORD
+tetriminoPaint              PROTO   :DWORD, :DWORD, :DWORD
+copiarPonteiroMatriz        PROTO   :DWORD, :DWORD
+getPixel                    PROTO   :BYTE
 
 
-matriz struct
+MATRIZ struct
     ponteiro    DWORD   ?
     altura      BYTE    ?
     largura     BYTE    ?
-matriz ends
+MATRIZ ends
 
-tetrimino struct
+TETRIMINO struct
     tipo    BYTE    ?
     posicao BYTE    ?
     mat     DWORD   ?
-tetrimino ends
+TETRIMINO ends
 
 
 .data?
@@ -45,10 +49,12 @@ tetrimino ends
     hHeap           dd 0
     hbmp            dd 0 ; handler 
 
-    MouseClick      db 0 ; 0 = no click yet
+    telaDesenhada   db 0
+    desenhandoTetrimino  db 0
+
     txt             dd 97,0
-    txtb            db 97,0
-    mapa            matriz <>
+    txtb            db 0,0
+    mapa            MATRIZ <>
     ;todos 9 menos o ultimo (16)
     pecas               db  1,0,0,1,1,1,0,0,0 ;azul
                         db  0,0,1,1,1,1,0,0,0 ;laranja
@@ -93,7 +99,7 @@ tetrimino ends
                     db  0,0,0,0,0,0,0,0,0,0,0,0
                     db  0,0,0,0,0,0,0,0,0,0,0,0
                     db  0,0,0,0,0,0,0,0
-    bloco           tetrimino <>
+    bloco           TETRIMINO <>
 
     ThreadDescer  dd 0
 	ExitCode 	  dd 0
@@ -110,3 +116,4 @@ tetrimino ends
     ROXO     db 4
     VERMELHO db 5
     CIANO    db 6
+    NADA     db 7

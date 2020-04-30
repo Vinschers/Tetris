@@ -34,20 +34,32 @@ WndProc proc hWin   :DWORD,
 
 
     .elseif uMsg == WM_PAINT
+        mov desenhandoTetrimino, 1
         invoke BeginPaint, hWin, ADDR ps
         mov hdc, eax
-        include gui.inc
+        
+        cmp telaDesenhada, 1
+        je cont
 
-        invoke desenharTetrimino, hWin, hdc, OFFSET bloco
+        invoke desenharTela, hdc
+        mov telaDesenhada, 1
 
-        invoke rotacionarMatriz, bloco.mat
+        cont:
+        mov al, bloco.posicao
+        cmp al, 200
+        jb desenhar
+
+        invoke refazerTetrimino, OFFSET bloco, LARANJA
+
+        desenhar:
+        invoke tetriminoPaint, hWin, hdc, OFFSET bloco
         
         invoke EndPaint, hWin, ADDR ps
+        mov desenhandoTetrimino, 0
 
 
     .elseif uMsg == WM_DESCER
-        add bloco.posicao, 10
-        invoke InvalidateRect,hWnd,NULL,TRUE
+        invoke InvalidateRect,hWnd, NULL, FALSE
 
     .elseif uMsg == WM_DESTROY
         invoke PostQuitMessage,NULL
@@ -64,5 +76,6 @@ WndProc endp
 
 include matriz.inc
 include tetrimino.inc
+include gui.inc
 
 end start

@@ -1,8 +1,8 @@
 criarMatriz proc
-    invoke GlobalAlloc, 0, sizeof matriz
-    mov (matriz ptr[eax]).ponteiro, 0
-    mov (matriz ptr[eax]).altura, 0
-    mov (matriz ptr[eax]).largura, 0
+    invoke GlobalAlloc, 0, sizeof MATRIZ
+    mov (MATRIZ ptr[eax]).ponteiro, 0
+    mov (MATRIZ ptr[eax]).altura, 0
+    mov (MATRIZ ptr[eax]).largura, 0
     ret
 criarMatriz endp
 
@@ -10,8 +10,8 @@ strMatriz proc hWin:DWORD, pMat:DWORD
     mov edx, pMat
     xor ecx, ecx
     xor eax, eax
-    mov al, (matriz ptr[edx]).altura
-    mov cl, (matriz ptr[edx]).largura
+    mov al, (MATRIZ ptr[edx]).altura
+    mov cl, (MATRIZ ptr[edx]).largura
     inc cl
     mul ecx
     mov ecx, 2
@@ -23,15 +23,15 @@ strMatriz proc hWin:DWORD, pMat:DWORD
 
     push eax
     mov edx, pMat
-    mov esi, (matriz ptr[edx]).ponteiro
+    mov esi, (MATRIZ ptr[edx]).ponteiro
 
     xor cx,cx
     xor ebx, ebx
     forLinha:
-        cmp cl, (matriz ptr[edx]).altura ; linha
+        cmp cl, (MATRIZ ptr[edx]).altura ; linha
         je fim
         forColuna:
-            cmp ch, (matriz ptr[edx]).largura ; coluna
+            cmp ch, (MATRIZ ptr[edx]).largura ; coluna
             je fimForL
             mov bl, byte ptr[esi]
             add bl, 48
@@ -61,26 +61,26 @@ strMatriz proc hWin:DWORD, pMat:DWORD
             ret
 strMatriz endp
 
-rotacionarMatriz proc pMat:DWORD
+rotacionarMatriz proc USES edx pMat:DWORD
     mov edx, pMat
     xor ecx, ecx
     xor eax, eax
     xor ebx, ebx
-    mov al, (matriz ptr[edx]).altura
-    mov cl, (matriz ptr[edx]).largura
+    mov al, (MATRIZ ptr[edx]).altura
+    mov cl, (MATRIZ ptr[edx]).largura
     mul ecx
     
     invoke HeapAlloc, hHeap, 8, eax
     mov edx, pMat
     mov esi, eax
-    mov eax, (matriz ptr[edx]).ponteiro
+    mov eax, (MATRIZ ptr[edx]).ponteiro
     xor ecx,ecx
 
     forLinha:
-        cmp cl, (matriz ptr[edx]).altura ; linha
+        cmp cl, (MATRIZ ptr[edx]).altura ; linha
         je fimFors
         forColuna:
-            cmp ch, (matriz ptr[edx]).largura ; coluna
+            cmp ch, (MATRIZ ptr[edx]).largura ; coluna
             je fimForL
             mov bl, byte ptr[eax]   
 
@@ -90,13 +90,13 @@ rotacionarMatriz proc pMat:DWORD
             xor eax, eax
             mov al, ch
             xor ch, ch
-            mov cl, (matriz ptr[edx]).altura
+            mov cl, (MATRIZ ptr[edx]).altura
             mul ecx
 
             pop ecx
 
             mov edx, pMat
-            add al, (matriz ptr[edx]).altura
+            add al, (MATRIZ ptr[edx]).altura
             dec al
             sub al, cl
 
@@ -113,17 +113,72 @@ rotacionarMatriz proc pMat:DWORD
             jmp forLinha
     fimFors:
         mov edx, pMat
-        cmp (matriz ptr[edx]).ponteiro, 0
+        cmp (MATRIZ ptr[edx]).ponteiro, 0
         je fimRotacionarMatriz
 
         push esi
-        invoke HeapFree, hHeap, NULL, (matriz ptr[edx]).ponteiro
+        invoke HeapFree, hHeap, NULL, (MATRIZ ptr[edx]).ponteiro
         pop esi
     fimRotacionarMatriz:
         mov edx, pMat
-        mov (matriz ptr[edx]).ponteiro, esi
+        mov (MATRIZ ptr[edx]).ponteiro, esi
         ret
 rotacionarMatriz endp
+
+copiarPonteiroMatriz proc src:DWORD, dest:DWORD
+    mov ecx, dest
+
+    xor eax, eax
+    xor ebx, ebx
+    mov al, (MATRIZ ptr[ecx]).largura
+    mov bl, (MATRIZ ptr[ecx]).altura
+    mul ebx
+
+    mov ecx, dest
+    mov edx, src
+
+    push eax
+
+    xor ebx, ebx
+    mov ecx, (MATRIZ ptr[ecx]).ponteiro
+
+    cmp ecx, 0
+    je alocar
+
+    push eax
+    invoke GlobalFree, ecx
+    pop eax
+
+    alocar:
+    invoke GlobalAlloc, 0, eax
+
+    mov ecx, dest
+    mov (MATRIZ ptr[ecx]).ponteiro, eax
+    mov ecx, eax
+    mov edx, src
+
+    pop eax
+
+    forM:
+    cmp ebx, eax
+    je fim
+
+    push eax
+
+    mov al, byte ptr[edx]
+    mov byte ptr[ecx], al
+
+    pop eax
+
+    inc ebx
+    inc ecx
+    inc edx
+
+    jmp forM
+
+    fim:
+    ret
+copiarPonteiroMatriz endp
 
 
 COMMENT @
