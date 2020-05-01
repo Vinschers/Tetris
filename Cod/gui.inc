@@ -1,5 +1,4 @@
 desenharTela proc hdc:DWORD
-	mov    hdc, eax
 	mov rect.top, 10
 	mov rect.bottom, 651
 	mov rect.left, 10

@@ -41,51 +41,43 @@ WndProc proc hWin   :DWORD,
         .endif
 
     .elseif uMsg == WM_PAINT
-       
-        mov desenhandoTetrimino, 1
         invoke BeginPaint, hWin, ADDR ps
         mov hdc, eax
-        
-        cmp telaDesenhada, 1
-        je cont
 
-        invoke desenharTela, hdc
-        mov telaDesenhada, 1
+        ;copiar bloco
 
-        cont:
-        xor eax,eax
-        mov eax, bloco.posicao
-        cmp eax, 200
-        jl desenhar
+        mov al, paintParam
+        .if al == PP_DESENHAR
+            invoke desenharTela, hdc
 
-        invoke refazerTetrimino, OFFSET bloco, LARANJA
+        .elseif al == PP_DESCER
+            invoke desenharTetrimino, hWin, hdc, OFFSET bloco, NADA
+            add bloco.posicao, 10
 
-        desenhar:
-            mov al, paintParam
+        .elseif al == PP_ROTACIONAR
+            invoke desenharTetrimino, hWin, hdc, OFFSET bloco, NADA
+            invoke rotacionarMatriz, bloco.mat
 
-            .if al == PP_DESCER
-                invoke desenharTetrimino, hWin, hdc, OFFSET bloco, NADA
-                add bloco.posicao, 10
+        .elseif al == PP_MOVER_DIREITA
+            invoke desenharTetrimino, hWin, hdc, OFFSET bloco, NADA
+            inc bloco.posicao
 
-            .elseif al == PP_ROTACIONAR
-                invoke desenharTetrimino, hWin, hdc, OFFSET bloco, NADA
-                invoke rotacionarMatriz, bloco.mat
+        .elseif al == PP_MOVER_ESQUERDA
+            invoke desenharTetrimino, hWin, hdc, OFFSET bloco, NADA
+            dec bloco.posicao
 
-            .elseif al == PP_MOVER_DIREITA
-                invoke desenharTetrimino, hWin, hdc, OFFSET bloco, NADA
-                inc bloco.posicao
+        .endif
 
-            .elseif al == PP_MOVER_ESQUERDA
-                invoke desenharTetrimino, hWin, hdc, OFFSET bloco, NADA
-                dec bloco.posicao
+        ;verificar se colidiu
+        ;se sim, pegar a copia, colocar no atual e excluir a copia
+        ;se nao, excluir a copia
 
-            .endif
+        invoke desenharTetrimino, hWin, hdc, OFFSET bloco, bloco.tipo
 
-            invoke desenharTetrimino, hWin, hdc, OFFSET bloco, bloco.tipo
+        mov al, PP_DESENHAR
+        mov paintParam, al
 
-            invoke EndPaint, hWin, ADDR ps
-
-            mov desenhandoTetrimino, 0
+        invoke EndPaint, hWin, ADDR ps
 
 
     .elseif uMsg == WM_DESCER
