@@ -16,6 +16,7 @@ tetriminoPaint              PROTO   :DWORD, :DWORD, :DWORD
 copiarPonteiroMatriz        PROTO   :DWORD, :DWORD
 getPixel                    PROTO   :BYTE
 apagarTetrimino             PROTO   :DWORD, :DWORD, :DWORD
+copiarTetrimino             PROTO   :DWORD
 
 
 MATRIZ struct

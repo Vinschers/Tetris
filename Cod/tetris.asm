@@ -44,14 +44,18 @@ WndProc proc hWin   :DWORD,
         invoke BeginPaint, hWin, ADDR ps
         mov hdc, eax
 
-        ;copiar bloco
+            ;copiar bloco
+
+        invoke copiarTetrimino, OFFSET bloco
+        mov ecx, eax
+
 
         mov al, paintParam
         .if al == PP_DESENHAR
             invoke desenharTela, hdc
 
         .elseif al == PP_DESCER
-            invoke desenharTetrimino, hWin, hdc, OFFSET bloco, NADA
+            invoke desenharTetrimino, hWin, hdc, ecx, NADA
             add bloco.posicao, 10
 
         .elseif al == PP_ROTACIONAR
@@ -67,12 +71,15 @@ WndProc proc hWin   :DWORD,
             dec bloco.posicao
 
         .endif
-
+         
+    
         ;verificar se colidiu
         ;se sim, pegar a copia, colocar no atual e excluir a copia
         ;se nao, excluir a copia
 
-        invoke desenharTetrimino, hWin, hdc, OFFSET bloco, bloco.tipo
+
+        invoke desenharTetrimino, hWin, hdc, ecx, bloco.tipo
+        invoke destruirTetrimino, ecx
 
         mov al, PP_DESENHAR
         mov paintParam, al
