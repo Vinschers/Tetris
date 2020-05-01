@@ -33,14 +33,12 @@ WndProc proc hWin   :DWORD,
 
     .elseif uMsg == WM_KEYUP
         .if wParam == VK_UP
-            mov al, PP_ROTACIONAR
+            pintar PP_ROTACIONAR
         .elseif wParam == 39
-            mov al, PP_MOVER_DIREITA
+            pintar PP_MOVER_DIREITA
         .elseif wParam == 37
-            mov al, PP_MOVER_ESQUERDA
+            pintar PP_MOVER_ESQUERDA
         .endif
-        mov paintParam, al
-        invoke InvalidateRect,hWnd, NULL, FALSE
 
     .elseif uMsg == WM_PAINT
        
@@ -64,30 +62,29 @@ WndProc proc hWin   :DWORD,
 
         desenhar:
             mov al, paintParam
-            .if al == PP_DESENHAR
-                invoke desenharTetrimino, hWin, hdc, OFFSET bloco, bloco.tipo
 
-            .elseif al == PP_DESCER
+            .if al == PP_DESCER
                 invoke desenharTetrimino, hWin, hdc, OFFSET bloco, NADA
                 add bloco.posicao, 10
-                invoke desenharTetrimino, hWin, hdc, OFFSET bloco, bloco.tipo
 
             .elseif al == PP_ROTACIONAR
                 invoke desenharTetrimino, hWin, hdc, OFFSET bloco, NADA
                 invoke rotacionarMatriz, bloco.mat
-                invoke desenharTetrimino, hWin, hdc, OFFSET bloco, bloco.tipo
 
             .elseif al == PP_MOVER_DIREITA
                 invoke desenharTetrimino, hWin, hdc, OFFSET bloco, NADA
                 inc bloco.posicao
-                invoke desenharTetrimino, hWin, hdc, OFFSET bloco, bloco.tipo
 
             .elseif al == PP_MOVER_ESQUERDA
                 invoke desenharTetrimino, hWin, hdc, OFFSET bloco, NADA
                 dec bloco.posicao
-                invoke desenharTetrimino, hWin, hdc, OFFSET bloco, bloco.tipo
+
             .endif
+
+            invoke desenharTetrimino, hWin, hdc, OFFSET bloco, bloco.tipo
+
             invoke EndPaint, hWin, ADDR ps
+
             mov desenhandoTetrimino, 0
 
 

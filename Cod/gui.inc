@@ -3,7 +3,7 @@ desenharTela proc hdc:DWORD
 	mov rect.top, 10
 	mov rect.bottom, 651
 	mov rect.left, 10
-	mov rect.right, 330 
+	mov rect.right, 332
 
 	invoke  Rectangle, hdc, rect.left, rect.top, rect.right, rect.bottom  
 
@@ -23,8 +23,8 @@ desenharTela proc hdc:DWORD
 	mov rect.top, 280
 	mov rect.bottom, 450
 	mov rect.left, 390
-	mov rect.right, 580 
-	invoke  Rectangle, hdc, rect.left, rect.top, rect.right, rect.bottom  
+	mov rect.right, 580
+	invoke  Rectangle, hdc, rect.left, rect.top, rect.right, rect.bottom
 
 	invoke  lstrlen, ADDR pontuacaoTxt
 	invoke  TextOut, hdc, 400, 480, ADDR pontuacaoTxt, eax
@@ -110,11 +110,7 @@ desenharTetrimino endp
 ThreadProcDescer PROC USES ecx Param:DWORD
     invoke WaitForSingleObject,hEventStart, 500
         .IF eax == WAIT_TIMEOUT
-            mov al, PP_DESCER
-            mov paintParam, al
-            invoke InvalidateRect, hWnd, NULL, FALSE
-            ;invoke PostMessage,hWnd,WM_DESCER,NULL,NULL
-            ;invoke PostMessage,hWnd,WM_PAINT,1,NULL
+            pintar PP_DESCER
             jmp ThreadProcDescer
         .ENDIF
 
