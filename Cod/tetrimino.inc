@@ -2,7 +2,6 @@ montarTetrimino proc pTetrimino:DWORD, tipo:BYTE
     call criarMatriz
     mov edx, pTetrimino
     mov (TETRIMINO ptr[edx]).mat, eax
-
     mov (TETRIMINO ptr[edx]).posicao, 3
 
     cmp tipo, 6
@@ -47,7 +46,7 @@ destruirTetrimino endp
 refazerTetrimino proc pTetrimino:DWORD, tipo:BYTE
     mov edx, pTetrimino
     mov eax, (TETRIMINO ptr[edx]).mat
-    mov (TETRIMINO ptr[edx]).posicao, -7
+    mov (TETRIMINO ptr[edx]).posicao, 3
 
     cmp tipo, 6
     jne pecaNormal

@@ -84,9 +84,10 @@ desenharTetrimino proc hWin:DWORD, hDC:DWORD, pTetrimino:DWORD, cor:BYTE
 
     add al, dl
 
+    xor ecx,ecx
     mov edx, pTetrimino
-    mov cl, (TETRIMINO ptr[edx]).posicao
-    add al, cl
+    mov ecx, (TETRIMINO ptr[edx]).posicao
+    add eax, ecx
 
     mov cl, cor
     
@@ -109,7 +110,11 @@ desenharTetrimino endp
 ThreadProcDescer PROC USES ecx Param:DWORD
     invoke WaitForSingleObject,hEventStart, 500
         .IF eax == WAIT_TIMEOUT
-            invoke PostMessage,hWnd,WM_DESCER,NULL,NULL
+            mov al, PP_DESCER
+            mov paintParam, al
+            invoke InvalidateRect, hWnd, NULL, FALSE
+            ;invoke PostMessage,hWnd,WM_DESCER,NULL,NULL
+            ;invoke PostMessage,hWnd,WM_PAINT,1,NULL
             jmp ThreadProcDescer
         .ENDIF
 
@@ -154,9 +159,15 @@ desenharBloco proc hWin:DWORD, hDC:DWORD, cor:BYTE, posicao:BYTE
 
 desenharBloco endp
 
-tetriminoPaint proc hWin:DWORD, hdc:DWORD, pTetrimino:DWORD	
+apagarTetrimino proc hWin:DWORD, hdc:DWORD, pTetrimino:DWORD
 	invoke desenharTetrimino, hWin, hdc, pTetrimino, NADA
+    ret
+apagarTetrimino endp
 
+
+tetriminoPaint proc hWin:DWORD, hdc:DWORD, pTetrimino:DWORD	
+    invoke apagarTetrimino, hWin, hdc, pTetrimino
+    ;invoke desenharTetrimino, hWin, hdc, pTetrimino, NADA
 	mov edx, pTetrimino
 	add (TETRIMINO ptr[edx]).posicao, 10
 	

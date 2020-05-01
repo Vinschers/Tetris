@@ -15,6 +15,7 @@ desenharTela                PROTO   :DWORD
 tetriminoPaint              PROTO   :DWORD, :DWORD, :DWORD
 copiarPonteiroMatriz        PROTO   :DWORD, :DWORD
 getPixel                    PROTO   :BYTE
+apagarTetrimino             PROTO   :DWORD, :DWORD, :DWORD
 
 
 MATRIZ struct
@@ -25,7 +26,7 @@ MATRIZ ends
 
 TETRIMINO struct
     tipo    BYTE    ?
-    posicao BYTE    ?
+    posicao DWORD    ?
     mat     DWORD   ?
 TETRIMINO ends
 
@@ -33,6 +34,7 @@ TETRIMINO ends
 .data?
     hitpoint POINT <>
     rect     RECT  <>
+    rectParaApagar RECT <>
     posx  dd ?
     posy  dd ?
 
@@ -48,6 +50,7 @@ TETRIMINO ends
     hInstance       dd 0  ; instancia do programa
     hHeap           dd 0
     hbmp            dd 0 ; handler 
+    paintParam      db 0
 
     telaDesenhada   db 0
     desenhandoTetrimino  db 0
@@ -117,3 +120,8 @@ TETRIMINO ends
     VERMELHO db 5
     CIANO    db 6
     NADA     db 7
+    PP_DESENHAR       db 0
+    PP_DESCER         db 1
+    PP_ROTACIONAR     db 2
+    PP_MOVER_DIREITA  db 3
+    PP_MOVER_ESQUERDA db 4
