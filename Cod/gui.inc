@@ -1,6 +1,6 @@
 desenharTela proc hdc:DWORD
 	mov rect.top, 10
-	mov rect.bottom, 651
+	mov rect.bottom, 652
 	mov rect.left, 10
 	mov rect.right, 332
 
@@ -76,12 +76,12 @@ desenharTetrimino proc hWin:DWORD, hDC:DWORD, pTetrimino:DWORD, cor:BYTE
 
     mov esi, edx
 
-    mov ebx, 10
+    mov ebx, 16
     mul ebx
 
     mov edx, esi
 
-    add al, dl
+    add ax, dx
 
     xor ecx,ecx
     mov edx, pTetrimino
@@ -90,7 +90,7 @@ desenharTetrimino proc hWin:DWORD, hDC:DWORD, pTetrimino:DWORD, cor:BYTE
 
     mov cl, cor
     
-    invoke desenharBloco, hWin, hDC, cl, al
+    invoke desenharBloco, hWin, hDC, cl, ax
 
     pop edx
     pop ecx
@@ -117,7 +117,7 @@ ThreadProcDescer PROC USES ecx Param:DWORD
     ret
 ThreadProcDescer ENDP
 
-desenharBloco proc hWin:DWORD, hDC:DWORD, cor:BYTE, posicao:BYTE
+desenharBloco proc hWin:DWORD, hDC:DWORD, cor:BYTE, posicao:WORD
 
     LOCAL hOld:DWORD
     LOCAL memDC :DWORD
@@ -175,12 +175,15 @@ tetriminoPaint endp
 
 ;ax -> coluna
 ;resto -> linha
-getPixel proc pos:BYTE
+getPixel proc pos:WORD
     xor edx, edx
     xor eax, eax
-    mov al, pos
-    mov ecx, 10
+    mov ax, pos
+    mov ecx, 16
     div ecx
+    sub eax, 3
+    sub edx, 3
+
     shl eax, 5
     shl edx, 5
     add eax, 11

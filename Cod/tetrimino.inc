@@ -2,7 +2,7 @@ montarTetrimino proc pTetrimino:DWORD, tipo:BYTE
     call criarMatriz
     mov edx, pTetrimino
     mov (TETRIMINO ptr[edx]).mat, eax
-    mov (TETRIMINO ptr[edx]).posicao, 3
+    mov (TETRIMINO ptr[edx]).posicao, 54
 
     cmp tipo, 6
     jne pecaNormal
@@ -39,9 +39,7 @@ montarTetrimino endp
 
 destruirTetrimino proc pTetrimino:DWORD
     mov eax, pTetrimino
-    invoke GlobalFree, (MATRIZ ptr[(TETRIMINO ptr[eax]).mat]).ponteiro
-    mov eax, pTetrimino
-    invoke GlobalFree, (TETRIMINO ptr[eax]).mat
+    invoke destruirMatriz, (TETRIMINO ptr[eax]).mat, 1
     mov eax, pTetrimino
     invoke GlobalFree, eax
     ret
@@ -50,7 +48,7 @@ destruirTetrimino endp
 refazerTetrimino proc pTetrimino:DWORD, tipo:BYTE
     mov edx, pTetrimino
     mov eax, (TETRIMINO ptr[edx]).mat
-    mov (TETRIMINO ptr[edx]).posicao, 3
+    mov (TETRIMINO ptr[edx]).posicao, 54
 
     cmp tipo, 6
     jne pecaNormal
@@ -140,7 +138,7 @@ copiarTetrimino proc ponteiro:DWORD
 copiarTetrimino  endp
 
 adicionarMatrizLogica proc pTetrimino:DWORD, pMapa:DWORD
-LOCAL mapaLargura:BYTE
+    LOCAL mapaLargura:BYTE
     LOCAL mapaAltura:BYTE
     LOCAL tetriLargura:BYTE
     LOCAL tetriAltura:BYTE
@@ -162,24 +160,9 @@ LOCAL mapaLargura:BYTE
     mov tetriLargura, cl
     mov edi, (MATRIZ ptr[edi]).ponteiro
 
-    push esi
-    push edi
 
-    mov eax, edx
-    xor edx, edx
-    mov ecx, 10
-    div ecx
-    add eax, 3
-    shl eax, 4
-    add eax, edx
-    add eax, 3
-
-    mov edx, eax
     xor eax, eax
     xor ecx, ecx
-
-    pop edi
-    pop esi
 
     forLinha:
         cmp cl, tetriAltura
@@ -246,23 +229,7 @@ colocarMatrizLogica proc pTetrimino:DWORD, pMapa:DWORD, valor:BYTE
     mov tetriLargura, cl
     mov edi, (MATRIZ ptr[edi]).ponteiro
 
-    push esi
-    push edi
-
-    mov eax, edx
-    xor edx, edx
-    mov ecx, 10
-    div ecx
-    add eax, 3
-    shl eax, 4
-    add eax, edx
-    add eax, 3
-    mov edx, eax
-    xor eax, eax
     xor ecx, ecx
-
-    pop edi
-    pop esi
 
     forLinha:
         cmp cl, tetriAltura
@@ -283,10 +250,11 @@ colocarMatrizLogica proc pTetrimino:DWORD, pMapa:DWORD, valor:BYTE
             mov cl, tetriLargura
             mul ecx
 
-            pop edx
-
             add eax, ebx
 
+            pop edx
+
+            xor ecx, ecx
             mov cl, byte ptr[edi + eax]
             cmp cl, 1
             jne continuar
@@ -297,14 +265,12 @@ colocarMatrizLogica proc pTetrimino:DWORD, pMapa:DWORD, valor:BYTE
             continuar:
             pop ecx
 
-            xor dh, dh
-
-            inc dl
+            inc edx
             inc ch
             jmp forColuna
         fimForColuna:
         xor ch, ch
-        add dl, 13
+        add edx, 13
         inc cl
         jmp forLinha
     fim:
@@ -315,21 +281,24 @@ verificarColisao proc mat:DWORD
     xor eax, eax
     xor ecx, ecx
 
-    mov esi, mat
-    mov al, (MATRIZ ptr[esi]).altura
-    mov cl, (MATRIZ ptr[esi]).largura
+    mov ebx, mat
+    mov al, (MATRIZ ptr[ebx]).altura
+    mov cl, (MATRIZ ptr[ebx]).largura
     mul ecx
     mov ecx, eax
-    mov esi, (MATRIZ ptr[esi]).ponteiro
+    mov ebx, mat
+    mov esi, (MATRIZ ptr[ebx]).ponteiro
 
     xor ebx, ebx
     xor eax, eax
+    xor edx, edx
 
     forColisao:
     cmp bl, cl
     je fim
 
     mov dl, byte ptr[esi + ebx]
+
     cmp dl, 1
     jbe contForColisao
 
