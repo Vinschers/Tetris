@@ -115,6 +115,7 @@ TETRIMINO ends
 	hThread 	  dd 0
 	hEventStart   dd 0
     hBmp          dd 0
+    velocidade    dd 500
 
 .const
     WM_DESCER equ WM_USER+100h
@@ -131,3 +132,4 @@ TETRIMINO ends
     PP_ROTACIONAR     db 2
     PP_MOVER_DIREITA  db 3
     PP_MOVER_ESQUERDA db 4
+    PP_REFAZER        db 5

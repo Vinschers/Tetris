@@ -32,6 +32,11 @@ WndProc proc hWin   :DWORD,
         mov ecx, OFFSET ThreadProcDescer
         invoke CreateThread, NULL, NULL, ecx, ADDR mapa, NORMAL_PRIORITY_CLASS, ADDR ThreadDescer
         mov hThread, eax
+    
+    .elseif uMsg == WM_KEYDOWN
+        .if wParam == 40
+            mov velocidade, 50
+        .endif
 
     .elseif uMsg == WM_KEYUP
         .if wParam == VK_UP
@@ -40,6 +45,12 @@ WndProc proc hWin   :DWORD,
             pintar PP_MOVER_DIREITA
         .elseif wParam == 37
             pintar PP_MOVER_ESQUERDA
+        .elseif wParam == 40
+            mov velocidade, 500
+        .elseif wParam == 32
+            mov velocidade, 50
+        .elseif wParam == 72
+            pintar PP_REFAZER
         .endif
 
     .elseif uMsg == WM_PAINT
@@ -55,7 +66,6 @@ WndProc proc hWin   :DWORD,
         mov al, paintParam
         .if al == PP_DESENHAR
             invoke desenharTela, hdc
-
         .elseif al == PP_DESCER
             invoke desenharTetrimino, hWin, hdc, OFFSET bloco, NADA
             add bloco.posicao, 10
@@ -72,6 +82,9 @@ WndProc proc hWin   :DWORD,
         .elseif al == PP_MOVER_ESQUERDA
             invoke desenharTetrimino, hWin, hdc, OFFSET bloco, NADA
             dec bloco.posicao
+        .elseif al == PP_REFAZER
+            invoke desenharTetrimino, hWin, hdc, OFFSET bloco, NADA
+            invoke refazerTetrimino, OFFSET bloco, CIANO
 
         .endif
 
