@@ -4,7 +4,7 @@ CREF_TRANSPARENT  EQU 0FF00FFh
 WinMain                     PROTO   :DWORD, :DWORD, :DWORD, :DWORD
 WndProc                     PROTO   :DWORD, :DWORD, :DWORD, :DWORD
 TopXY                       PROTO   :DWORD, :DWORD
-desenharBloco               PROTO   :DWORD, :DWORD, :BYTE,  :BYTE
+desenharBloco               PROTO   :DWORD, :DWORD, :BYTE,  :WORD
 montarTetrimino             PROTO   :DWORD, :BYTE
 desenharTetrimino           PROTO   :DWORD, :DWORD, :DWORD, :BYTE
 strMatriz                   PROTO   :DWORD, :DWORD
@@ -14,13 +14,16 @@ rotacionarMatriz            PROTO   :DWORD
 desenharTela                PROTO   :DWORD
 tetriminoPaint              PROTO   :DWORD, :DWORD, :DWORD
 copiarPonteiroMatriz        PROTO   :DWORD, :DWORD
-getPixel                    PROTO   :BYTE
+getPixel                    PROTO   :WORD
 apagarTetrimino             PROTO   :DWORD, :DWORD, :DWORD
 copiarTetrimino             PROTO   :DWORD
 adicionarMatrizLogica       PROTO   :DWORD, :DWORD
 colocarMatrizLogica         PROTO   :DWORD, :DWORD, :BYTE
 verificarColisao            PROTO   :DWORD
 atribuirTetrimino           PROTO   :DWORD, :DWORD
+copiarMatriz                PROTO   :DWORD
+atribuirMatriz              PROTO   :DWORD, :DWORD
+destruirMatriz              PROTO   :DWORD, :BYTE
 
 
 

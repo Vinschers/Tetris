@@ -15,7 +15,8 @@ WndProc proc hWin   :DWORD,
     LOCAL hdc:HDC
     LOCAL ps:PAINTSTRUCT
     LOCAL copiaTetrimino:DWORD
-    LOCAL mudarTetrimino:BYTE
+    LOCAL copiaMatriz:DWORD
+    LOCAL colidiu:BYTE
 
     invoke GetProcessHeap
     mov hHeap, eax
@@ -24,7 +25,7 @@ WndProc proc hWin   :DWORD,
         mov mapa.altura, 26
         mov mapa.largura, 16
 
-        invoke montarTetrimino, OFFSET bloco, ROXO
+        invoke montarTetrimino, OFFSET bloco, LARANJA
 
         invoke CreateEvent,NULL,FALSE,FALSE,NULL
         mov    hEventStart,eax
@@ -43,14 +44,13 @@ WndProc proc hWin   :DWORD,
         .endif
 
     .elseif uMsg == WM_PAINT
-
         invoke BeginPaint, hWin, ADDR ps
         mov hdc, eax
 
         invoke copiarTetrimino, OFFSET bloco
         mov copiaTetrimino, eax
         
-        ;invoke colocarMatrizLogica, OFFSET bloco, OFFSET mapa, 0
+        invoke colocarMatrizLogica, OFFSET bloco, OFFSET mapa, 0
 
         mov al, paintParam
         .if al == PP_DESENHAR
@@ -58,8 +58,7 @@ WndProc proc hWin   :DWORD,
 
         .elseif al == PP_DESCER
             invoke desenharTetrimino, hWin, hdc, OFFSET bloco, NADA
-            add bloco.posicao, 10
-            mov mudarTetrimino, 1
+            add bloco.posicao, 16
 
         .elseif al == PP_ROTACIONAR
             invoke desenharTetrimino, hWin, hdc, OFFSET bloco, NADA
@@ -75,35 +74,41 @@ WndProc proc hWin   :DWORD,
 
         .endif
 
-        ;invoke cop
-        ;invoke adicionarMatrizLogica, OFFSET bloco, OFFSET mapa
-        ;invoke strMatriz, hWin, bloco.mat
-        ;invoke verificarColisao, bloco.mat
+        invoke copiarMatriz, bloco.mat
+        mov copiaMatriz, eax
 
-        ;mov txt, eax
-        ;add txt, 48
-        ;showmsg addr txt
+        invoke adicionarMatrizLogica, OFFSET bloco, OFFSET mapa
+        invoke verificarColisao, bloco.mat
 
-        ;.if eax == 1
-        ;    invoke atribuirTetrimino, OFFSET bloco, copiaTetrimino
-        ;.elseif eax == 0
-        ;    mov ebx, copiaTetrimino
-        ;    invoke atribuirMatriz, bloco.mat, (TETRIMINO ptr[ebx]).mat
-        ;.endif
-    
+        mov colidiu, al
+
+        invoke atribuirMatriz, bloco.mat, copiaMatriz
+        invoke destruirMatriz, copiaMatriz, 1
+
+        .if colidiu == 1
+            invoke atribuirTetrimino, OFFSET bloco, copiaTetrimino
+        .endif
+
         ;verificar se colidiu
         ;se sim, pegar a copia, colocar no atual e excluir a copia
         ;se nao, excluir a copia
 
         invoke destruirTetrimino, copiaTetrimino
 
-        ;invoke colocarMatrizLogica, OFFSET bloco, OFFSET mapa, 1
+        invoke colocarMatrizLogica, OFFSET bloco, OFFSET mapa, 1
+        
         invoke desenharTetrimino, hWin, hdc, OFFSET bloco, bloco.tipo
+
+        mov al, paintParam
+        .if colidiu == 1
+            .if al == PP_DESCER
+                invoke refazerTetrimino, OFFSET bloco, AZUL
+                invoke desenharTetrimino, hWin, hdc, OFFSET bloco, bloco.tipo
+            .endif
+        .endif
 
         mov al, PP_DESENHAR
         mov paintParam, al
-
-        mov mudarTetrimino, 0
 
         invoke EndPaint, hWin, ADDR ps
 

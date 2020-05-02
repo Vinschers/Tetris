@@ -180,6 +180,43 @@ copiarPonteiroMatriz proc src:DWORD, dest:DWORD
     ret
 copiarPonteiroMatriz endp
 
+copiarMatriz proc src:DWORD
+    call criarMatriz
+    push eax
+    invoke atribuirMatriz, eax, src
+    pop eax
+    ret
+copiarMatriz endp
+
+atribuirMatriz proc dest:DWORD, src:DWORD
+    LOCAL teste:DWORD
+    mov esi, dest
+    mov edi, src
+
+    mov cl, (MATRIZ ptr[edi]).largura
+    mov (MATRIZ ptr[esi]).largura, cl
+    mov cl, (MATRIZ ptr[edi]).altura
+    mov (MATRIZ ptr[esi]).altura, cl
+    mov ebx, (MATRIZ ptr[edi]).ponteiro
+    invoke copiarPonteiroMatriz, ebx, dest
+
+    ret
+atribuirMatriz endp
+
+destruirMatriz proc pMat:DWORD, excluirSiMesma:BYTE
+    mov eax, pMat
+    mov edx, (MATRIZ ptr[eax]).ponteiro
+    ;invoke GlobalFree, edx
+    ;cmp excluirSiMesma, 1
+    ;jne fim
+
+    ;mov eax, pMat
+    ;invoke GlobalFree, eax
+
+    fim:
+    ret
+destruirMatriz endp
+
 
 COMMENT @
 rodarDireitaPeca proc p:DWORD
