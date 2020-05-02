@@ -107,7 +107,7 @@ desenharTetrimino proc hWin:DWORD, hDC:DWORD, pTetrimino:DWORD, cor:BYTE
 desenharTetrimino endp
 
 ThreadProcDescer PROC USES ecx Param:DWORD
-    invoke WaitForSingleObject,hEventStart, 500
+    invoke WaitForSingleObject,hEventStart, 3000
         .IF eax == WAIT_TIMEOUT
             pintar PP_DESCER
             jmp ThreadProcDescer

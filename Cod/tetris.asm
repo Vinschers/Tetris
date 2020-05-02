@@ -14,6 +14,8 @@ WndProc proc hWin   :DWORD,
 
     LOCAL hdc:HDC
     LOCAL ps:PAINTSTRUCT
+    LOCAL copiaTetrimino:DWORD
+    LOCAL mudarTetrimino:BYTE
 
     invoke GetProcessHeap
     mov hHeap, eax
@@ -41,22 +43,23 @@ WndProc proc hWin   :DWORD,
         .endif
 
     .elseif uMsg == WM_PAINT
+
         invoke BeginPaint, hWin, ADDR ps
         mov hdc, eax
 
-            ;copiar bloco
-
         invoke copiarTetrimino, OFFSET bloco
-        mov ecx, eax
-
+        mov copiaTetrimino, eax
+        
+        ;invoke colocarMatrizLogica, OFFSET bloco, OFFSET mapa, 0
 
         mov al, paintParam
         .if al == PP_DESENHAR
             invoke desenharTela, hdc
 
         .elseif al == PP_DESCER
-            invoke desenharTetrimino, hWin, hdc, ecx, NADA
+            invoke desenharTetrimino, hWin, hdc, OFFSET bloco, NADA
             add bloco.posicao, 10
+            mov mudarTetrimino, 1
 
         .elseif al == PP_ROTACIONAR
             invoke desenharTetrimino, hWin, hdc, OFFSET bloco, NADA
@@ -71,18 +74,36 @@ WndProc proc hWin   :DWORD,
             dec bloco.posicao
 
         .endif
-         
+
+        ;invoke cop
+        ;invoke adicionarMatrizLogica, OFFSET bloco, OFFSET mapa
+        ;invoke strMatriz, hWin, bloco.mat
+        ;invoke verificarColisao, bloco.mat
+
+        ;mov txt, eax
+        ;add txt, 48
+        ;showmsg addr txt
+
+        ;.if eax == 1
+        ;    invoke atribuirTetrimino, OFFSET bloco, copiaTetrimino
+        ;.elseif eax == 0
+        ;    mov ebx, copiaTetrimino
+        ;    invoke atribuirMatriz, bloco.mat, (TETRIMINO ptr[ebx]).mat
+        ;.endif
     
         ;verificar se colidiu
         ;se sim, pegar a copia, colocar no atual e excluir a copia
         ;se nao, excluir a copia
 
+        invoke destruirTetrimino, copiaTetrimino
 
-        invoke desenharTetrimino, hWin, hdc, ecx, bloco.tipo
-        invoke destruirTetrimino, ecx
+        ;invoke colocarMatrizLogica, OFFSET bloco, OFFSET mapa, 1
+        invoke desenharTetrimino, hWin, hdc, OFFSET bloco, bloco.tipo
 
         mov al, PP_DESENHAR
         mov paintParam, al
+
+        mov mudarTetrimino, 0
 
         invoke EndPaint, hWin, ADDR ps
 

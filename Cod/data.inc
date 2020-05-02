@@ -17,6 +17,11 @@ copiarPonteiroMatriz        PROTO   :DWORD, :DWORD
 getPixel                    PROTO   :BYTE
 apagarTetrimino             PROTO   :DWORD, :DWORD, :DWORD
 copiarTetrimino             PROTO   :DWORD
+adicionarMatrizLogica       PROTO   :DWORD, :DWORD
+colocarMatrizLogica         PROTO   :DWORD, :DWORD, :BYTE
+verificarColisao            PROTO   :DWORD
+atribuirTetrimino           PROTO   :DWORD, :DWORD
+
 
 
 MATRIZ struct
