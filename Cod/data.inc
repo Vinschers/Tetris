@@ -5,22 +5,22 @@ WinMain                     PROTO   :DWORD, :DWORD, :DWORD, :DWORD
 WndProc                     PROTO   :DWORD, :DWORD, :DWORD, :DWORD
 TopXY                       PROTO   :DWORD, :DWORD
 desenharBloco               PROTO   :DWORD, :DWORD, :BYTE,  :WORD
-montarTetrimino             PROTO   :DWORD, :BYTE
-desenharTetrimino           PROTO   :DWORD, :DWORD, :DWORD, :BYTE
+montarTetromino             PROTO   :DWORD, :BYTE
+desenharTetromino           PROTO   :DWORD, :DWORD, :DWORD, :BYTE
 strMatriz                   PROTO   :DWORD, :DWORD
-refazerTetrimino            PROTO   :DWORD, :BYTE
-destruirTetrimino           PROTO   :DWORD
+refazerTetromino            PROTO   :DWORD, :BYTE
+destruirTetromino           PROTO   :DWORD
 rotacionarMatriz            PROTO   :DWORD
 desenharTela                PROTO   :DWORD
-tetriminoPaint              PROTO   :DWORD, :DWORD, :DWORD
+tetrominoPaint              PROTO   :DWORD, :DWORD, :DWORD
 copiarPonteiroMatriz        PROTO   :DWORD, :DWORD
 getPixel                    PROTO   :WORD
-apagarTetrimino             PROTO   :DWORD, :DWORD, :DWORD
-copiarTetrimino             PROTO   :DWORD
+apagarTetromino             PROTO   :DWORD, :DWORD, :DWORD
+copiarTetromino             PROTO   :DWORD
 adicionarMatrizLogica       PROTO   :DWORD, :DWORD
 colocarMatrizLogica         PROTO   :DWORD, :DWORD, :BYTE
 verificarColisao            PROTO   :DWORD
-atribuirTetrimino           PROTO   :DWORD, :DWORD
+atribuirTetromino           PROTO   :DWORD, :DWORD
 copiarMatriz                PROTO   :DWORD
 atribuirMatriz              PROTO   :DWORD, :DWORD
 destruirMatriz              PROTO   :DWORD, :BYTE
@@ -36,12 +36,12 @@ MATRIZ struct
     largura     BYTE    ?
 MATRIZ ends
 
-TETRIMINO struct
+TETROMINO struct
     tipo    BYTE    ?
     posicao DWORD   ?
     rotacao BYTE    ?
     mat     DWORD   ?
-TETRIMINO ends
+TETROMINO ends
 
 
 .data?
@@ -66,7 +66,7 @@ TETRIMINO ends
     paintParam      db 0
 
     telaDesenhada   db 0
-    desenhandoTetrimino  db 0
+    desenhandoTetromino  db 0
 
     txt             dd 97,0
     txtb            db 0,0
@@ -116,7 +116,7 @@ TETRIMINO ends
                     db  0,0,0,0,0,0,0,0,0,0,0,0
                     db  0,0,0,0,0,0,0,0,0,0,0,0
                     db  0,0,0,0,0,0,0,0
-    bloco           TETRIMINO <>
+    bloco           TETROMINO <>
 
     ThreadDescer  dd 0
 	ExitCode 	  dd 0

@@ -13,7 +13,7 @@ WndProc proc hWin   :DWORD,
         mov mapa.altura, 26
         mov mapa.largura, 16
 
-        invoke montarTetrimino, OFFSET bloco, LARANJA
+        invoke montarTetromino, OFFSET bloco, LARANJA
 
         invoke CreateEvent,NULL,FALSE,FALSE,NULL
         mov    hEventStart,eax
@@ -43,10 +43,10 @@ WndProc proc hWin   :DWORD,
         .endif
 
     .elseif uMsg == WM_PAINT
-        cmp desenhandoTetrimino, 1
+        cmp desenhandoTetromino, 1
         je fim
 
-        mov desenhandoTetrimino, 1
+        mov desenhandoTetromino, 1
         invoke BeginPaint, hWin, ADDR ps
         mov hdc, eax
 
@@ -56,7 +56,7 @@ WndProc proc hWin   :DWORD,
         mov paintParam, al
 
         invoke EndPaint, hWin, ADDR ps
-        mov desenhandoTetrimino, 0
+        mov desenhandoTetromino, 0
 
         fim:
 
@@ -64,7 +64,7 @@ WndProc proc hWin   :DWORD,
 
     .elseif uMsg == WM_DESTROY
         invoke PostQuitMessage,NULL
-        invoke destruirTetrimino, OFFSET bloco
+        invoke destruirTetromino, OFFSET bloco
         return 0
 
 

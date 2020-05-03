@@ -32,9 +32,9 @@ desenharTela proc hdc:DWORD
 desenharTela endp
 
 ;P + Tcol + Tlin*16
-desenharTetrimino proc hWin:DWORD, hDC:DWORD, pTetrimino:DWORD, cor:BYTE
-    mov edx, pTetrimino
-    mov edx, (TETRIMINO ptr[edx]).mat
+desenharTetromino proc hWin:DWORD, hDC:DWORD, pTetromino:DWORD, cor:BYTE
+    mov edx, pTetromino
+    mov edx, (TETROMINO ptr[edx]).mat
 
     xor eax, eax
     xor ecx, ecx
@@ -42,8 +42,8 @@ desenharTetrimino proc hWin:DWORD, hDC:DWORD, pTetrimino:DWORD, cor:BYTE
     mov cl, (MATRIZ ptr[edx]).altura
     mul ecx
 
-    mov edx, pTetrimino
-    mov edx, (TETRIMINO ptr[edx]).mat
+    mov edx, pTetromino
+    mov edx, (TETROMINO ptr[edx]).mat
     mov edx, (MATRIZ ptr[edx]).ponteiro
 
     xor ebx, ebx
@@ -66,8 +66,8 @@ desenharTetrimino proc hWin:DWORD, hDC:DWORD, pTetrimino:DWORD, cor:BYTE
     mov al, bl ;al tem o contador
     xor ebx, ebx
 
-    mov edx, pTetrimino
-    mov edx, (TETRIMINO ptr[edx]).mat
+    mov edx, pTetromino
+    mov edx, (TETROMINO ptr[edx]).mat
     mov bl, (MATRIZ ptr[edx]).largura  ;bl tem a largura
 
     xor edx, edx
@@ -84,8 +84,8 @@ desenharTetrimino proc hWin:DWORD, hDC:DWORD, pTetrimino:DWORD, cor:BYTE
     add ax, dx
 
     xor ecx,ecx
-    mov edx, pTetrimino
-    mov ecx, (TETRIMINO ptr[edx]).posicao
+    mov edx, pTetromino
+    mov ecx, (TETROMINO ptr[edx]).posicao
     add eax, ecx
 
     mov cl, cor
@@ -104,7 +104,7 @@ desenharTetrimino proc hWin:DWORD, hDC:DWORD, pTetrimino:DWORD, cor:BYTE
 
     fim:
     ret
-desenharTetrimino endp
+desenharTetromino endp
 
 ThreadProcDescer PROC USES ecx Param:DWORD
     invoke WaitForSingleObject,hEventStart, velocidade
@@ -154,24 +154,10 @@ desenharBloco proc hWin:DWORD, hDC:DWORD, cor:BYTE, posicao:WORD
 
 desenharBloco endp
 
-apagarTetrimino proc hWin:DWORD, hdc:DWORD, pTetrimino:DWORD
-	invoke desenharTetrimino, hWin, hdc, pTetrimino, NADA
+apagarTetromino proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD
+	invoke desenharTetromino, hWin, hdc, pTetromino, NADA
     ret
-apagarTetrimino endp
-
-
-tetriminoPaint proc hWin:DWORD, hdc:DWORD, pTetrimino:DWORD	
-    invoke apagarTetrimino, hWin, hdc, pTetrimino
-    ;invoke desenharTetrimino, hWin, hdc, pTetrimino, NADA
-	mov edx, pTetrimino
-	add (TETRIMINO ptr[edx]).posicao, 10
-	
-	mov cl, (TETRIMINO ptr[edx]).tipo
-	invoke desenharTetrimino, hWin, hdc, pTetrimino, cl
-
-	fim:
-	ret
-tetriminoPaint endp
+apagarTetromino endp
 
 ;ax -> coluna
 ;resto -> linha
@@ -194,12 +180,12 @@ getPixel proc pos:WORD
 getPixel endp
 
 paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD
-	LOCAL copiaTetrimino:DWORD
+	LOCAL copiaTetromino:DWORD
 	LOCAL copiaMatriz:DWORD
 	LOCAL colidiu:BYTE
 
-	invoke copiarTetrimino, pTetromino
-    mov copiaTetrimino, eax
+	invoke copiarTetromino, pTetromino
+    mov copiaTetromino, eax
     
     invoke colocarMatrizLogica, pTetromino, pMapa, 0
 
@@ -208,52 +194,52 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD
         invoke desenharTela, hdc
 
     .elseif al == PP_DESCER
-        invoke desenharTetrimino, hWin, hdc, pTetromino, NADA
+        invoke desenharTetromino, hWin, hdc, pTetromino, NADA
         mov esi, pTetromino
-        add (TETRIMINO ptr[esi]).posicao, 16
-        mov desenhandoTetrimino, 0
+        add (TETROMINO ptr[esi]).posicao, 16
+        mov desenhandoTetromino, 0
 
     .elseif al == PP_ROTACIONAR
-        invoke desenharTetrimino, hWin, hdc, pTetromino, NADA
+        invoke desenharTetromino, hWin, hdc, pTetromino, NADA
         mov esi, pTetromino
-        invoke rotacionarMatriz, (TETRIMINO ptr[esi]).mat
+        invoke rotacionarMatriz, (TETROMINO ptr[esi]).mat
         mov esi, pTetromino
-        add (TETRIMINO ptr[esi]).rotacao, 1
-        mov cl, (TETRIMINO ptr[esi]).rotacao
+        add (TETROMINO ptr[esi]).rotacao, 1
+        mov cl, (TETROMINO ptr[esi]).rotacao
         .if cl == 4
         	mov esi, pTetromino
-            mov (TETRIMINO ptr[esi]).rotacao, 0
+            mov (TETROMINO ptr[esi]).rotacao, 0
         .endif
 
     .elseif al == PP_MOVER_DIREITA
-        invoke desenharTetrimino, hWin, hdc, pTetromino, NADA
+        invoke desenharTetromino, hWin, hdc, pTetromino, NADA
         mov esi, pTetromino
-        inc (TETRIMINO ptr[esi]).posicao
+        inc (TETROMINO ptr[esi]).posicao
 
     .elseif al == PP_MOVER_ESQUERDA
-        invoke desenharTetrimino, hWin, hdc, pTetromino, NADA
+        invoke desenharTetromino, hWin, hdc, pTetromino, NADA
         mov esi, pTetromino
-        dec (TETRIMINO ptr[esi]).posicao
+        dec (TETROMINO ptr[esi]).posicao
 
     .elseif al == PP_REFAZER
-        invoke refazerTetrimino, pTetromino, CIANO
+        invoke refazerTetromino, pTetromino, CIANO
 
     .endif
 
     mov esi, pTetromino
-    mov edi, (TETRIMINO ptr[esi]).mat
+    mov edi, (TETROMINO ptr[esi]).mat
     invoke copiarMatriz, edi
     mov copiaMatriz, eax
 
     invoke adicionarMatrizLogica, pTetromino, pMapa
     mov esi, pTetromino
-    mov edi, (TETRIMINO ptr[esi]).mat
+    mov edi, (TETROMINO ptr[esi]).mat
     invoke verificarColisao, edi
 
     mov colidiu, al
 
     mov esi, pTetromino
-    mov edi, (TETRIMINO ptr[esi]).mat
+    mov edi, (TETROMINO ptr[esi]).mat
 
     invoke atribuirMatriz, edi, copiaMatriz
     invoke destruirMatriz, copiaMatriz, 1
@@ -263,32 +249,32 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD
         .if al == PP_ROTACIONAR
             invoke testesRotacao, pTetromino, pMapa
             .if eax == 0
-                invoke atribuirTetrimino, pTetromino, copiaTetrimino
+                invoke atribuirTetromino, pTetromino, copiaTetromino
             .endif
         .else
-            invoke atribuirTetrimino, pTetromino, copiaTetrimino
+            invoke atribuirTetromino, pTetromino, copiaTetromino
         .endif
     .endif
 
-    invoke destruirTetrimino, copiaTetrimino
+    invoke destruirTetromino, copiaTetromino
     invoke colocarMatrizLogica, pTetromino, pMapa, 1
     mov esi, pTetromino
-    mov cl, (TETRIMINO ptr[esi]).tipo
-    invoke desenharTetrimino, hWin, hdc, pTetromino, cl
+    mov cl, (TETROMINO ptr[esi]).tipo
+    invoke desenharTetromino, hWin, hdc, pTetromino, cl
 
     mov al, paintParam
     .if colidiu == 1
         .if al == PP_DESCER
         	mov esi, pTetromino
-        	mov ecx, (TETRIMINO ptr[esi]).posicao
+        	mov ecx, (TETROMINO ptr[esi]).posicao
             .if ecx < 10
                 call perder
             .else
                 mov velocidade, 500
-                invoke refazerTetrimino, pTetromino, AZUL
+                invoke refazerTetromino, pTetromino, AZUL
                 mov esi, pTetromino
-			    mov cl, (TETRIMINO ptr[esi]).tipo
-			    invoke desenharTetrimino, hWin, hdc, pTetromino, cl
+			    mov cl, (TETROMINO ptr[esi]).tipo
+			    invoke desenharTetromino, hWin, hdc, pTetromino, cl
             .endif
         .endif
     .endif
@@ -298,7 +284,7 @@ paint endp
 
 esperarDesenho proc
     comparar:
-    cmp desenhandoTetrimino, 1
+    cmp desenhandoTetromino, 1
     je comparar
     ret
 esperarDesenho endp

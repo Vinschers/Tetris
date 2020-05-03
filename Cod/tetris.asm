@@ -6,7 +6,7 @@ start:
     
 include janela.inc
 include matriz.inc
-include tetrimino.inc
+include tetromino.inc
 include gui.inc
 include eventos.inc
 
