@@ -179,7 +179,7 @@ getPixel proc pos:WORD
     ret
 getPixel endp
 
-paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD
+paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
 	LOCAL copiaTetromino:DWORD
 	LOCAL copiaMatriz:DWORD
 	LOCAL colidiu:BYTE
@@ -224,6 +224,10 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD
     .elseif al == PP_REFAZER
         invoke refazerTetromino, pTetromino, CIANO
 
+    .elseif al == PP_CAIR_TUDO
+        invoke desenharTetromino, hWin, hdc, pTetromino, NADA
+        invoke descerTudo, pTetromino, pMapa
+
     .endif
 
     mov esi, pTetromino
@@ -257,6 +261,13 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD
     .endif
 
     invoke destruirTetromino, copiaTetromino
+
+    invoke desenharTetromino, hWin, hdc, pFantasma, NADA
+    invoke atualizarFantasma, pFantasma, pTetromino, pMapa
+    mov esi, pFantasma
+    mov cl, (TETROMINO ptr[esi]).tipo
+    invoke desenharTetromino, hWin, hdc, pFantasma, cl
+
     invoke colocarMatrizLogica, pTetromino, pMapa, 1
     mov esi, pTetromino
     mov cl, (TETROMINO ptr[esi]).tipo
@@ -272,6 +283,10 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD
             .else
                 mov velocidade, 500
                 invoke refazerTetromino, pTetromino, AZUL
+                invoke atualizarFantasma, pFantasma, pTetromino, pMapa
+                mov esi, pFantasma
+                mov cl, (TETROMINO ptr[esi]).tipo
+                invoke desenharTetromino, hWin, hdc, pFantasma, cl
                 mov esi, pTetromino
 			    mov cl, (TETROMINO ptr[esi]).tipo
 			    invoke desenharTetromino, hWin, hdc, pTetromino, cl

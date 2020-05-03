@@ -189,7 +189,6 @@ copiarMatriz proc src:DWORD
 copiarMatriz endp
 
 atribuirMatriz proc dest:DWORD, src:DWORD
-    LOCAL teste:DWORD
     mov esi, dest
     mov edi, src
 
@@ -206,12 +205,12 @@ atribuirMatriz endp
 destruirMatriz proc pMat:DWORD, excluirSiMesma:BYTE
     mov eax, pMat
     mov edx, (MATRIZ ptr[eax]).ponteiro
-    ;invoke GlobalFree, edx
-    ;cmp excluirSiMesma, 1
-    ;jne fim
+    invoke GlobalFree, edx
+    cmp excluirSiMesma, 1
+    jne fim
 
-    ;mov eax, pMat
-    ;invoke GlobalFree, eax
+    mov eax, pMat
+    invoke GlobalFree, eax
 
     fim:
     ret

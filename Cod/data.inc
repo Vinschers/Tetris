@@ -26,7 +26,9 @@ atribuirMatriz              PROTO   :DWORD, :DWORD
 destruirMatriz              PROTO   :DWORD, :BYTE
 testesRotacao               PROTO   :DWORD, :DWORD
 testarRotacao               PROTO   :DWORD, :DWORD, :BYTE, :BYTE
-paint                       PROTO   :DWORD, :DWORD, :DWORD, :DWORD
+paint                       PROTO   :DWORD, :DWORD, :DWORD, :DWORD, :DWORD
+atualizarFantasma           PROTO   :DWORD, :DWORD, :DWORD
+descerTudo                  PROTO   :DWORD, :DWORD
 
 
 
@@ -117,6 +119,7 @@ TETROMINO ends
                     db  0,0,0,0,0,0,0,0,0,0,0,0
                     db  0,0,0,0,0,0,0,0
     bloco           TETROMINO <>
+    fantasma        TETROMINO <>
 
     ThreadDescer  dd 0
 	ExitCode 	  dd 0
@@ -135,9 +138,11 @@ TETROMINO ends
     VERMELHO db 5
     CIANO    db 6
     NADA     db 7
+    GHOST    db 8
     PP_DESENHAR       db 0
     PP_DESCER         db 1
     PP_ROTACIONAR     db 2
     PP_MOVER_DIREITA  db 3
     PP_MOVER_ESQUERDA db 4
     PP_REFAZER        db 5
+    PP_CAIR_TUDO      db 6

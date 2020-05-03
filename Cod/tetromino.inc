@@ -625,3 +625,54 @@ testarRotacao proc pTetromino:DWORD, pMapa:DWORD, x:BYTE, y:BYTE
     mov eax, result
     ret
 testarRotacao endp
+
+atualizarFantasma proc pFant:DWORD, pTetro:DWORD, pMapa:DWORD
+    invoke atribuirTetromino, pFant, pTetro
+    mov esi, pFant
+    mov cl, GHOST
+    mov (TETROMINO ptr[esi]).tipo, cl
+
+    invoke descerTudo, pFant, pMapa
+
+    ret
+atualizarFantasma endp
+
+descerTudo proc pTetro:DWORD, pMapa:DWORD
+    LOCAL copiaT:DWORD
+    invoke GlobalAlloc, 0, sizeof TETROMINO
+    mov copiaT, eax
+    invoke montarTetromino, copiaT, NADA
+    invoke atribuirTetromino, copiaT, pTetro
+
+    xor eax, eax
+    
+    forDescer:
+        cmp eax, 1
+        je fim
+
+        mov edi, pTetro
+        mov esi, copiaT
+
+        mov ecx, (TETROMINO ptr[esi]).posicao
+        mov (TETROMINO ptr[edi]).posicao, ecx
+
+        mov edi, (TETROMINO ptr[edi]).mat
+        mov esi, (TETROMINO ptr[esi]).mat
+
+        invoke atribuirMatriz, esi, edi
+        mov esi, copiaT
+
+        add (TETROMINO ptr[esi]).posicao, 16
+        invoke adicionarMatrizLogica, esi, pMapa
+
+        mov esi, copiaT
+
+        mov edi, (TETROMINO ptr[esi]).mat
+        invoke verificarColisao, edi
+
+        jmp forDescer
+
+    fim:
+    invoke destruirTetromino, copiaT
+    ret
+descerTudo endp
