@@ -26,6 +26,7 @@ atribuirMatriz              PROTO   :DWORD, :DWORD
 destruirMatriz              PROTO   :DWORD, :BYTE
 testesRotacao               PROTO   :DWORD, :DWORD
 testarRotacao               PROTO   :DWORD, :DWORD, :BYTE, :BYTE
+paint                       PROTO   :DWORD, :DWORD, :DWORD, :DWORD
 
 
 

@@ -192,3 +192,118 @@ getPixel proc pos:WORD
     mov ax, dx
     ret
 getPixel endp
+
+paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD
+	LOCAL copiaTetrimino:DWORD
+	LOCAL copiaMatriz:DWORD
+	LOCAL colidiu:BYTE
+
+	invoke copiarTetrimino, pTetromino
+    mov copiaTetrimino, eax
+    
+    invoke colocarMatrizLogica, pTetromino, pMapa, 0
+
+    mov al, paintParam
+    .if al == PP_DESENHAR
+        invoke desenharTela, hdc
+
+    .elseif al == PP_DESCER
+        invoke desenharTetrimino, hWin, hdc, pTetromino, NADA
+        mov esi, pTetromino
+        add (TETRIMINO ptr[esi]).posicao, 16
+        mov desenhandoTetrimino, 0
+
+    .elseif al == PP_ROTACIONAR
+        invoke desenharTetrimino, hWin, hdc, pTetromino, NADA
+        mov esi, pTetromino
+        invoke rotacionarMatriz, (TETRIMINO ptr[esi]).mat
+        mov esi, pTetromino
+        add (TETRIMINO ptr[esi]).rotacao, 1
+        mov cl, (TETRIMINO ptr[esi]).rotacao
+        .if cl == 4
+        	mov esi, pTetromino
+            mov (TETRIMINO ptr[esi]).rotacao, 0
+        .endif
+
+    .elseif al == PP_MOVER_DIREITA
+        invoke desenharTetrimino, hWin, hdc, pTetromino, NADA
+        mov esi, pTetromino
+        inc (TETRIMINO ptr[esi]).posicao
+
+    .elseif al == PP_MOVER_ESQUERDA
+        invoke desenharTetrimino, hWin, hdc, pTetromino, NADA
+        mov esi, pTetromino
+        dec (TETRIMINO ptr[esi]).posicao
+
+    .elseif al == PP_REFAZER
+        invoke refazerTetrimino, pTetromino, CIANO
+
+    .endif
+
+    mov esi, pTetromino
+    mov edi, (TETRIMINO ptr[esi]).mat
+    invoke copiarMatriz, edi
+    mov copiaMatriz, eax
+
+    invoke adicionarMatrizLogica, pTetromino, pMapa
+    mov esi, pTetromino
+    mov edi, (TETRIMINO ptr[esi]).mat
+    invoke verificarColisao, edi
+
+    mov colidiu, al
+
+    mov esi, pTetromino
+    mov edi, (TETRIMINO ptr[esi]).mat
+
+    invoke atribuirMatriz, edi, copiaMatriz
+    invoke destruirMatriz, copiaMatriz, 1
+
+    mov al, paintParam
+    .if colidiu == 1
+        .if al == PP_ROTACIONAR
+            invoke testesRotacao, pTetromino, pMapa
+            .if eax == 0
+                invoke atribuirTetrimino, pTetromino, copiaTetrimino
+            .endif
+        .else
+            invoke atribuirTetrimino, pTetromino, copiaTetrimino
+        .endif
+    .endif
+
+    invoke destruirTetrimino, copiaTetrimino
+    invoke colocarMatrizLogica, pTetromino, pMapa, 1
+    mov esi, pTetromino
+    mov cl, (TETRIMINO ptr[esi]).tipo
+    invoke desenharTetrimino, hWin, hdc, pTetromino, cl
+
+    mov al, paintParam
+    .if colidiu == 1
+        .if al == PP_DESCER
+        	mov esi, pTetromino
+        	mov ecx, (TETRIMINO ptr[esi]).posicao
+            .if ecx < 10
+                call perder
+            .else
+                mov velocidade, 500
+                invoke refazerTetrimino, pTetromino, AZUL
+                mov esi, pTetromino
+			    mov cl, (TETRIMINO ptr[esi]).tipo
+			    invoke desenharTetrimino, hWin, hdc, pTetromino, cl
+            .endif
+        .endif
+    .endif
+
+	ret
+paint endp
+
+esperarDesenho proc
+    comparar:
+    cmp desenhandoTetrimino, 1
+    je comparar
+    ret
+esperarDesenho endp
+
+perder proc
+    ;string str, "Perdeu!\nDeseja jogar novamente?"
+    ret
+perder endp
