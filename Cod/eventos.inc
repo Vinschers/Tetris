@@ -13,7 +13,7 @@ WndProc proc hWin   :DWORD,
         mov mapa.altura, 26
         mov mapa.largura, 16
 
-        invoke montarTetromino, OFFSET bloco, LARANJA
+        invoke montarTetromino, OFFSET bloco, CIANO
         invoke montarTetromino, OFFSET fantasma, GHOST
 
         invoke CreateEvent,NULL,FALSE,FALSE,NULL

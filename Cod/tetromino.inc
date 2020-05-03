@@ -347,40 +347,10 @@ atribuirTetromino proc dest:DWORD, src:DWORD
     mov cl, (TETROMINO ptr[edx]).rotacao
     mov (TETROMINO ptr[eax]).rotacao, cl
 
-    mov eax, (TETROMINO ptr[edx]).mat
-    mov bl, (MATRIZ ptr[eax]).largura
-    mov cl, (MATRIZ ptr[eax]).altura
+    mov edi, (TETROMINO ptr[edx]).mat
+    mov esi, (TETROMINO ptr[eax]).mat
 
-    xor eax, eax
-    mov al, cl
-    xor ecx, ecx
-    mov cl, bl
-
-    mul ecx
-    xor esi, esi   ;contador
-
-    mov edx, src
-    mov edx, (TETROMINO ptr[edx]).mat
-    mov edx, (MATRIZ ptr[edx]).ponteiro
-
-    mov edi, dest
-    mov edi, (TETROMINO ptr[edi]).mat
-    mov edi, (MATRIZ ptr[edi]).ponteiro
-
-    forCopia:
-        cmp esi, eax
-        je fim
-
-        mov bl, byte ptr [edx]
-        mov byte ptr [edi], bl
-
-        inc esi
-        inc edx
-        inc edi
-
-        jmp forCopia
-
-    fim:
+    invoke atribuirMatriz, esi, edi
     ret
 atribuirTetromino endp
 

@@ -227,6 +227,8 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
     .elseif al == PP_CAIR_TUDO
         invoke desenharTetromino, hWin, hdc, pTetromino, NADA
         invoke descerTudo, pTetromino, pMapa
+        mov colidiu, 1
+        jmp atualizarVariaveis
 
     .endif
 
@@ -260,6 +262,8 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
         .endif
     .endif
 
+    atualizarVariaveis:
+
     invoke destruirTetromino, copiaTetromino
 
     invoke desenharTetromino, hWin, hdc, pFantasma, NADA
@@ -275,14 +279,14 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
 
     mov al, paintParam
     .if colidiu == 1
-        .if al == PP_DESCER
+        .if al == PP_DESCER || al == PP_CAIR_TUDO
         	mov esi, pTetromino
         	mov ecx, (TETROMINO ptr[esi]).posicao
             .if ecx < 10
                 call perder
             .else
                 mov velocidade, 500
-                invoke refazerTetromino, pTetromino, AZUL
+                invoke refazerTetromino, pTetromino, ROXO
                 invoke atualizarFantasma, pFantasma, pTetromino, pMapa
                 mov esi, pFantasma
                 mov cl, (TETROMINO ptr[esi]).tipo
