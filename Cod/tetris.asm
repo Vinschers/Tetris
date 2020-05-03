@@ -37,6 +37,8 @@ WndProc proc hWin   :DWORD,
     .elseif uMsg == WM_KEYDOWN
         .if wParam == 40
             mov velocidade, 50
+        .elseif wParam == 32
+            mov velocidade, 1
         .endif
 
     .elseif uMsg == WM_KEYUP
@@ -48,8 +50,6 @@ WndProc proc hWin   :DWORD,
             pintar PP_MOVER_ESQUERDA
         .elseif wParam == 40
             mov velocidade, 500
-        .elseif wParam == 32
-            mov velocidade, 50
         .elseif wParam == 72
             pintar PP_REFAZER
         .endif
@@ -73,6 +73,10 @@ WndProc proc hWin   :DWORD,
         .elseif al == PP_ROTACIONAR
             invoke desenharTetrimino, hWin, hdc, OFFSET bloco, NADA
             invoke rotacionarMatriz, bloco.mat
+            add bloco.rotacao, 1
+            .if bloco.rotacao == 4
+                mov bloco.rotacao, 0
+            .endif
 
         .elseif al == PP_MOVER_DIREITA
             invoke desenharTetrimino, hWin, hdc, OFFSET bloco, NADA
@@ -81,8 +85,8 @@ WndProc proc hWin   :DWORD,
         .elseif al == PP_MOVER_ESQUERDA
             invoke desenharTetrimino, hWin, hdc, OFFSET bloco, NADA
             dec bloco.posicao
+
         .elseif al == PP_REFAZER
-            invoke desenharTetrimino, hWin, hdc, OFFSET bloco, NADA
             invoke refazerTetrimino, OFFSET bloco, CIANO
 
         .endif
@@ -98,23 +102,26 @@ WndProc proc hWin   :DWORD,
         invoke atribuirMatriz, bloco.mat, copiaMatriz
         invoke destruirMatriz, copiaMatriz, 1
 
+        mov al, paintParam
         .if colidiu == 1
-            invoke atribuirTetrimino, OFFSET bloco, copiaTetrimino
+            .if al == PP_ROTACIONAR
+                invoke testesRotacao, OFFSET bloco, OFFSET mapa
+                .if eax == 0
+                    invoke atribuirTetrimino, OFFSET bloco, copiaTetrimino
+                .endif
+            .else
+                invoke atribuirTetrimino, OFFSET bloco, copiaTetrimino
+            .endif
         .endif
 
-        ;verificar se colidiu
-        ;se sim, pegar a copia, colocar no atual e excluir a copia
-        ;se nao, excluir a copia
-
         invoke destruirTetrimino, copiaTetrimino
-
         invoke colocarMatrizLogica, OFFSET bloco, OFFSET mapa, 1
-        
         invoke desenharTetrimino, hWin, hdc, OFFSET bloco, bloco.tipo
 
         mov al, paintParam
         .if colidiu == 1
             .if al == PP_DESCER
+                mov velocidade, 500
                 invoke refazerTetrimino, OFFSET bloco, AZUL
                 invoke desenharTetrimino, hWin, hdc, OFFSET bloco, bloco.tipo
             .endif

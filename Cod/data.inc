@@ -24,6 +24,8 @@ atribuirTetrimino           PROTO   :DWORD, :DWORD
 copiarMatriz                PROTO   :DWORD
 atribuirMatriz              PROTO   :DWORD, :DWORD
 destruirMatriz              PROTO   :DWORD, :BYTE
+testesRotacao               PROTO   :DWORD, :DWORD
+testarRotacao               PROTO   :DWORD, :DWORD, :BYTE, :BYTE
 
 
 
@@ -35,7 +37,8 @@ MATRIZ ends
 
 TETRIMINO struct
     tipo    BYTE    ?
-    posicao DWORD    ?
+    posicao DWORD   ?
+    rotacao BYTE    ?
     mat     DWORD   ?
 TETRIMINO ends
 
@@ -66,6 +69,7 @@ TETRIMINO ends
 
     txt             dd 97,0
     txtb            db 0,0
+    txtw            word 0,0
     mapa            MATRIZ <>
     ;todos 9 menos o ultimo (16)
     pecas               db  1,0,0,1,1,1,0,0,0 ;azul

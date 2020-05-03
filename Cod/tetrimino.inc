@@ -3,6 +3,7 @@ montarTetrimino proc pTetrimino:DWORD, tipo:BYTE
     mov edx, pTetrimino
     mov (TETRIMINO ptr[edx]).mat, eax
     mov (TETRIMINO ptr[edx]).posicao, 54
+    mov (TETRIMINO ptr[edx]).rotacao, 0
 
     cmp tipo, 6
     jne pecaNormal
@@ -49,6 +50,7 @@ refazerTetrimino proc pTetrimino:DWORD, tipo:BYTE
     mov edx, pTetrimino
     mov eax, (TETRIMINO ptr[edx]).mat
     mov (TETRIMINO ptr[edx]).posicao, 54
+    mov (TETRIMINO ptr[edx]).rotacao, 0
 
     cmp tipo, 6
     jne pecaNormal
@@ -87,7 +89,8 @@ copiarTetrimino proc ponteiro:DWORD
     LOCAL ptrNovo: DWORD
 
     invoke GlobalAlloc, 0, sizeof TETRIMINO
-    mov cl, (TETRIMINO ptr[ponteiro]).tipo
+    mov edx, ponteiro
+    mov cl, (TETRIMINO ptr[edx]).tipo
 
     mov ptrNovo, eax
     mov edx, eax
@@ -98,6 +101,8 @@ copiarTetrimino proc ponteiro:DWORD
 
     mov ebx, (TETRIMINO ptr[edx]).posicao
     mov (TETRIMINO ptr[eax]).posicao, ebx
+    mov bl, (TETRIMINO ptr[edx]).rotacao
+    mov (TETRIMINO ptr[eax]).rotacao, bl
 
     mov eax, (TETRIMINO ptr[edx]).mat
     mov bl, (MATRIZ ptr[eax]).largura
@@ -199,7 +204,16 @@ adicionarMatrizLogica proc pTetrimino:DWORD, pMapa:DWORD
             jmp forColuna
         fimForColuna:
         xor ch, ch
-        add edx, 13
+        xor eax, eax
+        mov al, mapaLargura
+        cbw
+        cwde
+        add edx, eax
+        xor eax, eax
+        mov al, tetriLargura
+        cbw
+        cwde
+        sub edx, eax
         inc cl
         jmp forLinha
     fim:
@@ -270,7 +284,16 @@ colocarMatrizLogica proc pTetrimino:DWORD, pMapa:DWORD, valor:BYTE
             jmp forColuna
         fimForColuna:
         xor ch, ch
-        add edx, 13
+        xor eax, eax
+        mov al, mapaLargura
+        cbw
+        cwde
+        add edx, eax
+        xor eax, eax
+        mov al, tetriLargura
+        cbw
+        cwde
+        sub edx, eax
         inc cl
         jmp forLinha
     fim:
@@ -314,13 +337,15 @@ verificarColisao proc mat:DWORD
 verificarColisao endp
 
 atribuirTetrimino proc dest:DWORD, src:DWORD
-    mov cl, (TETRIMINO ptr[src]).tipo
-
     mov eax, dest
     mov edx, src
 
     mov ebx, (TETRIMINO ptr[edx]).posicao
     mov (TETRIMINO ptr[eax]).posicao, ebx
+    mov cl, (TETRIMINO ptr[edx]).tipo
+    mov (TETRIMINO ptr[eax]).tipo, cl
+    mov cl, (TETRIMINO ptr[edx]).rotacao
+    mov (TETRIMINO ptr[eax]).rotacao, cl
 
     mov eax, (TETRIMINO ptr[edx]).mat
     mov bl, (MATRIZ ptr[eax]).largura
@@ -358,3 +383,242 @@ atribuirTetrimino proc dest:DWORD, src:DWORD
     fim:
     ret
 atribuirTetrimino endp
+
+testesRotacao proc pTetrimino:DWORD, pMapa:DWORD
+    LOCAL tipo:BYTE
+    LOCAL rot:BYTE
+
+    mov eax, pTetrimino
+    mov cl, (TETRIMINO ptr[eax]).tipo
+    mov tipo, cl
+    mov cl, (TETRIMINO ptr[eax]).rotacao
+    mov rot, cl
+
+    .if tipo == 6
+        .if rot == 0
+            invoke testarRotacao, pTetrimino, pMapa, 1, 0
+            .if eax == 1
+                jmp fim
+            .endif
+
+            invoke testarRotacao, pTetrimino, pMapa, -2, 0
+            .if eax == 1
+                jmp fim
+            .endif
+
+            invoke testarRotacao, pTetrimino, pMapa, 1, 2
+            .if eax == 1
+                jmp fim
+            .endif
+
+            invoke testarRotacao, pTetrimino, pMapa, -2, -1
+            .if eax == 1
+                jmp fim
+            .endif
+
+        .elseif rot == 1
+            invoke testarRotacao, pTetrimino, pMapa, -2, 0
+            .if eax == 1
+                jmp fim
+            .endif
+
+            invoke testarRotacao, pTetrimino, pMapa, 1, 0
+            .if eax == 1
+                jmp fim
+            .endif
+
+            invoke testarRotacao, pTetrimino, pMapa, -2, 1
+            .if eax == 1
+                jmp fim
+            .endif
+
+            invoke testarRotacao, pTetrimino, pMapa, 1, -2
+            .if eax == 1
+                jmp fim
+            .endif
+            
+        .elseif rot == 2
+            invoke testarRotacao, pTetrimino, pMapa, -1, 0
+            .if eax == 1
+                jmp fim
+            .endif
+
+            invoke testarRotacao, pTetrimino, pMapa, 2, 0
+            .if eax == 1
+                jmp fim
+            .endif
+
+            invoke testarRotacao, pTetrimino, pMapa, -1, -2
+            .if eax == 1
+                jmp fim
+            .endif
+
+            invoke testarRotacao, pTetrimino, pMapa, 2, 1
+            .if eax == 1
+                jmp fim
+            .endif
+            
+        .elseif rot == 3
+            invoke testarRotacao, pTetrimino, pMapa, 2, 0
+            .if eax == 1
+                jmp fim
+            .endif
+
+            invoke testarRotacao, pTetrimino, pMapa, -1, 0
+            .if eax == 1
+                jmp fim
+            .endif
+
+            invoke testarRotacao, pTetrimino, pMapa, 2, -1
+            .if eax == 1
+                jmp fim
+            .endif
+
+            invoke testarRotacao, pTetrimino, pMapa, -1, 2
+            .if eax == 1
+                jmp fim
+            .endif
+            
+        .endif
+
+    .else
+        .if rot == 0
+            invoke testarRotacao, pTetrimino, pMapa, -1, 0
+            .if eax == 1
+                jmp fim
+            .endif
+
+            invoke testarRotacao, pTetrimino, pMapa, -1, 1
+            .if eax == 1
+                jmp fim
+            .endif
+
+            invoke testarRotacao, pTetrimino, pMapa, 0, -2
+            .if eax == 1
+                jmp fim
+            .endif
+
+            invoke testarRotacao, pTetrimino, pMapa, -1, -2
+            .if eax == 1
+                jmp fim
+            .endif
+
+        .elseif rot == 1
+            invoke testarRotacao, pTetrimino, pMapa, -1, 0
+            .if eax == 1
+                jmp fim
+            .endif
+
+            invoke testarRotacao, pTetrimino, pMapa, -1, -1
+            .if eax == 1
+                jmp fim
+            .endif
+
+            invoke testarRotacao, pTetrimino, pMapa, 0, 2
+            .if eax == 1
+                jmp fim
+            .endif
+
+            invoke testarRotacao, pTetrimino, pMapa, -1, 2
+            .if eax == 1
+                jmp fim
+            .endif
+            
+        .elseif rot == 2
+            invoke testarRotacao, pTetrimino, pMapa, 1, 0
+            .if eax == 1
+                jmp fim
+            .endif
+
+            invoke testarRotacao, pTetrimino, pMapa, 1, 1
+            .if eax == 1
+                jmp fim
+            .endif
+
+            invoke testarRotacao, pTetrimino, pMapa, 0, -2
+            .if eax == 1
+                jmp fim
+            .endif
+
+            invoke testarRotacao, pTetrimino, pMapa, 1, -2
+            .if eax == 1
+                jmp fim
+            .endif
+            
+        .elseif rot == 3
+            invoke testarRotacao, pTetrimino, pMapa, 1, 0
+            .if eax == 1
+                jmp fim
+            .endif
+
+            invoke testarRotacao, pTetrimino, pMapa, 1, -1
+            .if eax == 1
+                jmp fim
+            .endif
+
+            invoke testarRotacao, pTetrimino, pMapa, 0, 2
+            .if eax == 1
+                jmp fim
+            .endif
+
+            invoke testarRotacao, pTetrimino, pMapa, 1, 2
+            .if eax == 1
+                jmp fim
+            .endif
+            
+        .endif
+    .endif
+
+    fim:
+    ret
+testesRotacao endp
+
+testarRotacao proc pTetrimino:DWORD, pMapa:DWORD, x:BYTE, y:BYTE
+    LOCAL copiaT:DWORD
+    invoke copiarTetrimino, pTetrimino
+    mov copiaT, eax
+
+    mov esi, pMapa
+
+    xor eax, eax
+    xor ecx, ecx
+    mov al, y
+    mov cl, (MATRIZ ptr[esi]).largura
+    mul cl
+
+    xor ecx, ecx
+    mov cl, x
+    push eax
+    xor eax, eax
+    mov al, cl
+    cbw
+    mov cx, ax
+    pop eax
+    add ax, cx
+    cwde
+
+    mov edi, copiaT
+    add (TETRIMINO ptr[edi]).posicao, eax
+
+    invoke adicionarMatrizLogica, edi, esi
+    invoke verificarColisao, copiaT
+
+    push eax
+
+    .if al == 0
+        mov edi, copiaT
+        mov ebx, (TETRIMINO ptr[edi]).posicao
+        mov edi, pTetrimino
+        mov (TETRIMINO ptr[edi]).posicao, ebx
+    .endif
+
+    invoke destruirTetrimino, copiaT
+
+    pop eax
+
+    .if eax == 0
+        return 1
+    .elseif eax == 1
+        return 0
+    .endif
+testarRotacao endp
