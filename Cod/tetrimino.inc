@@ -568,13 +568,14 @@ testesRotacao proc pTetrimino:DWORD, pMapa:DWORD
             
         .endif
     .endif
-
+    xor eax, eax
     fim:
     ret
 testesRotacao endp
 
 testarRotacao proc pTetrimino:DWORD, pMapa:DWORD, x:BYTE, y:BYTE
     LOCAL copiaT:DWORD
+    LOCAL result:DWORD
     invoke copiarTetrimino, pTetrimino
     mov copiaT, eax
 
@@ -601,11 +602,12 @@ testarRotacao proc pTetrimino:DWORD, pMapa:DWORD, x:BYTE, y:BYTE
     add (TETRIMINO ptr[edi]).posicao, eax
 
     invoke adicionarMatrizLogica, edi, esi
-    invoke verificarColisao, copiaT
+    mov edi, copiaT
+    invoke verificarColisao, (TETRIMINO ptr[edi]).mat
 
-    push eax
+    mov result, eax
 
-    .if al == 0
+    .if result == 0
         mov edi, copiaT
         mov ebx, (TETRIMINO ptr[edi]).posicao
         mov edi, pTetrimino
@@ -614,11 +616,12 @@ testarRotacao proc pTetrimino:DWORD, pMapa:DWORD, x:BYTE, y:BYTE
 
     invoke destruirTetrimino, copiaT
 
-    pop eax
-
-    .if eax == 0
-        return 1
-    .elseif eax == 1
-        return 0
+    .if result == 0
+        mov result, 1
+    .elseif result == 1
+        mov result, 0
     .endif
+
+    mov eax, result
+    ret
 testarRotacao endp

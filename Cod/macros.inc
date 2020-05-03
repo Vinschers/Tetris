@@ -85,6 +85,7 @@ showmsg MACRO msg
 ENDM
 
 pintar MACRO param
+    call esperarDesenho
     push eax
     mov al, param
     mov paintParam, al

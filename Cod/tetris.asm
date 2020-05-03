@@ -55,6 +55,10 @@ WndProc proc hWin   :DWORD,
         .endif
 
     .elseif uMsg == WM_PAINT
+        cmp desenhandoTetrimino, 1
+        je fim
+
+        mov desenhandoTetrimino, 1
         invoke BeginPaint, hWin, ADDR ps
         mov hdc, eax
 
@@ -66,9 +70,11 @@ WndProc proc hWin   :DWORD,
         mov al, paintParam
         .if al == PP_DESENHAR
             invoke desenharTela, hdc
+
         .elseif al == PP_DESCER
             invoke desenharTetrimino, hWin, hdc, OFFSET bloco, NADA
             add bloco.posicao, 16
+            mov desenhandoTetrimino, 0
 
         .elseif al == PP_ROTACIONAR
             invoke desenharTetrimino, hWin, hdc, OFFSET bloco, NADA
@@ -121,9 +127,13 @@ WndProc proc hWin   :DWORD,
         mov al, paintParam
         .if colidiu == 1
             .if al == PP_DESCER
-                mov velocidade, 500
-                invoke refazerTetrimino, OFFSET bloco, AZUL
-                invoke desenharTetrimino, hWin, hdc, OFFSET bloco, bloco.tipo
+                .if bloco.posicao < 10
+                    call perder
+                .else
+                    mov velocidade, 500
+                    invoke refazerTetrimino, OFFSET bloco, AZUL
+                    invoke desenharTetrimino, hWin, hdc, OFFSET bloco, bloco.tipo
+                .endif
             .endif
         .endif
 
@@ -132,6 +142,9 @@ WndProc proc hWin   :DWORD,
 
         invoke EndPaint, hWin, ADDR ps
 
+        mov desenhandoTetrimino, 0
+
+        fim:
 
     .elseif uMsg == WM_DESCER
 
@@ -148,6 +161,17 @@ WndProc proc hWin   :DWORD,
     ret
 
 WndProc endp
+
+esperarDesenho proc
+    comparar:
+    cmp desenhandoTetrimino, 1
+    je comparar
+    ret
+esperarDesenho endp
+
+perder proc
+    string str, "Perdeu!\nDeseja jogar novamente?"
+perder endp
 
 include matriz.inc
 include tetrimino.inc
