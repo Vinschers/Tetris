@@ -82,7 +82,7 @@ comecarJogo proc hWin:DWORD
     mov mapa.largura, 16
     invoke copiarPonteiroMatriz, OFFSET vetMapa, OFFSET mapa
     
-    invoke refazerTetromino, OFFSET bloco, VERMELHO
+    invoke refazerTetromino, OFFSET bloco, AMARELO
     ;invoke MessageBox,hWin, addr txt, NULL, MB_OK
     mov desenhandoTetromino, 0
     mov perdeu, 0

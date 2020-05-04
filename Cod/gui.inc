@@ -447,14 +447,7 @@ descerMatriz proc hWin:DWORD, hdc:DWORD, pMapa:DWORD, indice:WORD
             mov rectParaApagar.right,ebx
             invoke GetWindowRect, hWnd, OFFSET rectParaApagar
             pop ecx
-            ;push ecx
-            ;invoke BitBlt, hdc, 11, 27, 320, ecx, hdc, 11, 11, SRCCOPY
-            ;invoke Sleep, 100
-            ;invoke GetWindowRect, hWnd, OFFSET rectParaApagar
-            ;pop ecx
             invoke BitBlt, hdc, 11, 43, 320, ecx, hdc, 11, 11, SRCCOPY
-            
-            invoke strMatriz, hWin, pMapa   
             ret
     
 
