@@ -197,7 +197,6 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
         invoke desenharTetromino, hWin, hdc, pTetromino, NADA
         mov esi, pTetromino
         add (TETROMINO ptr[esi]).posicao, 16
-        mov desenhandoTetromino, 0
 
     .elseif al == PP_ROTACIONAR
         invoke desenharTetromino, hWin, hdc, pTetromino, NADA
@@ -285,6 +284,7 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
             .if ecx < 10
                 call perder
             .else
+                invoke trabalharComLinhas, hWin, hdc, pMapa
                 mov velocidade, 500
                 invoke refazerTetromino, pTetromino, ROXO
                 invoke atualizarFantasma, pFantasma, pTetromino, pMapa
@@ -296,6 +296,7 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
 			    invoke desenharTetromino, hWin, hdc, pTetromino, cl
             .endif
         .endif
+
     .endif
 
 	ret
@@ -312,3 +313,183 @@ perder proc
     ;string str, "Perdeu!\nDeseja jogar novamente?"
     ret
 perder endp
+
+trabalharComLinhas proc hWin:DWORD, hdc:DWORD, pMapa:DWORD
+    invoke acharLinhas, hWin ,pMapa
+    mov esi, pMapa
+    mov esi, (MATRIZ ptr[esi]).ponteiro
+    xor ecx, ecx
+    forAchados:
+        cmp ecx, 8
+        je fimAchados
+        cmp word ptr[eax], 0
+        je fimAchados
+
+        push esi
+        push ecx
+        push eax
+
+        mov dx, word ptr[eax]
+        invoke limparLinha, hWin, hdc, pMapa, dx
+
+        pop eax
+        push eax
+
+        mov dx, word ptr[eax]
+        invoke descerMatriz, hWin, hdc, pMapa, dx
+
+        pop eax
+        pop ecx
+        pop esi
+
+        add ecx, 2
+        add eax, 2
+        jmp forAchados
+
+    fimAchados:
+        ret
+trabalharComLinhas endp
+
+limparLinha proc hWin:DWORD, hdc:DWORD, pMapa:DWORD, indice:WORD 
+    xor edx, edx
+    add dx, indice
+
+    mov ecx, edx
+    add ecx, 10
+
+    forLimpar:
+        cmp edx, ecx
+        je fimForLimpar
+
+        push ecx
+        push edx
+
+        mov ecx, pMapa
+        mov ecx, (MATRIZ ptr[ecx]).ponteiro
+        mov byte ptr[edx + ecx], 0
+
+        invoke desenharBloco, hWin, hdc, NADA, dx
+        invoke Sleep, 75
+
+        pop edx
+        pop ecx
+
+        inc edx
+        jmp forLimpar
+    fimForLimpar:
+        ret
+limparLinha endp
+
+descerMatriz proc hWin:DWORD, hdc:DWORD, pMapa:DWORD, indice:WORD
+   
+    mov edx, pMapa
+    mov esi, (MATRIZ ptr[edx]).ponteiro
+    xor ecx, ecx
+    mov cx, indice
+    sub ecx, 16
+    xor ebx,ebx
+    xor edx,edx
+    forLinhas:
+        cmp ecx, 51
+        jle fimForLinhas
+        mov ebx, ecx
+        add ebx, 10
+        forPercorreLinha:
+            ;invoke strMatriz, hWin, pMapa 
+            cmp ecx, ebx
+            je fimForPercorreLinha
+            ;sub ecx, 16
+            mov dl, byte ptr[esi + ecx]
+            add ecx, 16
+            mov byte ptr[esi + ecx], dl
+            sub ecx, 16
+            inc ecx
+            jmp forPercorreLinha
+        fimForPercorreLinha:  
+            sub ecx, 26
+            jmp forLinhas
+
+    fimForLinhas:
+        mov ecx, 51
+        mov ebx, 61
+        forParaLimparPrimeira:
+            cmp ecx, ebx
+            je fimForParaLimparPrimeira
+            mov byte ptr[esi + ecx], 0
+            inc ecx
+            jmp forParaLimparPrimeira
+        fimForParaLimparPrimeira:
+            mov rectParaApagar.top, 11
+            mov rectParaApagar.left, 11
+            invoke getPixel, indice
+            mov bx, ax ; ebx coluna e eax linha
+            shr eax, 16
+            mov rectParaApagar.bottom, eax
+            mov ecx, rectParaApagar.bottom
+            sub ecx, 11
+            push ecx
+            mov rectParaApagar.right,ebx
+            invoke GetWindowRect, hWnd, OFFSET rectParaApagar
+            pop ecx
+            ;push ecx
+            ;invoke BitBlt, hdc, 11, 27, 320, ecx, hdc, 11, 11, SRCCOPY
+            ;invoke Sleep, 100
+            ;invoke GetWindowRect, hWnd, OFFSET rectParaApagar
+            ;pop ecx
+            invoke BitBlt, hdc, 11, 43, 320, ecx, hdc, 11, 11, SRCCOPY
+            
+            invoke strMatriz, hWin, pMapa   
+            ret
+    
+
+
+descerMatriz endp
+
+
+
+acharLinhas proc hWin:DWORD, pMapa:DWORD
+    invoke GlobalAlloc, 0, 8
+    push eax
+    mov dword ptr[eax], 0
+    add eax, 4
+    mov dword ptr[eax], 0
+    sub eax, 4
+    mov edx, pMapa
+    mov esi, (MATRIZ ptr[edx]).ponteiro
+    xor ecx, ecx
+    mov ecx, 51
+    xor ebx,ebx
+    xor edx,edx
+    forLinhas:
+        cmp edx, 0
+        je continuarForLinhas
+        mov word ptr[eax], dx
+        add eax, 2
+        continuarForLinhas:
+            cmp ecx, 365
+            jge fimForLinhas
+            mov ebx, ecx
+            add ebx, 10
+            forPercorreLinha:
+                cmp ecx, ebx
+                je achouLinha
+                xor edx, edx
+                mov dl,  byte ptr[esi + ecx]
+                cmp dl, 0
+                je voltarAbruptamente
+                inc ecx
+                jmp forPercorreLinha
+                voltarAbruptamente:
+                    mov ecx, ebx
+                    add ecx, 6
+                    xor edx,edx
+                    jmp forLinhas
+                achouLinha:
+                    mov edx, ecx
+                    sub edx, 10
+                    add ecx, 6
+                    jmp forLinhas
+    fimForLinhas:
+        pop eax
+        ret
+acharLinhas endp
