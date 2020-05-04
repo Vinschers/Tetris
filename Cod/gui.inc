@@ -112,8 +112,9 @@ ThreadProcDescer PROC USES ecx Param:DWORD
             pintar PP_DESCER
             jmp ThreadProcDescer
         .ENDIF
-
-        jmp ThreadProcDescer
+        .if perdeu != 1
+            jmp ThreadProcDescer
+        .endif
     ret
 ThreadProcDescer ENDP
 
@@ -281,8 +282,17 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
         .if al == PP_DESCER || al == PP_CAIR_TUDO
         	mov esi, pTetromino
         	mov ecx, (TETROMINO ptr[esi]).posicao
-            .if ecx < 10
-                call perder
+            .if ecx < 67
+                mov perdeu, 1
+                invoke perder, hWin, hdc
+                invoke desenharTela, hdc
+                mov edx, pTetromino
+                mov cl, (TETROMINO ptr[edx]).tipo
+                invoke desenharTetromino, hWin, hdc, pTetromino, cl
+                invoke atualizarFantasma, pFantasma, pTetromino, pMapa
+                mov esi, pFantasma
+                mov cl, (TETROMINO ptr[esi]).tipo
+                invoke desenharTetromino, hWin, hdc, pFantasma, cl
             .else
                 invoke trabalharComLinhas, hWin, hdc, pMapa
                 mov velocidade, 500
@@ -309,8 +319,14 @@ esperarDesenho proc
     ret
 esperarDesenho endp
 
-perder proc
-    ;string str, "Perdeu!\nDeseja jogar novamente?"
+perder proc hWin:DWORD, hdc:DWORD
+    invoke MessageBox,hWin, addr perdeuTxt, NULL, MB_YESNO
+
+    .if eax == IDYES
+        invoke comecarJogo, hWin
+    .else
+        invoke ExitProcess,0
+    .endif
     ret
 perder endp
 

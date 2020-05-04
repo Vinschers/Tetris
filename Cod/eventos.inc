@@ -9,19 +9,16 @@ WndProc proc hWin   :DWORD,
     invoke GetProcessHeap
     mov hHeap, eax
     .if uMsg == WM_CREATE
-        mov mapa.ponteiro, OFFSET vetMapa
-        mov mapa.altura, 26
-        mov mapa.largura, 16
-
         invoke montarTetromino, OFFSET bloco, CIANO
         invoke montarTetromino, OFFSET fantasma, GHOST
 
         invoke CreateEvent,NULL,FALSE,FALSE,NULL
         mov    hEventStart,eax
-
         mov ecx, OFFSET ThreadProcDescer
         invoke CreateThread, NULL, NULL, ecx, ADDR mapa, NORMAL_PRIORITY_CLASS, ADDR ThreadDescer
         mov hThread, eax
+        
+        invoke comecarJogo, hWin
     
     .elseif uMsg == WM_KEYDOWN
         .if wParam == 40
@@ -45,6 +42,8 @@ WndProc proc hWin   :DWORD,
 
     .elseif uMsg == WM_PAINT
         cmp desenhandoTetromino, 1
+        je fim
+        cmp perdeu, 1
         je fim
 
         mov desenhandoTetromino, 1
@@ -77,3 +76,16 @@ WndProc proc hWin   :DWORD,
     ret
 
 WndProc endp
+
+comecarJogo proc hWin:DWORD
+    mov mapa.altura, 26
+    mov mapa.largura, 16
+    invoke copiarPonteiroMatriz, OFFSET vetMapa, OFFSET mapa
+    
+    invoke refazerTetromino, OFFSET bloco, VERMELHO
+    ;invoke MessageBox,hWin, addr txt, NULL, MB_OK
+    mov desenhandoTetromino, 0
+    mov perdeu, 0
+
+    ret
+comecarJogo endp

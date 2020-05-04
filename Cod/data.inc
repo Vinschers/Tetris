@@ -33,7 +33,8 @@ trabalharComLinhas          PROTO   :DWORD, :DWORD, :DWORD
 acharLinhas                 PROTO   :DWORD, :DWORD
 descerMatriz                PROTO   :DWORD, :DWORD, :DWORD, :WORD
 limparLinha                 PROTO   :DWORD, :DWORD, :DWORD, :WORD
-
+perder                      PROTO   :DWORD, :DWORD
+comecarJogo                 PROTO   :DWORD
 
 
 
@@ -65,12 +66,14 @@ TETROMINO ends
     proxPecaTxt     db "Proxima Peca", 0
     pecaSeguradaTxt db "Peca Segurada", 0
     pontuacaoTxt    db "Pontuacao", 0
+    perdeuTxt       db "Perdeu!", 10, "Deseja jogar novamente?",0
     CommandLine     dd 0  ; parametros passados pela linha de comando (ponteiro)
     hWnd            dd 0  ; Handle principal do programa no windows
     hInstance       dd 0  ; instancia do programa
     hHeap           dd 0
     hbmp            dd 0 ; handler 
     paintParam      db 0
+    perdeu          db 0
 
     telaDesenhada   db 0
     desenhandoTetromino  db 0
