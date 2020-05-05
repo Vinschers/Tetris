@@ -191,6 +191,9 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
     invoke colocarMatrizLogica, pTetromino, pMapa, 0
 
     mov al, paintParam
+    mov dl, pecaGuardada
+    mov cl, jaGuardou
+
     .if al == PP_DESENHAR
         invoke desenharTela, hdc
 
@@ -222,7 +225,27 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
         dec (TETROMINO ptr[esi]).posicao
 
     .elseif al == PP_REFAZER
+        cmp cl, 0
+        jne fimRefazer 
+
+        mov jaGuardou, 1
+        push edx
+        invoke desenharTetromino, hWin, hdc, pTetromino, NADA
+        mov esi, pTetromino
+        mov bl, (TETROMINO ptr[esi]).tipo ; bl recebeu o tipo da peça que será guardada 
+        pop edx
+        push ebx
+        pop ebx
+        mov pecaGuardada, bl
+        cmp dl, 7
+        jne jaTemGuardada
+
         invoke refazerTetromino, pTetromino, CIANO
+        jmp fimRefazer
+
+        jaTemGuardada:
+            invoke refazerTetromino, pTetromino, dl
+        fimRefazer:
 
     .elseif al == PP_CAIR_TUDO
         invoke desenharTetromino, hWin, hdc, pTetromino, NADA
@@ -280,6 +303,7 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
     mov al, paintParam
     .if colidiu == 1
         .if al == PP_DESCER || al == PP_CAIR_TUDO
+            mov jaGuardou, 0
         	mov esi, pTetromino
         	mov ecx, (TETROMINO ptr[esi]).posicao
             .if ecx < 67

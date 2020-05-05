@@ -74,6 +74,8 @@ TETROMINO ends
     hbmp            dd 0 ; handler 
     paintParam      db 0
     perdeu          db 0
+    pecaGuardada    db 7 
+    jaGuardou       db 0 ; variavel de controle 
 
     telaDesenhada   db 0
     desenhandoTetromino  db 0
