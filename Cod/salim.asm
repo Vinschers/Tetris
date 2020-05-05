@@ -26,14 +26,33 @@ texto  db 0,0     ; variável usada para printar na tela
 .code                       ; Tell MASM where the code starts
 start: 
 
-     mov  ax, dx
-    xor  dx, dx
-    mov  cx, 10    
-    div  cx       ; here dx contains the remainder of the division - from 0 to 9
+    randomizando:
+        call random
 
-    add  dl, '0'  ; to ascii from '0' to '9'
-    mov edx, OFFSET texto
-    print edx
+        cmp dl, 6
+        jg menorQue7
+
+        jmp randomizando
+
+    menorQue7:
+        add edx, 48
+        print edx
+        ret
+
+
+  
+    random proc
+
+        mov  ax, dx
+        xor  dx, dx
+        mov  cx, 10    
+        div  cx       ; here dx contains the remainder of the division - from 0 to 9
+        add  dl, '0'  ; to ascii from '0' to '9'
+
+    random endp
+
+
+    # fazer vetor com números já usados 
 
 end start
 
