@@ -1,12 +1,13 @@
-montarTetromino proc pTetromino:DWORD, tipo:BYTE
-    call criarMatriz
+;Inicia o tetromino com valores padrão
+montarTetromino proc pTetromino:DWORD, tipo:BYTE    ;ponteiro para o tetromino e o tipo dele
+    call criarMatriz                                ;eax tem o ponteiro para a matriz vazia
     mov edx, pTetromino
-    mov (TETROMINO ptr[edx]).mat, eax
-    mov (TETROMINO ptr[edx]).posicao, 54
+    mov (TETROMINO ptr[edx]).mat, eax               ;a matriz do tetromino é a matriz criada
+    mov (TETROMINO ptr[edx]).posicao, 54            ;posição referente ao 0,0 visual na matriz lógica
     mov (TETROMINO ptr[edx]).rotacao, 0
 
     cmp tipo, 6
-    jne pecaNormal
+    jne pecaNormal                                  ;as peças 0 a 5 têm matrizes 3x3 enquanto a peça 6 tem a matriz 4x4
 
     mov (MATRIZ ptr[eax]).largura, 4
     mov (MATRIZ ptr[eax]).altura, 4
@@ -22,7 +23,7 @@ montarTetromino proc pTetromino:DWORD, tipo:BYTE
 
     mov edx, pTetromino
 
-    mov (TETROMINO ptr[edx]).tipo, al
+    mov (TETROMINO ptr[edx]).tipo, al               ;tipo do tetromino é atribuido
 
     mov cl, 9
     mul cl
@@ -33,20 +34,23 @@ montarTetromino proc pTetromino:DWORD, tipo:BYTE
 
     mov edx, (TETROMINO ptr[eax]).mat
 
-    invoke copiarPonteiroMatriz, ecx, edx
+    invoke copiarPonteiroMatriz, ecx, edx           ;copia-se o vetor do modelo para a matriz do tetromino, para evitar mudanças no modelo geral
 
     ret
 montarTetromino endp
 
+;Destroi o ponteiro de um tetromino
 destruirTetromino proc pTetromino:DWORD
     mov eax, pTetromino
-    invoke destruirMatriz, (TETROMINO ptr[eax]).mat, 1
+    invoke destruirMatriz, (TETROMINO ptr[eax]).mat, 1          ;destroi a matriz do tetromino
     mov eax, pTetromino
-    invoke GlobalFree, eax
+    invoke GlobalFree, eax                                      ;destroi a si próprio
     ret
 destruirTetromino endp
 
+;Reinicia um tetromino já iniciado com outro tipo
 refazerTetromino proc pTetromino:DWORD, tipo:BYTE
+    ;é quase igual ao montarTetromino, mas a matriz não é recriada
     mov edx, pTetromino
     mov eax, (TETROMINO ptr[edx]).mat
     mov (TETROMINO ptr[edx]).posicao, 54
@@ -84,7 +88,7 @@ refazerTetromino proc pTetromino:DWORD, tipo:BYTE
     ret
 refazerTetromino endp
 
-
+;retorna um ponteiro para um tetromino identico ao passado
 copiarTetromino proc ponteiro:DWORD
     LOCAL ptrNovo: DWORD
 
@@ -108,40 +112,20 @@ copiarTetromino proc ponteiro:DWORD
     mov bl, (MATRIZ ptr[eax]).largura
     mov cl, (MATRIZ ptr[eax]).altura
 
-    xor eax, eax
-    mov al, cl
-    xor ecx, ecx
-    mov cl, bl
-
-    mul ecx
-    xor esi, esi   ;contador
-
     mov edx, ponteiro
     mov edx, (TETROMINO ptr[edx]).mat
     mov edx, (MATRIZ ptr[edx]).ponteiro
 
     mov edi, ptrNovo
     mov edi, (TETROMINO ptr[edi]).mat
-    mov edi, (MATRIZ ptr[edi]).ponteiro
 
-    forCopia:
-        cmp esi, eax
-        je fim
+    invoke copiarPonteiroMatriz, edx, edi
 
-        mov bl, byte ptr [edx]
-        mov byte ptr [edi], bl
-
-        inc esi
-        inc edx
-        inc edi
-
-        jmp forCopia
-
-    fim:
     return ptrNovo
 
 copiarTetromino  endp
 
+;adiciona os valores da matriz lógica à matriz do tetromino na posição respectiva
 adicionarMatrizLogica proc pTetromino:DWORD, pMapa:DWORD
     LOCAL mapaLargura:BYTE
     LOCAL mapaAltura:BYTE
@@ -220,6 +204,7 @@ adicionarMatrizLogica proc pTetromino:DWORD, pMapa:DWORD
     ret
 adicionarMatrizLogica endp
 
+;coloca o valor passado na matriz lógica na posição do tetromino
 colocarMatrizLogica proc pTetromino:DWORD, pMapa:DWORD, valor:BYTE
     LOCAL mapaLargura:BYTE
     LOCAL mapaAltura:BYTE
@@ -300,6 +285,7 @@ colocarMatrizLogica proc pTetromino:DWORD, pMapa:DWORD, valor:BYTE
     ret
 colocarMatrizLogica endp
 
+;verifica se há algum 2 na matriz do tetromino. Se sim, houve colisão
 verificarColisao proc mat:DWORD
     xor eax, eax
     xor ecx, ecx
@@ -336,6 +322,7 @@ verificarColisao proc mat:DWORD
     ret
 verificarColisao endp
 
+;copia o tetromino src para o tetromino dest. Ambos devem estar montados
 atribuirTetromino proc dest:DWORD, src:DWORD
     mov eax, dest
     mov edx, src
@@ -354,6 +341,9 @@ atribuirTetromino proc dest:DWORD, src:DWORD
     ret
 atribuirTetromino endp
 
+;seguindo a lógica oficial do tetris, presente em https://tetris.fandom.com/wiki/SRS, quando uma rotação de tetromino resulta em colisão
+;os seguintes testes são feitos. Se algum deles resultar em uma rotação possível, a rotação é executada. Se não, ela é barrada
+;Esses testes consistem em mudanças na posição do tetromino no eixo X e Y
 testesRotacao proc pTetromino:DWORD, pMapa:DWORD
     LOCAL tipo:BYTE
     LOCAL rot:BYTE
@@ -543,6 +533,7 @@ testesRotacao proc pTetromino:DWORD, pMapa:DWORD
     ret
 testesRotacao endp
 
+;testa a rotação para uma posição X e Y, verificando colisão
 testarRotacao proc pTetromino:DWORD, pMapa:DWORD, x:BYTE, y:BYTE
     LOCAL copiaT:DWORD
     LOCAL result:DWORD
@@ -596,6 +587,7 @@ testarRotacao proc pTetromino:DWORD, pMapa:DWORD, x:BYTE, y:BYTE
     ret
 testarRotacao endp
 
+;atualiza a posição da peça fantasma
 atualizarFantasma proc pFant:DWORD, pTetro:DWORD, pMapa:DWORD
     invoke atribuirTetromino, pFant, pTetro
     mov esi, pFant
@@ -607,6 +599,7 @@ atualizarFantasma proc pFant:DWORD, pTetro:DWORD, pMapa:DWORD
     ret
 atualizarFantasma endp
 
+;atualiza a posição do tetromino e o coloca na posição mais baixa possível
 descerTudo proc pTetro:DWORD, pMapa:DWORD
     LOCAL copiaT:DWORD
     invoke GlobalAlloc, 0, sizeof TETROMINO
