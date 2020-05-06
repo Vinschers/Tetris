@@ -225,6 +225,9 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
         dec (TETROMINO ptr[esi]).posicao
 
     .elseif al == PP_REFAZER
+        cmp cl, 0
+        jne fimRefazer 
+        
         push ecx
         push edx
         mov rect.top, 50
@@ -234,8 +237,6 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
         invoke  Rectangle, hdc, rect.left, rect.top, rect.right, rect.bottom  
         pop edx
         pop ecx
-        cmp cl, 0
-        jne fimRefazer 
 
         mov jaGuardou, 1
         push edx
@@ -535,11 +536,10 @@ acharLinhas proc hWin:DWORD, pMapa:DWORD
 acharLinhas endp
 
 
-;P + Tcol + Tlin*16
+;P + Tcol + Tlin*6
 desenharTetrominoGuardado proc hWin:DWORD, hDC:DWORD, pTetromino:DWORD, cor:BYTE
     mov edx, pTetromino
     mov edx, (TETROMINO ptr[edx]).mat
-    ;mov (TETROMINO ptr[edx]).posicao, 
 
     xor eax, eax
     xor ecx, ecx
@@ -590,8 +590,6 @@ desenharTetrominoGuardado proc hWin:DWORD, hDC:DWORD, pTetromino:DWORD, cor:BYTE
 
     xor ecx,ecx
     mov edx, pTetromino
-    mov ecx, 0
-    add eax, ecx
 
     mov cl, cor
     
@@ -647,6 +645,7 @@ desenharBlocoGuardado proc hWin:DWORD, hDC:DWORD, cor:BYTE, posicao:WORD
 desenharBlocoGuardado endp
 
 getPixelGuardado proc pos:WORD
+
     xor edx, edx
     xor eax, eax
     mov ax, pos
@@ -659,5 +658,6 @@ getPixelGuardado proc pos:WORD
     add edx, 451
     shl eax, 16
     mov ax, dx
+    
     ret
 getPixelGuardado endp
