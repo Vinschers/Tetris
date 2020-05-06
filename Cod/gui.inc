@@ -10,11 +10,10 @@ desenharTela proc hdc:DWORD
 	invoke  TextOut, hdc, 400, 20, ADDR pecaSeguradaTxt, eax
 
 	mov rect.top, 50
-	mov rect.bottom, 200
+	mov rect.bottom, 210
 	mov rect.left, 390
-	mov rect.right, 580 
+	mov rect.right, 582
 	invoke  Rectangle, hdc, rect.left, rect.top, rect.right, rect.bottom  
-
 
 	invoke  lstrlen, ADDR proxPecaTxt
 	invoke  TextOut, hdc, 400, 250, ADDR proxPecaTxt, eax
@@ -238,7 +237,7 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
         pop edx
         pop ecx
 
-        mov jaGuardou, 1
+        mov jaGuardou, 1 ; há peça guardada 
         push edx
         invoke desenharTetromino, hWin, hdc, pTetromino, NADA
         mov esi, pTetromino
@@ -338,9 +337,7 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
 			    invoke desenharTetromino, hWin, hdc, pTetromino, cl
             .endif
         .endif
-
     .endif
-
 	ret
 paint endp
 
