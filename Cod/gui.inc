@@ -230,10 +230,10 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
         push ecx
         push edx
         mov rect.top, 50
-        mov rect.bottom, 200
-        mov rect.left, 390
-        mov rect.right, 580 
-        invoke  Rectangle, hdc, rect.left, rect.top, rect.right, rect.bottom  
+	    mov rect.bottom, 210
+	    mov rect.left, 390
+	    mov rect.right, 582
+	    invoke  Rectangle, hdc, rect.left, rect.top, rect.right, rect.bottom
         pop edx
         pop ecx
 
