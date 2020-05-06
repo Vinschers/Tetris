@@ -225,6 +225,15 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
         dec (TETROMINO ptr[esi]).posicao
 
     .elseif al == PP_REFAZER
+        push ecx
+        push edx
+        mov rect.top, 50
+        mov rect.bottom, 200
+        mov rect.left, 390
+        mov rect.right, 580 
+        invoke  Rectangle, hdc, rect.left, rect.top, rect.right, rect.bottom  
+        pop edx
+        pop ecx
         cmp cl, 0
         jne fimRefazer 
 
@@ -233,20 +242,18 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
         invoke desenharTetromino, hWin, hdc, pTetromino, NADA
         mov esi, pTetromino
         mov bl, (TETROMINO ptr[esi]).tipo ; bl recebeu o tipo da peça que será guardada 
-        pop edx
-        push ebx
-        pop ebx
         mov pecaGuardada, bl
+        invoke desenharTetrominoGuardado, hWin, hdc, pTetromino, bl
+        mov esi, pTetromino
+        pop edx
         cmp dl, 7
         jne jaTemGuardada
-
         invoke refazerTetromino, pTetromino, CIANO
         jmp fimRefazer
 
         jaTemGuardada:
             invoke refazerTetromino, pTetromino, dl
         fimRefazer:
-
     .elseif al == PP_CAIR_TUDO
         invoke desenharTetromino, hWin, hdc, pTetromino, NADA
         invoke descerTudo, pTetromino, pMapa
@@ -526,3 +533,131 @@ acharLinhas proc hWin:DWORD, pMapa:DWORD
         pop eax
         ret
 acharLinhas endp
+
+
+;P + Tcol + Tlin*16
+desenharTetrominoGuardado proc hWin:DWORD, hDC:DWORD, pTetromino:DWORD, cor:BYTE
+    mov edx, pTetromino
+    mov edx, (TETROMINO ptr[edx]).mat
+    ;mov (TETROMINO ptr[edx]).posicao, 
+
+    xor eax, eax
+    xor ecx, ecx
+    mov al, (MATRIZ ptr[edx]).largura
+    mov cl, (MATRIZ ptr[edx]).altura
+    mul ecx ; eax tem o valor de posições da matriz do tetronimo, é usado para percorrer
+
+    mov edx, pTetromino
+    mov edx, (TETROMINO ptr[edx]).mat
+    mov edx, (MATRIZ ptr[edx]).ponteiro
+
+    xor ebx, ebx
+    xor ecx, ecx
+
+    forT:
+    cmp ebx, eax
+    je fim
+
+    mov cl, byte ptr[edx]
+    cmp cl, 0
+    je cont
+
+    push eax
+    push ebx
+    push ecx
+    push edx
+
+    xor eax, eax
+    mov al, bl ;al tem o contador
+    xor ebx, ebx
+
+    mov edx, pTetromino
+    mov edx, (TETROMINO ptr[edx]).mat
+    mov bl, (MATRIZ ptr[edx]).largura  ;bl tem a largura
+
+    xor edx, edx
+
+    div ebx   ;al tem a linha
+
+    mov esi, edx
+
+    mov ebx, 6
+    mul ebx
+
+    mov edx, esi
+
+    add ax, dx
+
+    xor ecx,ecx
+    mov edx, pTetromino
+    mov ecx, 0
+    add eax, ecx
+
+    mov cl, cor
+    
+    invoke desenharBlocoGuardado, hWin, hDC, cl, ax
+
+    pop edx
+    pop ecx
+    pop ebx
+    pop eax
+
+    cont:
+    inc ebx
+    inc edx
+    jmp forT
+
+    fim:
+    ret
+desenharTetrominoGuardado endp
+
+desenharBlocoGuardado proc hWin:DWORD, hDC:DWORD, cor:BYTE, posicao:WORD
+
+    LOCAL hOld:DWORD
+    LOCAL memDC :DWORD
+
+    invoke CreateCompatibleDC,hDC
+
+    mov memDC, eax
+    invoke SelectObject,memDC,hBmp  ; selecionei o novo bitmap
+    mov hOld, eax
+    xor ebx, ebx
+    invoke getPixelGuardado, posicao
+    mov bx, ax ; ebx coluna e eax linha
+    shr eax, 16
+
+    mov ecx, eax
+    mov edx, ebx
+
+    xor eax, eax     ; limpamos eax
+    xor ebx, ebx     ; limpar ebx
+    mov ebx, 32 
+    mov al, cor     ; atribuímos o valor do tipo ao registrador de 8 bits, o al
+    push edx
+    mul ebx          ; multiplicamos o valor armazenado em al por 32
+    pop edx
+    mov ebx, eax     ; salvamos o valor de al em tipo, que será usado para o ponto de início do corte no eixo X
+    INVOKE  TransparentBlt,hDC,edx,ecx,32,32,memDC,ebx,0,32,32,CREF_TRANSPARENT    ; cortamos a imagem  
+
+    invoke SelectObject,hDC,hOld
+    invoke DeleteDC,memDC
+
+    return 0
+
+desenharBlocoGuardado endp
+
+getPixelGuardado proc pos:WORD
+    xor edx, edx
+    xor eax, eax
+    mov ax, pos
+    mov ecx, 6
+    div ecx
+
+    shl eax, 5
+    shl edx, 5
+    add eax, 91
+    add edx, 451
+    shl eax, 16
+    mov ax, dx
+    ret
+getPixelGuardado endp

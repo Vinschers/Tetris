@@ -35,7 +35,9 @@ descerMatriz                PROTO   :DWORD, :DWORD, :DWORD, :WORD
 limparLinha                 PROTO   :DWORD, :DWORD, :DWORD, :WORD
 perder                      PROTO   :DWORD, :DWORD
 comecarJogo                 PROTO   :DWORD
-
+desenharBlocoGuardado       PROTO   :DWORD, :DWORD, :BYTE,  :WORD
+desenharTetrominoGuardado   PROTO   :DWORD, :DWORD, :DWORD, :BYTE
+getPixelGuardado            PROTO   :WORD
 
 
 MATRIZ struct
