@@ -67,8 +67,6 @@ WndProc proc hWin   :DWORD,
         invoke destruirTetromino, OFFSET bloco
         invoke destruirMatriz, OFFSET mapa, 0
         return 0
-
-
     .endif
 
     invoke DefWindowProc,hWin,uMsg,wParam,lParam
