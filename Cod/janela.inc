@@ -112,3 +112,85 @@ TopXY proc wDim:DWORD, sDim:DWORD
 TopXY endp
 
 
+randomizarVetor proc vet:DWORD
+    mov esi, vet
+    xor ecx, ecx   
+    completarVetor:
+        mov byte ptr[esi+ecx], 8
+        inc ecx
+
+        cmp ecx, 7
+        jne completarVetor
+
+    xor ecx, ecx    ; contador do for menor
+    for1:
+
+        cmp ecx, 7
+        je final
+
+        push esi 
+        push ecx
+        call randomizar
+        pop ecx
+        pop esi
+        
+
+        push esi
+        push ecx
+        push eax
+        invoke verificarTipoNoVetor, esi, al
+        xor edx, edx
+        mov dl, al
+        pop eax
+        pop ecx
+        pop esi
+        
+        cmp edx, 1
+        je for1
+
+        mov byte ptr [esi + ecx], al
+        inc ecx
+        jmp for1
+        
+    final:
+        ret
+
+randomizarVetor endp 
+
+
+verificarTipoNoVetor proc vet:DWORD, tipo:BYTE
+    mov ebx, vet
+    xor ecx, ecx
+    xor eax, eax
+    for1:
+        cmp cl, 7
+        je final
+
+        mov ch, tipo
+        cmp byte ptr[ebx], ch
+        jne nExiste
+
+        mov eax, 1
+        jmp final
+
+        nExiste:
+            inc ecx
+            inc ebx
+            jmp for1
+
+    final:    
+        ret
+
+verificarTipoNoVetor endp 
+
+
+randomizar proc
+    
+    invoke Dns_GetRandomXid, 0          ; Argument not used -> AX = random WORD
+    mov ecx, 7
+    xor edx, edx
+    div ecx
+    mov eax, edx
+    ret
+    
+randomizar endp

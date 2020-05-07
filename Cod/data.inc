@@ -8,7 +8,7 @@ desenharBloco               PROTO   :DWORD, :DWORD, :BYTE,  :WORD
 montarTetromino             PROTO   :DWORD, :BYTE
 desenharTetromino           PROTO   :DWORD, :DWORD, :DWORD, :BYTE
 strMatriz                   PROTO   :DWORD, :DWORD
-refazerTetromino            PROTO   :DWORD, :BYTE
+refazerTetromino            PROTO   :DWORD, :DWORD, :BYTE
 destruirTetromino           PROTO   :DWORD
 rotacionarMatriz            PROTO   :DWORD
 desenharTela                PROTO   :DWORD
@@ -26,7 +26,7 @@ atribuirMatriz              PROTO   :DWORD, :DWORD
 destruirMatriz              PROTO   :DWORD, :BYTE
 testesRotacao               PROTO   :DWORD, :DWORD
 testarRotacao               PROTO   :DWORD, :DWORD, :BYTE, :BYTE
-paint                       PROTO   :DWORD, :DWORD, :DWORD, :DWORD, :DWORD
+paint                       PROTO   :DWORD, :DWORD, :DWORD, :DWORD, :DWORD, :DWORD, :BYTE
 atualizarFantasma           PROTO   :DWORD, :DWORD, :DWORD
 descerTudo                  PROTO   :DWORD, :DWORD
 trabalharComLinhas          PROTO   :DWORD, :DWORD, :DWORD
@@ -38,6 +38,8 @@ comecarJogo                 PROTO   :DWORD
 desenharBlocoGuardado       PROTO   :DWORD, :DWORD, :BYTE,  :WORD
 desenharTetrominoGuardado   PROTO   :DWORD, :DWORD, :DWORD, :BYTE
 getPixelGuardado            PROTO   :WORD
+verificarTipoNoVetor        PROTO   :DWORD, :BYTE
+
 
 
 MATRIZ struct
@@ -60,6 +62,7 @@ TETROMINO ends
     rectParaApagar RECT <>
     posx  dd ?
     posy  dd ?
+
 
 
 
@@ -131,6 +134,8 @@ TETROMINO ends
 	hEventStart   dd 0
     hBmp          dd 0
     velocidade    dd 500
+    vetorPecas    db 8,8,8,8,8,8,8
+    pecaAtual     db 0
 
 .const
     WM_DESCER equ WM_USER+100h

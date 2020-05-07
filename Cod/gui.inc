@@ -179,7 +179,7 @@ getPixel proc pos:WORD
     ret
 getPixel endp
 
-paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
+paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD, vetPecas:DWORD, atual:BYTE
 	LOCAL copiaTetromino:DWORD
 	LOCAL copiaMatriz:DWORD
 	LOCAL colidiu:BYTE
@@ -327,7 +327,12 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
             .else
                 invoke trabalharComLinhas, hWin, hdc, pMapa
                 mov velocidade, 500
-                invoke refazerTetromino, pTetromino, ROXO
+                invoke refazerTetromino, pTetromino, vetPecas, atual
+                inc atual
+                .if atual == 7
+                    mov atual, 0
+                    call randomizarVetor
+                .endif 
                 invoke atualizarFantasma, pFantasma, pTetromino, pMapa
                 mov esi, pFantasma
                 mov cl, (TETROMINO ptr[esi]).tipo

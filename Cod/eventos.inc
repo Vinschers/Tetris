@@ -50,7 +50,7 @@ WndProc proc hWin   :DWORD,
         invoke BeginPaint, hWin, ADDR ps
         mov hdc, eax
 
-        invoke paint, hWin, hdc, OFFSET bloco, OFFSET mapa, OFFSET fantasma
+        invoke paint, hWin, hdc, OFFSET bloco, OFFSET mapa, OFFSET fantasma, OFFSET vetorPecas, pecaAtual
 
         mov al, PP_DESENHAR
         mov paintParam, al
@@ -79,8 +79,9 @@ comecarJogo proc hWin:DWORD
     mov mapa.altura, 26
     mov mapa.largura, 16
     invoke copiarPonteiroMatriz, OFFSET vetMapa, OFFSET mapa
-    
-    invoke refazerTetromino, OFFSET bloco, AMARELO
+    call randomizarVetor
+    mov pecaAtual, 0
+    invoke refazerTetromino, OFFSET bloco, OFFSET vetorPecas, pecaAtual
     ;invoke MessageBox,hWin, addr txt, NULL, MB_OK
     mov desenhandoTetromino, 0
     mov perdeu, 0

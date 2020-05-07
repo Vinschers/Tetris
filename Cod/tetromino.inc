@@ -49,8 +49,16 @@ destruirTetromino proc pTetromino:DWORD
 destruirTetromino endp
 
 ;Reinicia um tetromino já iniciado com outro tipo
-refazerTetromino proc pTetromino:DWORD, tipo:BYTE
-    ;é quase igual ao montarTetromino, mas a matriz não é recriada
+refazerTetromino proc pTetromino:DWORD, vetor:DWORD, pos:BYTE
+    ; é quase igual ao montarTetromino, mas a matriz não é recriada
+
+    LOCAL tipo:BYTE
+    mov eax, vetor
+    xor edx, edx
+    mov dl, pos
+    mov al, byte ptr[eax + edx]
+    mov tipo, al
+    
     mov edx, pTetromino
     mov eax, (TETROMINO ptr[edx]).mat
     mov (TETROMINO ptr[edx]).posicao, 54
