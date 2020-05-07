@@ -248,11 +248,16 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
         pop edx
         cmp dl, 7
         jne jaTemGuardada
-        invoke refazerTetromino, pTetromino, CIANO
+
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        ;   alterado por: Salim
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+        invoke refazerTetromino, pTetromino, vetPecas, atual
         jmp fimRefazer
 
         jaTemGuardada:
-            invoke refazerTetromino, pTetromino, dl
+            invoke refazerTetromino, pTetromino, vetPecas, atual
         fimRefazer:
     .elseif al == PP_CAIR_TUDO
         invoke desenharTetromino, hWin, hdc, pTetromino, NADA
