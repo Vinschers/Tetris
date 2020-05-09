@@ -133,7 +133,6 @@ randomizarVetor proc vet:DWORD
         call randomizar
         pop ecx
         pop esi
-        
 
         push esi
         push ecx

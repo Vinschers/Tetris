@@ -21,7 +21,7 @@ desenharTela proc hdc:DWORD
 	mov rect.top, 280
 	mov rect.bottom, 450
 	mov rect.left, 390
-	mov rect.right, 580
+	mov rect.right, 582
 	invoke  Rectangle, hdc, rect.left, rect.top, rect.right, rect.bottom
 
 	invoke  lstrlen, ADDR pontuacaoTxt
@@ -179,7 +179,7 @@ getPixel proc pos:WORD
     ret
 getPixel endp
 
-paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD, vetPecas:DWORD, atual:BYTE
+paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD, vetPecas:DWORD, atual:DWORD
 	LOCAL copiaTetromino:DWORD
 	LOCAL copiaMatriz:DWORD
 	LOCAL colidiu:BYTE
@@ -240,6 +240,7 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
         mov jaGuardou, 1 ; há peça guardada 
         push edx
         invoke desenharTetromino, hWin, hdc, pTetromino, NADA
+        invoke desenharTetromino, hWin, hdc, pFantasma, NADA
         mov esi, pTetromino
         mov bl, (TETROMINO ptr[esi]).tipo ; bl recebeu o tipo da peça que será guardada 
         mov pecaGuardada, bl
@@ -248,16 +249,10 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
         pop edx
         cmp dl, 7
         jne jaTemGuardada
-
-        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-        ;   alterado por: Salim
-        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-        invoke refazerTetromino, pTetromino, vetPecas, atual
-        jmp fimRefazer
+        jmp proximaPeca
 
         jaTemGuardada:
-            invoke refazerTetromino, pTetromino, vetPecas, atual
+            invoke refazerTetrominoTipo, pTetromino, dl
         fimRefazer:
     .elseif al == PP_CAIR_TUDO
         invoke desenharTetromino, hWin, hdc, pTetromino, NADA
@@ -332,13 +327,27 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
             .else
                 invoke trabalharComLinhas, hWin, hdc, pMapa
                 mov velocidade, 500
-                invoke refazerTetromino, pTetromino, vetPecas, atual
-                inc atual
-                .if atual == 7
-                    mov atual, 0
-                    call randomizarVetor
+                proximaPeca:
+                mov ebx, atual
+                inc byte ptr [ebx]
+                mov cl, byte ptr [ebx]
+                .if cl == 7   ; caso o registrador cl seja igual a 7, significa que chegamos ao fim do vetor de peças
+                    mov ebx, atual
+                    mov byte ptr [ebx], 0
+                    ; invoke randomizarVetor, vetPecas
                 .endif 
+                invoke refazerTetrominoVetor, pTetromino, vetPecas, cl
                 invoke atualizarFantasma, pFantasma, pTetromino, pMapa
+                mov ebx, atual
+                mov cl, byte ptr [ebx]
+                inc cl 
+                cmp cl, 7 
+                jne atualizarProx
+
+                invoke randomizarVetor, vetPecas
+                mov cl, 0
+                atualizarProx:
+                invoke desenharTetrominoProx, hWin, hdc, cl
                 mov esi, pFantasma
                 mov cl, (TETROMINO ptr[esi]).tipo
                 invoke desenharTetromino, hWin, hdc, pFantasma, cl
@@ -667,4 +676,138 @@ getPixelGuardado proc pos:WORD
     mov ax, dx
     
     ret
+
 getPixelGuardado endp
+
+
+;P + Tcol + Tlin*6
+desenharTetrominoProx proc hWin:DWORD, hDC:DWORD, cor:BYTE
+    LOCAL pTetromino:DWORD
+    invoke GlobalAlloc, 0, sizeof TETROMINO
+    mov pTetromino, eax
+    invoke montarTetromino, pTetromino, cor
+    mov edx, pTetromino
+    mov edx, (TETROMINO ptr[edx]).mat
+
+    xor eax, eax
+    xor ecx, ecx
+    mov al, (MATRIZ ptr[edx]).largura
+    mov cl, (MATRIZ ptr[edx]).altura
+    mul ecx ; eax tem o valor de posições da matriz do tetronimo, é usado para percorrer
+
+    mov edx, pTetromino
+    mov edx, (TETROMINO ptr[edx]).mat
+    mov edx, (MATRIZ ptr[edx]).ponteiro
+
+    xor ebx, ebx
+    xor ecx, ecx
+
+    forT:
+    cmp ebx, eax
+    je fim
+
+    mov cl, byte ptr[edx]
+    cmp cl, 0
+    je cont
+
+    push eax
+    push ebx
+    push ecx
+    push edx
+
+    xor eax, eax
+    mov al, bl ;al tem o contador
+    xor ebx, ebx
+
+    mov edx, pTetromino
+    mov edx, (TETROMINO ptr[edx]).mat
+    mov bl, (MATRIZ ptr[edx]).largura  ;bl tem a largura
+
+    xor edx, edx
+
+    div ebx   ;al tem a linha
+
+    mov esi, edx
+
+    mov ebx, 6
+    mul ebx
+
+    mov edx, esi
+
+    add ax, dx
+
+    xor ecx,ecx
+    mov edx, pTetromino
+
+    mov cl, cor
+    
+    invoke desenharBlocoProx, hWin, hDC, cl, ax
+
+    pop edx
+    pop ecx
+    pop ebx
+    pop eax
+
+    cont:
+    inc ebx
+    inc edx
+    jmp forT
+
+    fim:
+    invoke destruirTetromino, pTetromino
+    ret
+desenharTetrominoProx endp
+
+desenharBlocoProx proc hWin:DWORD, hDC:DWORD, cor:BYTE, posicao:WORD
+
+    LOCAL hOld:DWORD
+    LOCAL memDC :DWORD
+
+    invoke CreateCompatibleDC,hDC
+
+    mov memDC, eax
+    invoke SelectObject,memDC,hBmp  ; selecionei o novo bitmap
+    mov hOld, eax
+    xor ebx, ebx
+    invoke getPixelProx, posicao
+    mov bx, ax ; ebx coluna e eax linha
+    shr eax, 16
+
+    mov ecx, eax
+    mov edx, ebx
+
+    xor eax, eax     ; limpamos eax
+    xor ebx, ebx     ; limpar ebx
+    mov ebx, 32 
+    mov al, cor     ; atribuímos o valor do tipo ao registrador de 8 bits, o al
+    push edx
+    mul ebx          ; multiplicamos o valor armazenado em al por 32
+    pop edx
+    mov ebx, eax     ; salvamos o valor de al em tipo, que será usado para o ponto de início do corte no eixo X
+    INVOKE  TransparentBlt,hDC,edx,ecx,32,32,memDC,ebx,0,32,32,CREF_TRANSPARENT    ; cortamos a imagem  
+
+    invoke SelectObject,hDC,hOld
+    invoke DeleteDC,memDC
+
+    return 0
+
+desenharBlocoProx endp
+
+getPixelProx proc pos:WORD
+
+    xor edx, edx
+    xor eax, eax
+    mov ax, pos
+    mov ecx, 6
+    div ecx
+
+    shl eax, 5
+    shl edx, 5
+    add eax, 321
+    add edx, 451
+    shl eax, 16
+    mov ax, dx
+    
+    ret
+
+getPixelProx endp

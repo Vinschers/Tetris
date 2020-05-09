@@ -50,7 +50,7 @@ WndProc proc hWin   :DWORD,
         invoke BeginPaint, hWin, ADDR ps
         mov hdc, eax
 
-        invoke paint, hWin, hdc, OFFSET bloco, OFFSET mapa, OFFSET fantasma, OFFSET vetorPecas, pecaAtual
+        invoke paint, hWin, hdc, OFFSET bloco, OFFSET mapa, OFFSET fantasma, OFFSET vetorPecas, OFFSET pecaAtual
 
         mov al, PP_DESENHAR
         mov paintParam, al
@@ -76,15 +76,14 @@ WndProc proc hWin   :DWORD,
 WndProc endp
 
 comecarJogo proc hWin:DWORD
-    mov mapa.altura, 26
-    mov mapa.largura, 16
+    mov mapa.altura, 26     ; defininmos a altura do mapa
+    mov mapa.largura, 16    ; definimos a largura do mapa
     invoke copiarPonteiroMatriz, OFFSET vetMapa, OFFSET mapa
-    call randomizarVetor
-    mov pecaAtual, 0
-    invoke refazerTetromino, OFFSET bloco, OFFSET vetorPecas, pecaAtual
-    ;invoke MessageBox,hWin, addr txt, NULL, MB_OK
+    invoke randomizarVetor, OFFSET vetorPecas   ; randomizamos o vetor
+    mov pecaAtual, 0    ; definimos a peça atual como a do primeiro tipo no vetor já randomizado
+    
+    invoke refazerTetrominoVetor, OFFSET bloco, OFFSET vetorPecas, pecaAtual
     mov desenhandoTetromino, 0
     mov perdeu, 0
-
     ret
 comecarJogo endp

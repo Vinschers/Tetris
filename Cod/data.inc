@@ -8,7 +8,9 @@ desenharBloco               PROTO   :DWORD, :DWORD, :BYTE,  :WORD
 montarTetromino             PROTO   :DWORD, :BYTE
 desenharTetromino           PROTO   :DWORD, :DWORD, :DWORD, :BYTE
 strMatriz                   PROTO   :DWORD, :DWORD
-refazerTetromino            PROTO   :DWORD, :DWORD, :BYTE
+refazerTetromino            PROTO   :DWORD, :BYTE
+refazerTetrominoTipo        PROTO   :DWORD, :BYTE
+refazerTetrominoVetor       PROTO   :DWORD, :DWORD, :BYTE
 destruirTetromino           PROTO   :DWORD
 rotacionarMatriz            PROTO   :DWORD
 desenharTela                PROTO   :DWORD
@@ -26,7 +28,7 @@ atribuirMatriz              PROTO   :DWORD, :DWORD
 destruirMatriz              PROTO   :DWORD, :BYTE
 testesRotacao               PROTO   :DWORD, :DWORD
 testarRotacao               PROTO   :DWORD, :DWORD, :BYTE, :BYTE
-paint                       PROTO   :DWORD, :DWORD, :DWORD, :DWORD, :DWORD, :DWORD, :BYTE
+paint                       PROTO   :DWORD, :DWORD, :DWORD, :DWORD, :DWORD, :DWORD, :DWORD
 atualizarFantasma           PROTO   :DWORD, :DWORD, :DWORD
 descerTudo                  PROTO   :DWORD, :DWORD
 trabalharComLinhas          PROTO   :DWORD, :DWORD, :DWORD
@@ -38,7 +40,11 @@ comecarJogo                 PROTO   :DWORD
 desenharBlocoGuardado       PROTO   :DWORD, :DWORD, :BYTE,  :WORD
 desenharTetrominoGuardado   PROTO   :DWORD, :DWORD, :DWORD, :BYTE
 getPixelGuardado            PROTO   :WORD
+desenharBlocoProx           PROTO   :DWORD, :DWORD, :BYTE,  :WORD
+desenharTetrominoProx       PROTO   :DWORD, :DWORD, :BYTE
+getPixelProx                PROTO   :WORD
 verificarTipoNoVetor        PROTO   :DWORD, :BYTE
+randomizarVetor             PROTO   :DWORD
 
 
 
@@ -134,7 +140,7 @@ TETROMINO ends
 	hEventStart   dd 0
     hBmp          dd 0
     velocidade    dd 500
-    vetorPecas    db 8,8,8,8,8,8,8
+    vetorPecas    db 0,1,2,3,4,5,6
     pecaAtual     db 0
 
 .const
