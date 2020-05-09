@@ -45,6 +45,9 @@ desenharTetrominoProx       PROTO   :DWORD, :DWORD, :BYTE
 getPixelProx                PROTO   :WORD
 verificarTipoNoVetor        PROTO   :DWORD, :BYTE
 randomizarVetor             PROTO   :DWORD
+printNum                    PROTO   :DWORD, :DWORD, :DWORD, :DWORD
+printDig                    PROTO   :DWORD, :DWORD
+getExp                      PROTO   :DWORD
 
 
 
@@ -92,7 +95,7 @@ TETROMINO ends
     linhas          db 0 ;
     linhasAux       db 0
     pontuacao       dd 0,0 ;
-
+    posAtual        dd 500
     telaDesenhada   db 0
     desenhandoTetromino  db 0
 
@@ -147,6 +150,7 @@ TETROMINO ends
     velocidade    dd 500
     vetorPecas    db 0,1,2,3,4,5,6
     pecaAtual     db 0
+    expoente      dd 0
 
 .const
     WM_DESCER equ WM_USER+100h

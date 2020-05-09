@@ -441,15 +441,8 @@ trabalharComLinhas proc hWin:DWORD, hdc:DWORD, pMapa:DWORD
 
         xor ebx, ebx
         mov bl, nivel
-        mov txt, ebx
-        add txt, 48
-        showmsg ADDR txt
-        ;mov bl, byte ptr [ebx]
 
         inc bl 
- 
-        ;xor ebx, ebx
-        ;mov bl, nivel
         mul ebx
         add pontuacao, eax
         
@@ -458,10 +451,8 @@ trabalharComLinhas proc hWin:DWORD, hdc:DWORD, pMapa:DWORD
         push ecx
         push edx
 
-        add pontuacao, 48
-        invoke lstrlen, ADDR pontuacao
-        invoke TextOut, hdc, 500, 530, ADDR pontuacao, eax
-        sub pontuacao, 48 
+        invoke getExp, pontuacao
+        invoke printNum, hWin, hdc, expoente, pontuacao
 
         pop edx
         pop ecx
@@ -471,15 +462,12 @@ trabalharComLinhas proc hWin:DWORD, hdc:DWORD, pMapa:DWORD
         dec bl
         mov linhasAux, 0
         add linhas, cl
+
         xor ecx, ecx
         mov cl, linhas
-
-        ;mov txt, ecx
-        ;add txt, 48
-        ;showmsg ADDR txt
-
-        cmp ecx, 2
+        cmp ecx, 10
         jl retornar
+
         inc bl
         mov nivel, bl
         push eax
@@ -595,8 +583,6 @@ descerMatriz proc hWin:DWORD, hdc:DWORD, pMapa:DWORD, indice:WORD
 
 descerMatriz endp
 
-
-
 acharLinhas proc hWin:DWORD, pMapa:DWORD
     invoke GlobalAlloc, 0, 8
     push eax
@@ -643,7 +629,6 @@ acharLinhas proc hWin:DWORD, pMapa:DWORD
         pop eax
         ret
 acharLinhas endp
-
 
 ;P + Tcol + Tlin*6
 desenharTetrominoGuardado proc hWin:DWORD, hDC:DWORD, pTetromino:DWORD, cor:BYTE
@@ -771,7 +756,6 @@ getPixelGuardado proc pos:WORD
     ret
 
 getPixelGuardado endp
-
 
 ;P + Tcol + Tlin*6
 desenharTetrominoProx proc hWin:DWORD, hDC:DWORD, cor:BYTE
@@ -911,3 +895,81 @@ getPixelProx proc pos:WORD
     ret
 
 getPixelProx endp
+
+getExp proc valor:DWORD
+    mov     ecx, valor
+    mov     eax, 1
+    mov     ebx, 10
+    xor     edx, edx
+
+    whileCod1:
+        mul ebx
+        jo fimWhileCod1
+
+        cmp eax, ecx
+        jb whileCod1
+    
+    cmp eax, ecx
+    je fimExp
+
+    fimWhileCod1:
+    mov ecx, 10
+    div ecx
+
+    fimExp:
+    mov ecx, eax
+    mov expoente, eax
+    ret
+getExp endp
+
+; printa o numero que esta em eax
+printDig proc hWin:DWORD, hDC:DWORD
+    mov txt, eax
+    add txt, 48
+    invoke lstrlen, ADDR txt
+    invoke TextOut, hDC, posAtual, 530, ADDR txt, eax
+    add posAtual, 8
+    ret
+
+printDig endp
+
+;printa o valor
+printNum proc hWin:DWORD, hDC:DWORD, exp:DWORD, valor:DWORD
+
+    xor edx, edx
+    mov ecx, exp
+    mov eax, valor
+    mov posAtual, 500
+
+    whileCod2:
+        div ecx  
+   
+        push ecx
+        push eax
+        push edx
+
+        invoke printDig, hWin, hDC
+        
+        pop edx
+        pop eax
+        pop ecx
+
+
+        push edx
+
+        mov eax, ecx
+        xor edx, edx
+        mov ecx, 10
+        div ecx
+        mov ecx, eax
+
+        pop eax
+
+        xor edx, edx
+
+        cmp ecx, 0
+        jne whileCod2
+
+    ret
+
+printNum endp
