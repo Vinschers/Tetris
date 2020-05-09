@@ -24,8 +24,21 @@ desenharTela proc hdc:DWORD
 	mov rect.right, 582
 	invoke  Rectangle, hdc, rect.left, rect.top, rect.right, rect.bottom
 
+    invoke lstrlen, ADDR nivelTxt
+    invoke TextOut, hdc, 400, 480, ADDR nivelTxt, eax
+
 	invoke  lstrlen, ADDR pontuacaoTxt
-	invoke  TextOut, hdc, 400, 480, ADDR pontuacaoTxt, eax
+	invoke  TextOut, hdc, 400, 530, ADDR pontuacaoTxt, eax
+    
+    add nivel, 48
+    invoke lstrlen, ADDR nivel
+    invoke TextOut, hdc, 455, 480, ADDR nivel, eax
+    sub nivel, 48 
+
+    add pontuacao, 48
+    invoke lstrlen, ADDR pontuacao
+    invoke TextOut, hdc, 500, 530, ADDR pontuacao, eax
+    sub pontuacao, 48 
 
 	ret
 desenharTela endp
@@ -395,6 +408,7 @@ trabalharComLinhas proc hWin:DWORD, hdc:DWORD, pMapa:DWORD
 
         mov dx, word ptr[eax]
         invoke limparLinha, hWin, hdc, pMapa, dx
+        inc linhasAux 
 
         pop eax
         push eax
@@ -411,6 +425,85 @@ trabalharComLinhas proc hWin:DWORD, hdc:DWORD, pMapa:DWORD
         jmp forAchados
 
     fimAchados:
+        xor ecx, ecx
+        mov cl, linhasAux
+        cmp cl, 0
+        je retornar
+        .if cl == 1
+            mov eax, 40
+        .elseif cl == 2
+            mov eax, 100
+        .elseif cl == 3
+            mov eax, 300
+        .elseif cl == 4
+            mov eax, 1200
+        .endif
+
+        xor ebx, ebx
+        mov bl, nivel
+        mov txt, ebx
+        add txt, 48
+        showmsg ADDR txt
+        ;mov bl, byte ptr [ebx]
+
+        inc bl 
+ 
+        ;xor ebx, ebx
+        ;mov bl, nivel
+        mul ebx
+        add pontuacao, eax
+        
+        push eax
+        push ebx
+        push ecx
+        push edx
+
+        add pontuacao, 48
+        invoke lstrlen, ADDR pontuacao
+        invoke TextOut, hdc, 500, 530, ADDR pontuacao, eax
+        sub pontuacao, 48 
+
+        pop edx
+        pop ecx
+        pop ebx
+        pop eax
+
+        dec bl
+        mov linhasAux, 0
+        add linhas, cl
+        xor ecx, ecx
+        mov cl, linhas
+
+        ;mov txt, ecx
+        ;add txt, 48
+        ;showmsg ADDR txt
+
+        cmp ecx, 2
+        jl retornar
+        inc bl
+        mov nivel, bl
+        push eax
+        push ebx
+        push ecx
+        push edx
+
+        add nivel, 48
+        invoke lstrlen, ADDR nivel
+        invoke TextOut, hdc, 455, 480, ADDR nivel, eax
+        sub nivel, 48 
+
+        pop edx
+        pop ecx
+        pop ebx
+        pop eax
+
+        mov linhas, 0
+
+        mov edx, velocidade
+        sub edx, 60
+        mov velocidade, edx
+        
+    retornar:
         ret
 trabalharComLinhas endp
 
@@ -685,6 +778,13 @@ desenharTetrominoProx proc hWin:DWORD, hDC:DWORD, cor:BYTE
     LOCAL pTetromino:DWORD
     invoke GlobalAlloc, 0, sizeof TETROMINO
     mov pTetromino, eax
+
+    ;mov rect.top, 280
+	;mov rect.bottom, 450
+	;mov rect.left, 390
+	;mov rect.right, 582
+	;invoke  Rectangle, hDC, rect.left, rect.top, rect.right, rect.bottom
+
     invoke montarTetromino, pTetromino, cor
     mov edx, pTetromino
     mov edx, (TETROMINO ptr[edx]).mat

@@ -76,7 +76,8 @@ TETROMINO ends
     szDisplayName   db "Tetris", 0 
     proxPecaTxt     db "Proxima Peca", 0
     pecaSeguradaTxt db "Peca Segurada", 0
-    pontuacaoTxt    db "Pontuacao", 0
+    pontuacaoTxt    db "Pontuacao: ", 0
+    nivelTxt        db "Nivel: ", 0
     perdeuTxt       db "Perdeu!", 10, "Deseja jogar novamente?",0
     CommandLine     dd 0  ; parametros passados pela linha de comando (ponteiro)
     hWnd            dd 0  ; Handle principal do programa no windows
@@ -87,6 +88,10 @@ TETROMINO ends
     perdeu          db 0
     pecaGuardada    db 7 
     jaGuardou       db 0 ; variavel de controle 
+    nivel           db 0,0 ;
+    linhas          db 0 ;
+    linhasAux       db 0
+    pontuacao       dd 0,0 ;
 
     telaDesenhada   db 0
     desenhandoTetromino  db 0
