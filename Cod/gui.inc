@@ -1,4 +1,16 @@
+;//////////////////////////////////////////////////////////////////////////////////
+;feito por:
+;18188 Guilherme Salim de Barros
+;18178 Felipe Sherer Vicentin
+;18343 Lorenna Joanna Leal Nunes 
+;18190 Maria Eduarda Elias Rocha
+;para o prof Sergio na matéria 'linguagem de montagem'
+;todos direitos reservados -- 2019  ©
+;//////////////////////////////////////////////////////////////////////////////////
+
+;procedimento que desenha a janela 
 desenharTela proc hdc:DWORD
+    ;configuração das posições
 	mov rect.top, 10
 	mov rect.bottom, 652
 	mov rect.left, 10
@@ -47,7 +59,7 @@ desenharTela endp
 desenharTetromino proc hWin:DWORD, hDC:DWORD, pTetromino:DWORD, cor:BYTE
     mov edx, pTetromino
     mov edx, (TETROMINO ptr[edx]).mat
-
+    ;limpa os registradores
     xor eax, eax
     xor ecx, ecx
     mov al, (MATRIZ ptr[edx]).largura
@@ -57,7 +69,7 @@ desenharTetromino proc hWin:DWORD, hDC:DWORD, pTetromino:DWORD, cor:BYTE
     mov edx, pTetromino
     mov edx, (TETROMINO ptr[edx]).mat
     mov edx, (MATRIZ ptr[edx]).ponteiro
-
+    ;limpas os registradores
     xor ebx, ebx
     xor ecx, ecx
 
@@ -95,7 +107,7 @@ desenharTetromino proc hWin:DWORD, hDC:DWORD, pTetromino:DWORD, cor:BYTE
 
     add ax, dx
 
-    xor ecx,ecx
+    xor ecx,ecx; limpa registrador
     mov edx, pTetromino
     mov ecx, (TETROMINO ptr[edx]).posicao
     add eax, ecx
@@ -141,7 +153,7 @@ desenharBloco proc hWin:DWORD, hDC:DWORD, cor:BYTE, posicao:WORD
     invoke SelectObject,memDC,hBmp  ; selecionei o novo bitmap
     mov hOld, eax
 
-    xor ebx, ebx
+    xor ebx, ebx; limpa registrador
     invoke getPixel, posicao
     mov bx, ax ; ebx coluna e eax linha
     shr eax, 16
@@ -175,6 +187,7 @@ apagarTetromino endp
 ;ax -> coluna
 ;resto -> linha
 getPixel proc pos:WORD
+    ; limpa registradores
     xor edx, edx
     xor eax, eax
     mov ax, pos
@@ -354,7 +367,7 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
                 invoke atualizarFantasma, pFantasma, pTetromino, pMapa
                 desenharProximaPeca:
                 mov ebx, atual
-                xor ecx, ecx
+                xor ecx, ecx; limpa registrador
                 mov cl, byte ptr [ebx]
                 inc cl 
 
@@ -402,7 +415,7 @@ trabalharComLinhas proc hWin:DWORD, hdc:DWORD, pMapa:DWORD
     invoke acharLinhas, hWin ,pMapa
     mov esi, pMapa
     mov esi, (MATRIZ ptr[esi]).ponteiro
-    xor ecx, ecx
+    xor ecx, ecx; limpa registrador
     forAchados:
         cmp ecx, 8
         je fimAchados
@@ -432,7 +445,7 @@ trabalharComLinhas proc hWin:DWORD, hdc:DWORD, pMapa:DWORD
         jmp forAchados
 
     fimAchados:
-        xor ecx, ecx
+        xor ecx, ecx; limpa registrador
         mov cl, linhasAux
         cmp cl, 0
         je retornar
@@ -446,7 +459,7 @@ trabalharComLinhas proc hWin:DWORD, hdc:DWORD, pMapa:DWORD
             mov eax, 1200
         .endif
 
-        xor ebx, ebx
+        xor ebx, ebx; limpa registrador
         mov bl, nivel
 
         inc bl 
@@ -470,7 +483,7 @@ trabalharComLinhas proc hWin:DWORD, hdc:DWORD, pMapa:DWORD
         mov linhasAux, 0
         add linhas, cl
 
-        xor ecx, ecx
+        xor ecx, ecx ; limpa registrador
         mov cl, linhas
         cmp ecx, 10
         jl retornar
@@ -481,7 +494,7 @@ trabalharComLinhas proc hWin:DWORD, hdc:DWORD, pMapa:DWORD
         push ebx
         push ecx
         push edx
-
+        ;adicionar na tela o nível em que está
         add nivel, 48
         invoke lstrlen, ADDR nivel
         invoke TextOut, hdc, 455, 480, ADDR nivel, eax
@@ -503,7 +516,7 @@ trabalharComLinhas proc hWin:DWORD, hdc:DWORD, pMapa:DWORD
 trabalharComLinhas endp
 
 limparLinha proc hWin:DWORD, hdc:DWORD, pMapa:DWORD, indice:WORD 
-    xor edx, edx
+    xor edx, edx; limpa registrador
     add dx, indice
 
     mov ecx, edx
@@ -536,9 +549,10 @@ descerMatriz proc hWin:DWORD, hdc:DWORD, pMapa:DWORD, indice:WORD
    
     mov edx, pMapa
     mov esi, (MATRIZ ptr[edx]).ponteiro
-    xor ecx, ecx
+    xor ecx, ecx; limpa registrador
     mov cx, indice
     sub ecx, 16
+    ; limpa registradores
     xor ebx,ebx
     xor edx,edx
     forLinhas:
@@ -599,8 +613,9 @@ acharLinhas proc hWin:DWORD, pMapa:DWORD
     sub eax, 4
     mov edx, pMapa
     mov esi, (MATRIZ ptr[edx]).ponteiro
-    xor ecx, ecx
+    xor ecx, ecx; limpa registrador
     mov ecx, 51
+    ; limpa registradores
     xor ebx,ebx
     xor edx,edx
     forLinhas:
@@ -616,7 +631,7 @@ acharLinhas proc hWin:DWORD, pMapa:DWORD
             forPercorreLinha:
                 cmp ecx, ebx
                 je achouLinha
-                xor edx, edx
+                xor edx, edx; limpa registrador
                 mov dl,  byte ptr[esi + ecx]
                 cmp dl, 0
                 je voltarAbruptamente
@@ -625,7 +640,7 @@ acharLinhas proc hWin:DWORD, pMapa:DWORD
                 voltarAbruptamente:
                     mov ecx, ebx
                     add ecx, 6
-                    xor edx,edx
+                    xor edx,edx; limpa registrador
                     jmp forLinhas
                 achouLinha:
                     mov edx, ecx
@@ -638,10 +653,11 @@ acharLinhas proc hWin:DWORD, pMapa:DWORD
 acharLinhas endp
 
 ;P + Tcol + Tlin*6
+;procedimento que desenha na matriz o tetromino que foi guardado pelo usuário
 desenharTetrominoGuardado proc hWin:DWORD, hDC:DWORD, pTetromino:DWORD, cor:BYTE
     mov edx, pTetromino
     mov edx, (TETROMINO ptr[edx]).mat
-
+    ;limpa registradores
     xor eax, eax
     xor ecx, ecx
     mov al, (MATRIZ ptr[edx]).largura
@@ -651,7 +667,7 @@ desenharTetrominoGuardado proc hWin:DWORD, hDC:DWORD, pTetromino:DWORD, cor:BYTE
     mov edx, pTetromino
     mov edx, (TETROMINO ptr[edx]).mat
     mov edx, (MATRIZ ptr[edx]).ponteiro
-
+    ;limpa registradores
     xor ebx, ebx
     xor ecx, ecx
 
@@ -668,15 +684,15 @@ desenharTetrominoGuardado proc hWin:DWORD, hDC:DWORD, pTetromino:DWORD, cor:BYTE
     push ecx
     push edx
 
-    xor eax, eax
+    xor eax, eax; limpa registrador
     mov al, bl ;al tem o contador
-    xor ebx, ebx
+    xor ebx, ebx; limpa registrador
 
     mov edx, pTetromino
     mov edx, (TETROMINO ptr[edx]).mat
     mov bl, (MATRIZ ptr[edx]).largura  ;bl tem a largura
 
-    xor edx, edx
+    xor edx, edx; limpa registrador
 
     div ebx   ;al tem a linha
 
@@ -689,7 +705,7 @@ desenharTetrominoGuardado proc hWin:DWORD, hDC:DWORD, pTetromino:DWORD, cor:BYTE
 
     add ax, dx
 
-    xor ecx,ecx
+    xor ecx,ecx; limpa registrador
     mov edx, pTetromino
 
     mov cl, cor
@@ -720,14 +736,14 @@ desenharBlocoGuardado proc hWin:DWORD, hDC:DWORD, cor:BYTE, posicao:WORD
     mov memDC, eax
     invoke SelectObject,memDC,hBmp  ; selecionei o novo bitmap
     mov hOld, eax
-    xor ebx, ebx
+    xor ebx, ebx; limpa registrador
     invoke getPixelGuardado, posicao
     mov bx, ax ; ebx coluna e eax linha
     shr eax, 16
 
     mov ecx, eax
     mov edx, ebx
-
+    ; limpa registradores
     xor eax, eax     ; limpamos eax
     xor ebx, ebx     ; limpar ebx
     mov ebx, 32 
@@ -746,7 +762,7 @@ desenharBlocoGuardado proc hWin:DWORD, hDC:DWORD, cor:BYTE, posicao:WORD
 desenharBlocoGuardado endp
 
 getPixelGuardado proc pos:WORD
-
+    ; limpa registradores
     xor edx, edx
     xor eax, eax
     mov ax, pos
@@ -781,7 +797,7 @@ desenharTetrominoProx proc hWin:DWORD, hDC:DWORD, cor:BYTE
     invoke montarTetromino, pTetromino, cor
     mov edx, pTetromino
     mov edx, (TETROMINO ptr[edx]).mat
-
+    ; limpa registradores
     xor eax, eax
     xor ecx, ecx
     mov al, (MATRIZ ptr[edx]).largura
@@ -791,7 +807,7 @@ desenharTetrominoProx proc hWin:DWORD, hDC:DWORD, cor:BYTE
     mov edx, pTetromino
     mov edx, (TETROMINO ptr[edx]).mat
     mov edx, (MATRIZ ptr[edx]).ponteiro
-
+    ; limpa registradores
     xor ebx, ebx
     xor ecx, ecx
 
@@ -808,15 +824,15 @@ desenharTetrominoProx proc hWin:DWORD, hDC:DWORD, cor:BYTE
     push ecx
     push edx
 
-    xor eax, eax
+    xor eax, eax; limpa registrador
     mov al, bl ;al tem o contador
-    xor ebx, ebx
+    xor ebx, ebx; limpa registrador
 
     mov edx, pTetromino
     mov edx, (TETROMINO ptr[edx]).mat
     mov bl, (MATRIZ ptr[edx]).largura  ;bl tem a largura
 
-    xor edx, edx
+    xor edx, edx; limpa registrador
 
     div ebx   ;al tem a linha
 
@@ -829,7 +845,7 @@ desenharTetrominoProx proc hWin:DWORD, hDC:DWORD, cor:BYTE
 
     add ax, dx
 
-    xor ecx,ecx
+    xor ecx,ecx; limpa registrador
     mov edx, pTetromino
 
     mov cl, cor
@@ -861,14 +877,14 @@ desenharBlocoProx proc hWin:DWORD, hDC:DWORD, cor:BYTE, posicao:WORD
     mov memDC, eax
     invoke SelectObject,memDC,hBmp  ; selecionei o novo bitmap
     mov hOld, eax
-    xor ebx, ebx
+    xor ebx, ebx; limpa registrador
     invoke getPixelProx, posicao
     mov bx, ax ; ebx coluna e eax linha
     shr eax, 16
 
     mov ecx, eax
     mov edx, ebx
-
+    ; limpa registrador
     xor eax, eax     ; limpamos eax
     xor ebx, ebx     ; limpar ebx
     mov ebx, 32 
@@ -887,7 +903,7 @@ desenharBlocoProx proc hWin:DWORD, hDC:DWORD, cor:BYTE, posicao:WORD
 desenharBlocoProx endp
 
 getPixelProx proc pos:WORD
-
+    ; limpa registradores
     xor edx, edx
     xor eax, eax
     mov ax, pos
@@ -909,7 +925,7 @@ getExp proc valor:DWORD
     mov     ecx, valor
     mov     eax, 1
     mov     ebx, 10
-    xor     edx, edx
+    xor     edx, edx; limpa registrador
 
     whileCod1:
         mul ebx
@@ -945,7 +961,7 @@ printDig endp
 ;printa o valor
 printNum proc hWin:DWORD, hDC:DWORD, exp:DWORD, valor:DWORD
 
-    xor edx, edx
+    xor edx, edx; limpa registrador
     mov ecx, exp
     mov eax, valor
     mov posAtual, 500
@@ -967,14 +983,14 @@ printNum proc hWin:DWORD, hDC:DWORD, exp:DWORD, valor:DWORD
         push edx
 
         mov eax, ecx
-        xor edx, edx
+        xor edx, edx; limpa registrador
         mov ecx, 10
         div ecx
         mov ecx, eax
 
         pop eax
 
-        xor edx, edx
+        xor edx, edx; limpa registrador
 
         cmp ecx, 0
         jne whileCod2
