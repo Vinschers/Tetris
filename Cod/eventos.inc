@@ -81,8 +81,8 @@ comecarJogo proc hWin:DWORD
     invoke copiarPonteiroMatriz, OFFSET vetMapa, OFFSET mapa
     invoke randomizarVetor, OFFSET vetorPecas   ; randomizamos o vetor
     mov pecaAtual, 0    ; definimos a peça atual como a do primeiro tipo no vetor já randomizado
-    
     invoke refazerTetrominoVetor, OFFSET bloco, OFFSET vetorPecas, pecaAtual
+
     mov desenhandoTetromino, 0
     mov perdeu, 0
     ret

@@ -208,6 +208,7 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
 
     .if al == PP_DESENHAR
         invoke desenharTela, hdc
+        jmp desenharProximaPeca
 
     .elseif al == PP_DESCER
         invoke desenharTetromino, hWin, hdc, pTetromino, NADA
@@ -347,19 +348,25 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
                 .if cl == 7   ; caso o registrador cl seja igual a 7, significa que chegamos ao fim do vetor de peças
                     mov ebx, atual
                     mov byte ptr [ebx], 0
-                    ; invoke randomizarVetor, vetPecas
                 .endif 
+                mov cl, byte ptr [ebx]
                 invoke refazerTetrominoVetor, pTetromino, vetPecas, cl
                 invoke atualizarFantasma, pFantasma, pTetromino, pMapa
+                desenharProximaPeca:
                 mov ebx, atual
+                xor ecx, ecx
                 mov cl, byte ptr [ebx]
                 inc cl 
+
                 cmp cl, 7 
                 jne atualizarProx
 
                 invoke randomizarVetor, vetPecas
                 mov cl, 0
+
                 atualizarProx:
+                mov edx, vetPecas
+                mov cl, byte ptr[edx + ecx]
                 invoke desenharTetrominoProx, hWin, hdc, cl
                 mov esi, pFantasma
                 mov cl, (TETROMINO ptr[esi]).tipo
@@ -763,11 +770,13 @@ desenharTetrominoProx proc hWin:DWORD, hDC:DWORD, cor:BYTE
     invoke GlobalAlloc, 0, sizeof TETROMINO
     mov pTetromino, eax
 
-    ;mov rect.top, 280
-	;mov rect.bottom, 450
-	;mov rect.left, 390
-	;mov rect.right, 582
-	;invoke  Rectangle, hDC, rect.left, rect.top, rect.right, rect.bottom
+    mov rect.top, 280
+	mov rect.bottom, 450
+	mov rect.left, 390
+	mov rect.right, 582
+	invoke  Rectangle, hDC, rect.left, rect.top, rect.right, rect.bottom
+
+
 
     invoke montarTetromino, pTetromino, cor
     mov edx, pTetromino
@@ -777,7 +786,7 @@ desenharTetrominoProx proc hWin:DWORD, hDC:DWORD, cor:BYTE
     xor ecx, ecx
     mov al, (MATRIZ ptr[edx]).largura
     mov cl, (MATRIZ ptr[edx]).altura
-    mul ecx ; eax tem o valor de posições da matriz do tetronimo, é usado para percorrer
+    mul ecx ; eax tem o valor de posições da matriz do tetromino, é usado para percorrer
 
     mov edx, pTetromino
     mov edx, (TETROMINO ptr[edx]).mat
