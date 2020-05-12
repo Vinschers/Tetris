@@ -1,7 +1,7 @@
 ;//////////////////////////////////////////////////////////////////////////////////
 ;feito por:
 ;18188 Guilherme Salim de Barros
-;18178 Felipe Sherer Vicentin
+;18178 Felipe Scherer Vicentin
 ;18343 Lorenna Joanna Leal Nunes 
 ;18190 Maria Eduarda Elias Rocha
 ;para o prof Sergio na matéria 'linguagem de montagem'
@@ -221,6 +221,11 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
 
     .if al == PP_DESENHAR
         invoke desenharTela, hdc
+        invoke desenharTetromino, hWin, hdc, pFantasma, NADA
+        invoke atualizarFantasma, pFantasma, pTetromino, pMapa
+        mov esi, pFantasma
+        mov cl, (TETROMINO ptr[esi]).tipo
+        invoke desenharTetromino, hWin, hdc, pFantasma, cl
         jmp desenharProximaPeca
 
     .elseif al == PP_DESCER
