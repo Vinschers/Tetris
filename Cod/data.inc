@@ -23,7 +23,7 @@ refazerTetrominoTipo        PROTO   :DWORD, :BYTE
 refazerTetrominoVetor       PROTO   :DWORD, :DWORD, :BYTE
 destruirTetromino           PROTO   :DWORD
 rotacionarMatriz            PROTO   :DWORD
-desenharTela                PROTO   :DWORD
+desenharTela                PROTO   :DWORD, :DWORD
 tetrominoPaint              PROTO   :DWORD, :DWORD, :DWORD
 copiarPonteiroMatriz        PROTO   :DWORD, :DWORD
 getPixel                    PROTO   :WORD
@@ -161,6 +161,9 @@ TETROMINO ends
     vetorPecas    db 0,1,2,3,4,5,6
     pecaAtual     db 0
     expoente      dd 0
+    formatacaoNivel     db "Nivel: %d", 0
+    formatacaoPontuacao db "Pontuacao: %d", 0
+    buffer        db 20 dup(0)
 
 .const
     WM_DESCER equ WM_USER+100h

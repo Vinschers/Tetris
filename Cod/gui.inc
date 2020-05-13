@@ -9,7 +9,7 @@
 ;//////////////////////////////////////////////////////////////////////////////////
 
 ;procedimento que desenha a janela 
-desenharTela proc hdc:DWORD
+desenharTela proc hWin:DWORD, hdc:DWORD
     ;configuração das posições
 	mov rect.top, 10
 	mov rect.bottom, 652
@@ -36,21 +36,32 @@ desenharTela proc hdc:DWORD
 	mov rect.right, 582
 	invoke  Rectangle, hdc, rect.left, rect.top, rect.right, rect.bottom
 
-    invoke lstrlen, ADDR nivelTxt
-    invoke TextOut, hdc, 400, 480, ADDR nivelTxt, eax
+    xor eax, eax
+    mov al, nivel
 
-	invoke  lstrlen, ADDR pontuacaoTxt
-	invoke  TextOut, hdc, 400, 530, ADDR pontuacaoTxt, eax
+
+    invoke wsprintf, OFFSET buffer, OFFSET formatacaoNivel, eax
+    invoke GetClientRect, hWin, ADDR rect
     
-    add nivel, 48
-    invoke lstrlen, ADDR nivel
-    invoke TextOut, hdc, 455, 480, ADDR nivel, eax
-    sub nivel, 48 
+    
+    mov rect.left, 400
+    mov rect.top, 470
+    mov rect.right, 650
+    mov rect.bottom, 500
+    invoke DrawText, hdc, ADDR buffer, -1, ADDR rect, DT_SINGLELINE
 
-    add pontuacao, 48
-    invoke lstrlen, ADDR pontuacao
-    invoke TextOut, hdc, 500, 530, ADDR pontuacao, eax
-    sub pontuacao, 48 
+    mov eax, pontuacao
+
+
+    invoke wsprintf, OFFSET buffer, OFFSET formatacaoPontuacao, eax
+    invoke GetClientRect, hWin, ADDR rect
+    
+    
+    mov rect.left, 400
+    mov rect.top, 530
+    mov rect.right, 650
+    mov rect.bottom, 550
+    invoke DrawText, hdc, ADDR buffer, -1, ADDR rect, DT_SINGLELINE
 
 	ret
 desenharTela endp
@@ -220,7 +231,7 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
     mov cl, jaGuardou
 
     .if al == PP_DESENHAR
-        invoke desenharTela, hdc
+        invoke desenharTela, hWin ,hdc
         invoke desenharTetromino, hWin, hdc, pFantasma, NADA
         invoke atualizarFantasma, pFantasma, pTetromino, pMapa
         mov esi, pFantasma
@@ -348,7 +359,7 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
             .if ecx < 67
                 mov perdeu, 1
                 invoke perder, hWin, hdc
-                invoke desenharTela, hdc
+                invoke desenharTela, hWin,hdc
                 mov edx, pTetromino
                 mov cl, (TETROMINO ptr[edx]).tipo
                 invoke desenharTetromino, hWin, hdc, pTetromino, cl
@@ -370,6 +381,46 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
                 mov cl, byte ptr [ebx]
                 invoke refazerTetrominoVetor, pTetromino, vetPecas, cl
                 invoke atualizarFantasma, pFantasma, pTetromino, pMapa
+                pontuacaoPecaCaida:
+                    push eax
+                    push ebx
+                    push ecx
+                    push edx
+
+                    xor ebx,ebx
+                    mov bl, nivel
+                    inc ebx
+                    mov eax, 100
+                    mul ebx
+
+                    add pontuacao, eax
+                    push eax
+                    push ebx
+                    push ecx
+                    push edx
+
+                    mov eax, pontuacao
+
+
+                    invoke wsprintf, OFFSET buffer, OFFSET formatacaoPontuacao, eax
+                    invoke GetClientRect, hWin, ADDR rect
+                    
+                    
+                    mov rect.left, 400
+                    mov rect.top, 530
+                    mov rect.right, 650
+                    mov rect.bottom, 550
+                    invoke DrawText, hdc, ADDR buffer, -1, ADDR rect, DT_SINGLELINE
+
+                    pop edx
+                    pop ecx
+                    pop ebx
+                    pop eax
+                    pop edx
+                    pop ecx
+                    pop ebx
+                    pop eax
+
                 desenharProximaPeca:
                 mov ebx, atual
                 xor ecx, ecx; limpa registrador
@@ -417,6 +468,7 @@ perder proc hWin:DWORD, hdc:DWORD
 perder endp
 
 trabalharComLinhas proc hWin:DWORD, hdc:DWORD, pMapa:DWORD
+    LOCAL retanguloTextoPontuacao:RECT
     invoke acharLinhas, hWin ,pMapa
     mov esi, pMapa
     mov esi, (MATRIZ ptr[esi]).ponteiro
@@ -476,8 +528,18 @@ trabalharComLinhas proc hWin:DWORD, hdc:DWORD, pMapa:DWORD
         push ecx
         push edx
 
-        invoke getExp, pontuacao
-        invoke printNum, hWin, hdc, expoente, pontuacao
+        mov eax, pontuacao
+
+
+        invoke wsprintf, OFFSET buffer, OFFSET formatacaoPontuacao, eax
+        invoke GetClientRect, hWin, ADDR retanguloTextoPontuacao
+        
+        
+        mov retanguloTextoPontuacao.left, 400
+        mov retanguloTextoPontuacao.top, 530
+        mov retanguloTextoPontuacao.right, 650
+        mov retanguloTextoPontuacao.bottom, 550
+        invoke DrawText, hdc, ADDR buffer, -1, ADDR retanguloTextoPontuacao, DT_SINGLELINE
 
         pop edx
         pop ecx
@@ -499,11 +561,19 @@ trabalharComLinhas proc hWin:DWORD, hdc:DWORD, pMapa:DWORD
         push ebx
         push ecx
         push edx
-        ;adicionar na tela o nível em que está
-        add nivel, 48
-        invoke lstrlen, ADDR nivel
-        invoke TextOut, hdc, 455, 480, ADDR nivel, eax
-        sub nivel, 48 
+        xor eax, eax
+        mov al, nivel
+
+
+        invoke wsprintf, OFFSET buffer, OFFSET formatacaoNivel, eax
+        invoke GetClientRect, hWin, ADDR retanguloTextoPontuacao
+        
+        
+        mov retanguloTextoPontuacao.left, 400
+        mov retanguloTextoPontuacao.top, 470
+        mov retanguloTextoPontuacao.right, 650
+        mov retanguloTextoPontuacao.bottom, 500
+        invoke DrawText, hdc, ADDR buffer, -1, ADDR retanguloTextoPontuacao, DT_SINGLELINE
 
         pop edx
         pop ecx
@@ -776,7 +846,7 @@ getPixelGuardado proc pos:WORD
 
     shl eax, 5
     shl edx, 5
-    add eax, 91
+    add eax, 51
     add edx, 451
     shl eax, 16
     mov ax, dx
@@ -925,81 +995,3 @@ getPixelProx proc pos:WORD
     ret
 
 getPixelProx endp
-
-getExp proc valor:DWORD
-    mov     ecx, valor
-    mov     eax, 1
-    mov     ebx, 10
-    xor     edx, edx; limpa registrador
-
-    whileCod1:
-        mul ebx
-        jo fimWhileCod1
-
-        cmp eax, ecx
-        jb whileCod1
-    
-    cmp eax, ecx
-    je fimExp
-
-    fimWhileCod1:
-    mov ecx, 10
-    div ecx
-
-    fimExp:
-    mov ecx, eax
-    mov expoente, eax
-    ret
-getExp endp
-
-; printa o numero que esta em eax
-printDig proc hWin:DWORD, hDC:DWORD
-    mov txt, eax
-    add txt, 48
-    invoke lstrlen, ADDR txt
-    invoke TextOut, hDC, posAtual, 530, ADDR txt, eax
-    add posAtual, 8
-    ret
-
-printDig endp
-
-;printa o valor
-printNum proc hWin:DWORD, hDC:DWORD, exp:DWORD, valor:DWORD
-
-    xor edx, edx; limpa registrador
-    mov ecx, exp
-    mov eax, valor
-    mov posAtual, 500
-
-    whileCod2:
-        div ecx  
-   
-        push ecx
-        push eax
-        push edx
-
-        invoke printDig, hWin, hDC
-        
-        pop edx
-        pop eax
-        pop ecx
-
-
-        push edx
-
-        mov eax, ecx
-        xor edx, edx; limpa registrador
-        mov ecx, 10
-        div ecx
-        mov ecx, eax
-
-        pop eax
-
-        xor edx, edx; limpa registrador
-
-        cmp ecx, 0
-        jne whileCod2
-
-    ret
-
-printNum endp
