@@ -9,6 +9,7 @@ WndProc proc hWin   :DWORD,
     invoke GetProcessHeap
     mov hHeap, eax
     .if uMsg == WM_CREATE
+        invoke PlaySound, OFFSET caminhoMusica,NULL,SND_ASYNC
         invoke montarTetromino, OFFSET bloco, CIANO
         invoke montarTetromino, OFFSET fantasma, GHOST
 
@@ -82,7 +83,6 @@ comecarJogo proc hWin:DWORD
     invoke randomizarVetor, OFFSET vetorPecas   ; randomizamos o vetor
     mov pecaAtual, 0    ; definimos a peça atual como a do primeiro tipo no vetor já randomizado
     invoke refazerTetrominoVetor, OFFSET bloco, OFFSET vetorPecas, pecaAtual
-
     mov desenhandoTetromino, 0
     mov perdeu, 0
     ret

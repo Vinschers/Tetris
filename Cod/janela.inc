@@ -77,7 +77,7 @@ WinMain proc hInst     :DWORD,
                           Wtx,Wty,Wwd,Wht,
                           NULL,NULL,
                           hInst,NULL
-
+    
     mov   hWnd,eax  ; copy return value into handle DWORD
 
     invoke ShowWindow,hWnd,SW_SHOWNORMAL      ; display the window

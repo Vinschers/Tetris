@@ -18,6 +18,7 @@ include \masm32\include\oleaut32.inc
 include \masm32\macros\macros.asm
 include \masm32\include\comctl32.inc
 include \masm32\include\dnsapi.inc
+include \masm32\include\winmm.inc
 
 ; include das bibliotecas básicas do windows
 
@@ -32,5 +33,6 @@ includelib \masm32\lib\msimg32.lib
 includelib \masm32\lib\oleaut32.lib
 includelib \masm32\lib\msvcrt.lib
 includelib \masm32\lib\dnsapi.lib
+includelib \masm32\lib\winmm.lib
 
 include macros.inc
