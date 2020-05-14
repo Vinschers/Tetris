@@ -10,13 +10,42 @@
 
 ;procedimento que desenha a janela 
 desenharTela proc hWin:DWORD, hdc:DWORD
+    LOCAL corDeFundo:BYTE
+    LOCAL corDeFundoRect:BYTE
+    mov corDeFundo, 0
+    mov corDeFundoRect, 255
+
+    cmp tema, 2
+    jne temaClaro
+
+    mov corDeFundoRect, 33
+
+    temaClaro:
+    cmp tema, 0
+    jne temaEscuro
+
+    add corDeFundo, 220
+
+    temaEscuro:
+    add corDeFundo, 20
+
+    mov rect.top, 0
+    mov rect.left, 0
+    mov rect.bottom, 700
+    mov rect.right, 650
+    RGB corDeFundo, corDeFundo, corDeFundo
+    invoke CreateSolidBrush, eax
+    invoke FillRect, hdc, OFFSET rect, eax
+
     ;configuração das posições
 	mov rect.top, 10
 	mov rect.bottom, 652
 	mov rect.left, 10
 	mov rect.right, 332
 
-	invoke  Rectangle, hdc, rect.left, rect.top, rect.right, rect.bottom  
+	RGB corDeFundoRect, corDeFundoRect, corDeFundoRect
+    invoke CreateSolidBrush, eax
+    invoke FillRect, hdc, OFFSET rect, eax
 
 	invoke  lstrlen, ADDR pecaSeguradaTxt
 	invoke  TextOut, hdc, 400, 20, ADDR pecaSeguradaTxt, eax
@@ -25,7 +54,9 @@ desenharTela proc hWin:DWORD, hdc:DWORD
 	mov rect.bottom, 210
 	mov rect.left, 390
 	mov rect.right, 582
-	invoke  Rectangle, hdc, rect.left, rect.top, rect.right, rect.bottom  
+	RGB corDeFundoRect, corDeFundoRect, corDeFundoRect
+    invoke CreateSolidBrush, eax
+    invoke FillRect, hdc, OFFSET rect, eax
 
 	invoke  lstrlen, ADDR proxPecaTxt
 	invoke  TextOut, hdc, 400, 250, ADDR proxPecaTxt, eax
@@ -34,7 +65,9 @@ desenharTela proc hWin:DWORD, hdc:DWORD
 	mov rect.bottom, 450
 	mov rect.left, 390
 	mov rect.right, 582
-	invoke  Rectangle, hdc, rect.left, rect.top, rect.right, rect.bottom
+	RGB corDeFundoRect, corDeFundoRect, corDeFundoRect
+    invoke CreateSolidBrush, eax
+    invoke FillRect, hdc, OFFSET rect, eax
 
     xor eax, eax
     mov al, nivel
@@ -220,7 +253,15 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
 	LOCAL copiaTetromino:DWORD
 	LOCAL copiaMatriz:DWORD
 	LOCAL colidiu:BYTE
+    LOCAL corDeFundoRect:BYTE
+    mov corDeFundoRect, 255
 
+    cmp tema, 2
+    jne temaClaro
+
+    mov corDeFundoRect, 33
+
+    temaClaro:
 	invoke copiarTetromino, pTetromino
     mov copiaTetromino, eax
     
@@ -232,7 +273,9 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
 
     .if al == PP_DESENHAR
         invoke desenharTela, hWin ,hdc
-        invoke desenharTetromino, hWin, hdc, pFantasma, NADA
+        mov cl, NADA
+        add cl, tema
+        invoke desenharTetromino, hWin, hdc, pFantasma, cl
         invoke atualizarFantasma, pFantasma, pTetromino, pMapa
         mov esi, pFantasma
         mov cl, (TETROMINO ptr[esi]).tipo
@@ -240,12 +283,16 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
         jmp desenharProximaPeca
 
     .elseif al == PP_DESCER
-        invoke desenharTetromino, hWin, hdc, pTetromino, NADA
+        mov cl, NADA
+        add cl, tema
+        invoke desenharTetromino, hWin, hdc, pTetromino, cl
         mov esi, pTetromino
         add (TETROMINO ptr[esi]).posicao, 16
 
     .elseif al == PP_ROTACIONAR
-        invoke desenharTetromino, hWin, hdc, pTetromino, NADA
+        mov cl, NADA
+        add cl, tema
+        invoke desenharTetromino, hWin, hdc, pTetromino, cl
         mov esi, pTetromino
         invoke rotacionarMatriz, (TETROMINO ptr[esi]).mat
         mov esi, pTetromino
@@ -257,12 +304,16 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
         .endif
 
     .elseif al == PP_MOVER_DIREITA
-        invoke desenharTetromino, hWin, hdc, pTetromino, NADA
+        mov cl, NADA
+        add cl, tema
+        invoke desenharTetromino, hWin, hdc, pTetromino, cl
         mov esi, pTetromino
         inc (TETROMINO ptr[esi]).posicao
 
     .elseif al == PP_MOVER_ESQUERDA
-        invoke desenharTetromino, hWin, hdc, pTetromino, NADA
+        mov cl, NADA
+        add cl, tema
+        invoke desenharTetromino, hWin, hdc, pTetromino, cl
         mov esi, pTetromino
         dec (TETROMINO ptr[esi]).posicao
 
@@ -276,14 +327,20 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
 	    mov rect.bottom, 210
 	    mov rect.left, 390
 	    mov rect.right, 582
-	    invoke  Rectangle, hdc, rect.left, rect.top, rect.right, rect.bottom
+	    RGB corDeFundoRect, corDeFundoRect, corDeFundoRect
+        invoke CreateSolidBrush, eax
+        invoke FillRect, hdc, OFFSET rect, eax
         pop edx
         pop ecx
 
         mov jaGuardou, 1 ; há peça guardada 
         push edx
-        invoke desenharTetromino, hWin, hdc, pTetromino, NADA
-        invoke desenharTetromino, hWin, hdc, pFantasma, NADA
+        mov cl, NADA
+        add cl, tema
+        invoke desenharTetromino, hWin, hdc, pTetromino, cl
+        mov cl, NADA
+        add cl, tema
+        invoke desenharTetromino, hWin, hdc, pFantasma, cl
         mov esi, pTetromino
         mov bl, (TETROMINO ptr[esi]).tipo ; bl recebeu o tipo da peça que será guardada 
         mov pecaGuardada, bl
@@ -298,7 +355,9 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
             invoke refazerTetrominoTipo, pTetromino, dl
         fimRefazer:
     .elseif al == PP_CAIR_TUDO
-        invoke desenharTetromino, hWin, hdc, pTetromino, NADA
+        mov cl, NADA
+        add cl, tema
+        invoke desenharTetromino, hWin, hdc, pTetromino, cl
         invoke descerTudo, pTetromino, pMapa
         mov colidiu, 1
         jmp atualizarVariaveis
@@ -339,7 +398,9 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
 
     invoke destruirTetromino, copiaTetromino
 
-    invoke desenharTetromino, hWin, hdc, pFantasma, NADA
+    mov cl, NADA
+    add cl, tema
+    invoke desenharTetromino, hWin, hdc, pFantasma, cl
     invoke atualizarFantasma, pFantasma, pTetromino, pMapa
     mov esi, pFantasma
     mov cl, (TETROMINO ptr[esi]).tipo
@@ -609,7 +670,9 @@ limparLinha proc hWin:DWORD, hdc:DWORD, pMapa:DWORD, indice:WORD
         mov ecx, (MATRIZ ptr[ecx]).ponteiro
         mov byte ptr[edx + ecx], 0
 
-        invoke desenharBloco, hWin, hdc, NADA, dx
+        mov cl, NADA
+        add cl, tema
+        invoke desenharBloco, hWin, hdc, cl, dx
         invoke Sleep, 75
 
         pop edx
@@ -859,6 +922,15 @@ getPixelGuardado endp
 ;P + Tcol + Tlin*6
 desenharTetrominoProx proc hWin:DWORD, hDC:DWORD, cor:BYTE
     LOCAL pTetromino:DWORD
+    LOCAL corDeFundoRect:BYTE
+    mov corDeFundoRect, 255
+
+    cmp tema, 2
+    jne temaClaro
+
+    mov corDeFundoRect, 33
+
+    temaClaro:
     invoke GlobalAlloc, 0, sizeof TETROMINO
     mov pTetromino, eax
 
@@ -866,7 +938,9 @@ desenharTetrominoProx proc hWin:DWORD, hDC:DWORD, cor:BYTE
 	mov rect.bottom, 450
 	mov rect.left, 390
 	mov rect.right, 582
-	invoke  Rectangle, hDC, rect.left, rect.top, rect.right, rect.bottom
+	RGB corDeFundoRect, corDeFundoRect, corDeFundoRect
+    invoke CreateSolidBrush, eax
+    invoke FillRect, hDC, OFFSET rect, eax
 
 
 

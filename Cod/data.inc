@@ -165,6 +165,7 @@ TETROMINO ends
     formatacaoPontuacao db "Pontuacao: %d", 0
     buffer        db 20 dup(0)
     caminhoMusica db "tetris_theme.wav", 0
+    tema          db 2
 
 .const
     WM_DESCER equ WM_USER+100h

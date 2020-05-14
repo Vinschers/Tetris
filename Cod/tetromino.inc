@@ -612,6 +612,7 @@ atualizarFantasma proc pFant:DWORD, pTetro:DWORD, pMapa:DWORD
     invoke atribuirTetromino, pFant, pTetro
     mov esi, pFant
     mov cl, GHOST
+    add cl, tema
     mov (TETROMINO ptr[esi]).tipo, cl
 
     invoke descerTudo, pFant, pMapa

@@ -193,16 +193,3 @@ randomizar proc
     ret
     
 randomizar endp
-
-ThreadProcMusica PROC USES ecx Param:DWORD
-    invoke WaitForSingleObject,hEventStart, velocidade
-        .IF eax == WAIT_TIMEOUT
-            pintar PP_DESCER
-            jmp ThreadProcDescer
-        .ENDIF
-        .if perdeu != 1
-            jmp ThreadProcDescer
-        .endif
-    jmp ThreadProcMusica
-    ret
-ThreadProcMusica ENDP
