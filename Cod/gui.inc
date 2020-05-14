@@ -457,6 +457,7 @@ esperarDesenho proc
 esperarDesenho endp
 
 perder proc hWin:DWORD, hdc:DWORD
+    invoke PlaySound,NULL,NULL,SND_ASYNC
     invoke MessageBox,hWin, addr perdeuTxt, NULL, MB_YESNO
 
     .if eax == IDYES

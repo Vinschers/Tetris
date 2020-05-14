@@ -9,7 +9,7 @@ WndProc proc hWin   :DWORD,
     invoke GetProcessHeap
     mov hHeap, eax
     .if uMsg == WM_CREATE
-        invoke PlaySound, OFFSET caminhoMusica,NULL,SND_ASYNC
+        
         invoke montarTetromino, OFFSET bloco, CIANO
         invoke montarTetromino, OFFSET fantasma, GHOST
 
@@ -77,6 +77,7 @@ WndProc proc hWin   :DWORD,
 WndProc endp
 
 comecarJogo proc hWin:DWORD
+    invoke PlaySound, OFFSET caminhoMusica,NULL,SND_ASYNC or SND_LOOP
     mov mapa.altura, 26     ; defininmos a altura do mapa
     mov mapa.largura, 16    ; definimos a largura do mapa
     invoke copiarPonteiroMatriz, OFFSET vetMapa, OFFSET mapa
