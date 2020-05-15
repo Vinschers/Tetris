@@ -540,7 +540,8 @@ esperarDesenho endp
 perder proc hWin:DWORD, hdc:DWORD
     invoke PlaySound,NULL,NULL,SND_ASYNC
     invoke MessageBox,hWin, addr perdeuTxt, NULL, MB_YESNO
-
+    mov pontuacao, 0
+    mov nivel, 0
     .if eax == IDYES
         invoke comecarJogo, hWin
     .else
