@@ -9,7 +9,6 @@ WndProc proc hWin   :DWORD,
     invoke GetProcessHeap
     mov hHeap, eax
     .if uMsg == WM_CREATE
-        
         invoke montarTetromino, OFFSET bloco, CIANO
         invoke montarTetromino, OFFSET fantasma, GHOST
 
@@ -20,6 +19,12 @@ WndProc proc hWin   :DWORD,
         mov hThread, eax
         
         invoke comecarJogo, hWin
+
+    .elseif uMsg == WM_COMMAND
+        mov eax, wParam
+        .if ax == 100
+            showmsg ADDR txt
+        .endif
     
     .elseif uMsg == WM_KEYDOWN
         .if wParam == 40
@@ -39,6 +44,8 @@ WndProc proc hWin   :DWORD,
             mov velocidade, 500
         .elseif wParam == 72
             pintar PP_REFAZER
+        .elseif wParam == 84
+            pintar PP_MUDAR_TEMA
         .endif
 
     .elseif uMsg == WM_PAINT

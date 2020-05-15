@@ -362,6 +362,31 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
         mov colidiu, 1
         jmp atualizarVariaveis
 
+    .elseif al == PP_MUDAR_TEMA
+        mov perdeu, 1
+        invoke PlaySound,NULL,NULL,SND_ASYNC
+        invoke MessageBox,hWin, addr temaTxt, NULL, MB_YESNO
+
+        .if eax == IDYES
+            .if tema == 0
+                mov tema, 2
+            .else
+                mov tema, 0
+            .endif
+            invoke comecarJogo, hWin
+            invoke desenharTela, hWin,hdc
+            mov edx, pTetromino
+            mov cl, (TETROMINO ptr[edx]).tipo
+            invoke desenharTetromino, hWin, hdc, pTetromino, cl
+            invoke atualizarFantasma, pFantasma, pTetromino, pMapa
+            mov esi, pFantasma
+            mov cl, (TETROMINO ptr[esi]).tipo
+            invoke desenharTetromino, hWin, hdc, pFantasma, cl
+        .else
+            mov perdeu, 0
+            invoke PlaySound, OFFSET caminhoMusica,NULL,SND_ASYNC or SND_LOOP
+        .endif
+
     .endif
 
     mov esi, pTetromino

@@ -81,6 +81,7 @@ TETROMINO ends
     rectParaApagar RECT <>
     posx  dd ?
     posy  dd ?
+    hButton HWND ?
 
 
 
@@ -92,6 +93,11 @@ TETROMINO ends
     pontuacaoTxt    db "Pontuacao: ", 0
     nivelTxt        db "Nivel: ", 0
     perdeuTxt       db "Perdeu!", 10, "Deseja jogar novamente?",0
+    temaTxt         db "Mudar o tema? O jogo reiniciará",0
+
+    ButtonClassName db "button", 0
+    ButtonText db "I am a button, press me!", 0
+
     CommandLine     dd 0  ; parametros passados pela linha de comando (ponteiro)
     hWnd            dd 0  ; Handle principal do programa no windows
     hInstance       dd 0  ; instancia do programa
@@ -185,3 +191,5 @@ TETROMINO ends
     PP_MOVER_ESQUERDA db 4
     PP_REFAZER        db 5
     PP_CAIR_TUDO      db 6
+    PP_MUDAR_TEMA     db 7
+    BUTTON_ID equ 100
