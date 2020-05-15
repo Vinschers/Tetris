@@ -93,7 +93,7 @@ TETROMINO ends
     pontuacaoTxt    db "Pontuacao: ", 0
     nivelTxt        db "Nivel: ", 0
     perdeuTxt       db "Perdeu!", 10, "Deseja jogar novamente?",0
-    temaTxt         db "Mudar o tema? O jogo reiniciará",0
+    temaTxt         db "Mudar o tema? O jogo vai reiniciar",0
 
     CommandLine     dd 0  ; parametros passados pela linha de comando (ponteiro)
     hWnd            dd 0  ; Handle principal do programa no windows
@@ -190,3 +190,11 @@ TETROMINO ends
     PP_CAIR_TUDO      db 6
     PP_MUDAR_TEMA     db 7
     BUTTON_ID equ 100
+    EXPLICACAO_TITULO db "CONTROLES",0
+    EXPLICACAO_TEXTO  db "-->      Mover para a direita",10
+                      db "<--      Mover para a esquerda",10
+                      db "v        Aumentar velocidade de descida",10
+                      db "^        Rotacionar tetromino",10
+                      db "[Espaco] Descer tetromino",10
+                      db "[H]      Segurar tetromino",10
+                      db "[T]      Mudar o tema do jogo",0
