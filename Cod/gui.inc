@@ -446,13 +446,8 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
                 mov perdeu, 1
                 invoke perder, hWin, hdc
                 invoke desenharTela, hWin,hdc
-                mov edx, pTetromino
-                mov cl, (TETROMINO ptr[edx]).tipo
-                invoke desenharTetromino, hWin, hdc, pTetromino, cl
                 invoke atualizarFantasma, pFantasma, pTetromino, pMapa
-                mov esi, pFantasma
-                mov cl, (TETROMINO ptr[esi]).tipo
-                invoke desenharTetromino, hWin, hdc, pFantasma, cl
+                jmp desenharProximaPeca
             .else
                 invoke trabalharComLinhas, hWin, hdc, pMapa
                 mov velocidade, 500
