@@ -9,6 +9,7 @@ WndProc proc hWin   :DWORD,
     invoke GetProcessHeap
     mov hHeap, eax
     .if uMsg == WM_CREATE
+        invoke MessageBox, hWin, addr EXPLICACAO_TEXTO, addr EXPLICACAO_TITULO, MB_OK
         invoke montarTetromino, OFFSET bloco, CIANO
         invoke montarTetromino, OFFSET fantasma, GHOST
 
