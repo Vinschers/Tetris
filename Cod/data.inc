@@ -95,9 +95,6 @@ TETROMINO ends
     perdeuTxt       db "Perdeu!", 10, "Deseja jogar novamente?",0
     temaTxt         db "Mudar o tema? O jogo reiniciará",0
 
-    ButtonClassName db "button", 0
-    ButtonText db "I am a button, press me!", 0
-
     CommandLine     dd 0  ; parametros passados pela linha de comando (ponteiro)
     hWnd            dd 0  ; Handle principal do programa no windows
     hInstance       dd 0  ; instancia do programa
