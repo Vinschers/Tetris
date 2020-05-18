@@ -64,6 +64,7 @@ desenharTela proc hWin:DWORD, hdc:DWORD
 	mov rect.bottom, 210
 	mov rect.left, 390
 	mov rect.right, 582
+
 	RGB corDeFundoRect, corDeFundoRect, corDeFundoRect
     invoke CreateSolidBrush, eax
     invoke FillRect, hdc, OFFSET rect, eax
@@ -264,13 +265,17 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
 	LOCAL copiaMatriz:DWORD
 	LOCAL colidiu:BYTE
     LOCAL corDeFundoRect:BYTE
+    LOCAL corTxt:BYTE
+    LOCAL hfont:HFONT
+
     mov corDeFundoRect, 255
+    mov corTxt, 0
 
     cmp tema, 2
     jne temaClaro
 
     mov corDeFundoRect, 33
-
+    mov corTxt, 255
     temaClaro:
 	invoke copiarTetromino, pTetromino
     mov copiaTetromino, eax
@@ -492,7 +497,6 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
 
                     mov eax, pontuacao
 
-
                     invoke wsprintf, OFFSET buffer, OFFSET formatacaoPontuacao, eax
                     invoke GetClientRect, hWin, ADDR rect
                     
@@ -501,7 +505,15 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
                     mov rect.top, 530
                     mov rect.right, 650
                     mov rect.bottom, 550
+
+                    invoke SelectObject, hdc, eax
+                    mov    hfont,eax
+                    RGB    corTxt,corTxt,corTxt
+                    invoke SetTextColor,hdc,eax
+                    RGB    corDeFundoRect,corDeFundoRect,corDeFundoRect
+                    invoke SetBkColor,hdc,eax
                     invoke DrawText, hdc, ADDR buffer, -1, ADDR rect, DT_SINGLELINE
+                    invoke SelectObject,hdc, hfont
 
                     pop edx
                     pop ecx
@@ -562,37 +574,49 @@ perder endp
 
 trabalharComLinhas proc hWin:DWORD, hdc:DWORD, pMapa:DWORD
     LOCAL retanguloTextoPontuacao:RECT
-    invoke acharLinhas, hWin ,pMapa
-    mov esi, pMapa
-    mov esi, (MATRIZ ptr[esi]).ponteiro
-    xor ecx, ecx; limpa registrador
-    forAchados:
-        cmp ecx, 8
-        je fimAchados
-        cmp word ptr[eax], 0
-        je fimAchados
+    LOCAL corTxt:BYTE
+    LOCAL corDeFundoRect:BYTE
+    LOCAL hfont:HFONT
+    mov corDeFundoRect, 255
+    mov corTxt, 0
 
-        push esi
-        push ecx
-        push eax
+    cmp tema, 2
+    jne temaClaro
 
-        mov dx, word ptr[eax]
-        invoke limparLinha, hWin, hdc, pMapa, dx
-        inc linhasAux 
+    mov corDeFundoRect, 33
+    mov corTxt, 255
+    temaClaro:
+        invoke acharLinhas, hWin ,pMapa
+        mov esi, pMapa
+        mov esi, (MATRIZ ptr[esi]).ponteiro
+        xor ecx, ecx; limpa registrador
+        forAchados:
+            cmp ecx, 8
+            je fimAchados
+            cmp word ptr[eax], 0
+            je fimAchados
 
-        pop eax
-        push eax
+            push esi
+            push ecx
+            push eax
 
-        mov dx, word ptr[eax]
-        invoke descerMatriz, hWin, hdc, pMapa, dx
+            mov dx, word ptr[eax]
+            invoke limparLinha, hWin, hdc, pMapa, dx
+            inc linhasAux 
 
-        pop eax
-        pop ecx
-        pop esi
+            pop eax
+            push eax
 
-        add ecx, 2
-        add eax, 2
-        jmp forAchados
+            mov dx, word ptr[eax]
+            invoke descerMatriz, hWin, hdc, pMapa, dx
+
+            pop eax
+            pop ecx
+            pop esi
+
+            add ecx, 2
+            add eax, 2
+            jmp forAchados
 
     fimAchados:
         xor ecx, ecx; limpa registrador
@@ -632,8 +656,14 @@ trabalharComLinhas proc hWin:DWORD, hdc:DWORD, pMapa:DWORD
         mov retanguloTextoPontuacao.top, 530
         mov retanguloTextoPontuacao.right, 650
         mov retanguloTextoPontuacao.bottom, 550
+        invoke SelectObject, hdc, eax
+        mov    hfont,eax
+        RGB    corTxt,corTxt,corTxt
+        invoke SetTextColor,hdc,eax
+        RGB    corDeFundoRect,corDeFundoRect,corDeFundoRect
+        invoke SetBkColor,hdc,eax
         invoke DrawText, hdc, ADDR buffer, -1, ADDR retanguloTextoPontuacao, DT_SINGLELINE
-
+        invoke SelectObject,hdc, hfont
         pop edx
         pop ecx
         pop ebx
@@ -666,8 +696,17 @@ trabalharComLinhas proc hWin:DWORD, hdc:DWORD, pMapa:DWORD
         mov retanguloTextoPontuacao.top, 470
         mov retanguloTextoPontuacao.right, 650
         mov retanguloTextoPontuacao.bottom, 500
-        invoke DrawText, hdc, ADDR buffer, -1, ADDR retanguloTextoPontuacao, DT_SINGLELINE
 
+        
+        invoke SelectObject, hdc, eax
+        mov    hfont,eax
+        RGB    corTxt,corTxt,corTxt
+        invoke SetTextColor,hdc,eax
+        RGB    corDeFundoRect,corDeFundoRect,corDeFundoRect
+        invoke SetBkColor,hdc,eax
+        invoke DrawText, hdc, ADDR buffer, -1, ADDR retanguloTextoPontuacao, DT_SINGLELINE
+        invoke SelectObject,hdc, hfont
+        
         pop edx
         pop ecx
         pop ebx
