@@ -16,21 +16,16 @@ desenharTela proc hWin:DWORD, hdc:DWORD
     LOCAL hfont:HFONT
     mov corDeFundo, 0
     mov corDeFundoRect, 255
+    mov corTxt, 20
 
-    cmp tema, 2
-    jne temaClaro
-
-    mov corDeFundoRect, 33
-
-    temaClaro:
-    cmp tema, 0
-    jne temaEscuro
-
-    add corDeFundo, 220
-
-    temaEscuro:
-    add corDeFundo, 20
-    add corTxt, 255
+    .if tema == 0
+        mov corDeFundoRect, 255
+        mov corDeFundo, 240
+    .else
+        mov corDeFundoRect, 33
+        mov corDeFundo, 20
+        mov corTxt, 255
+    .endif
     
 
     mov rect.top, 0
@@ -196,6 +191,17 @@ ThreadProcDescer PROC USES ecx Param:DWORD
         .endif
     ret
 ThreadProcDescer ENDP
+
+
+ThreadProcMusica PROC USES ecx Param:dword
+    .if reproduzindoMusica == 1
+        invoke PlaySound, OFFSET CAMINHO_MUSICA,NULL,NULL
+    .else
+        invoke PlaySound, NULL, NULL, NULL
+    .endif
+    jmp ThreadProcMusica
+    ret
+ThreadProcMusica ENDP
 
 desenharBloco proc hWin:DWORD, hDC:DWORD, cor:BYTE, posicao:WORD
 
@@ -390,6 +396,8 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
             .endif
             invoke comecarJogo, hWin
             invoke desenharTela, hWin,hdc
+            mov pontuacao, 0
+            mov nivel, 0
             mov edx, pTetromino
             mov cl, (TETROMINO ptr[edx]).tipo
             invoke desenharTetromino, hWin, hdc, pTetromino, cl
@@ -397,9 +405,13 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
             mov esi, pFantasma
             mov cl, (TETROMINO ptr[esi]).tipo
             invoke desenharTetromino, hWin, hdc, pFantasma, cl
+            mov ecx, vetPecas
+            inc ecx
+            mov cl, byte ptr[ecx]
+            invoke desenharTetrominoProx, hWin, hdc, cl
         .else
             mov perdeu, 0
-            invoke PlaySound, OFFSET caminhoMusica,NULL,SND_ASYNC or SND_LOOP
+            invoke PlaySound, OFFSET CAMINHO_MUSICA,NULL,SND_ASYNC or SND_LOOP
         .endif
 
     .endif
@@ -432,6 +444,9 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
         .else
             invoke atribuirTetromino, pTetromino, copiaTetromino
         .endif
+        ;invoke PlaySound, OFFSET CAMINHO_CAINDO,NULL,NULL
+        ;invoke PlaySound, OFFSET CAMINHO_MUSICA,NULL,SND_ASYNC or SND_LOOP
+
     .endif
 
     atualizarVariaveis:
@@ -706,7 +721,7 @@ trabalharComLinhas proc hWin:DWORD, hdc:DWORD, pMapa:DWORD
         invoke SetBkColor,hdc,eax
         invoke DrawText, hdc, ADDR buffer, -1, ADDR retanguloTextoPontuacao, DT_SINGLELINE
         invoke SelectObject,hdc, hfont
-        
+
         pop edx
         pop ecx
         pop ebx

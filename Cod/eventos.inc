@@ -85,7 +85,21 @@ WndProc proc hWin   :DWORD,
 WndProc endp
 
 comecarJogo proc hWin:DWORD
-    invoke PlaySound, OFFSET caminhoMusica,NULL,SND_ASYNC or SND_LOOP
+    invoke PlaySound, OFFSET CAMINHO_MUSICA,NULL,SND_ASYNC or SND_LOOP
+    ;LOCAL op:MCI_OPEN_PARMS
+    ;LOCAL pp:MCI_PLAY_PARMS
+    ;mov op.dwCallback, 0
+    ;mov op.lpstrDeviceType, MCI_ALL_DEVICE_ID
+    ;mov op.lpstrElementName, OFFSET CAMINHO_MUSICA
+    ;mov op.lpstrAlias, 0
+
+    ;invoke mciSendCommandA, NULL, MCI_OPEN,  MCI_OPEN_ELEMENT or MCI_WAIT or MCI_OPEN_TYPE or MCI_OPEN_TYPE_ID, op
+    ; Play command
+    ;mov pp.dwCallback, 0
+    ;mov pp.dwFrom, 0
+    ;invoke mciSendCommandA, op.wDeviceID, MCI_PLAY or MCI_NOTIFY or MCI_FROM, OFFSET pp
+
+
     mov mapa.altura, 26     ; defininmos a altura do mapa
     mov mapa.largura, 16    ; definimos a largura do mapa
     invoke copiarPonteiroMatriz, OFFSET vetMapa, OFFSET mapa

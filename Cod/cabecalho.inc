@@ -20,6 +20,7 @@ include \masm32\include\comctl32.inc
 include \masm32\include\dnsapi.inc
 include \masm32\include\winmm.inc
 
+
 ; include das bibliotecas básicas do windows
 
 includelib \masm32\lib\masm32.lib

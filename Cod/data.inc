@@ -82,6 +82,8 @@ TETROMINO ends
     posx  dd ?
     posy  dd ?
     hButton HWND ?
+    
+	pDevice     dd ?
 
 
 
@@ -167,9 +169,9 @@ TETROMINO ends
     formatacaoNivel     db "Nivel: %d", 0
     formatacaoPontuacao db "Pontuacao: %d", 0
     buffer        db 20 dup(0)
-    caminhoMusica db "tetris_theme.wav", 0
     tema          db 2
     FontName db "script",0
+    reproduzindoMusica db 0
 
 .const
     WM_DESCER equ WM_USER+100h
@@ -199,3 +201,6 @@ TETROMINO ends
                       db "[Espaco] Descer tetromino",10
                       db "[H]      Segurar tetromino",10
                       db "[T]      Mudar o tema do jogo",0
+    
+    CAMINHO_MUSICA db "tetris_theme.wav", 0
+    CAMINHO_CAINDO db "fall.wav", 0
