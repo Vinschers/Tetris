@@ -12,6 +12,8 @@
 desenharTela proc hWin:DWORD, hdc:DWORD
     LOCAL corDeFundo:BYTE
     LOCAL corDeFundoRect:BYTE
+    LOCAL corTxt:BYTE
+    LOCAL hfont:HFONT
     mov corDeFundo, 0
     mov corDeFundoRect, 255
 
@@ -28,6 +30,8 @@ desenharTela proc hWin:DWORD, hdc:DWORD
 
     temaEscuro:
     add corDeFundo, 20
+    add corTxt, 255
+    
 
     mov rect.top, 0
     mov rect.left, 0
@@ -47,8 +51,14 @@ desenharTela proc hWin:DWORD, hdc:DWORD
     invoke CreateSolidBrush, eax
     invoke FillRect, hdc, OFFSET rect, eax
 
-	invoke  lstrlen, ADDR pecaSeguradaTxt
-	invoke  TextOut, hdc, 400, 20, ADDR pecaSeguradaTxt, eax
+    invoke SelectObject, hdc, eax
+    mov    hfont,eax
+    RGB    corTxt,corTxt,corTxt
+    invoke SetTextColor,hdc,eax
+    RGB    corDeFundoRect,corDeFundoRect,corDeFundoRect
+    invoke SetBkColor,hdc,eax
+    invoke TextOut,hdc,400,20,ADDR pecaSeguradaTxt,SIZEOF pecaSeguradaTxt
+    invoke SelectObject,hdc, hfont
 
 	mov rect.top, 50
 	mov rect.bottom, 210
