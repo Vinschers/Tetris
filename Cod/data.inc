@@ -81,9 +81,18 @@ TETROMINO ends
     rectParaApagar RECT <>
     posx  dd ?
     posy  dd ?
-    hButton HWND ?
-    
-	pDevice     dd ?
+    hButton HWND ?	
+
+    ;variaveis para produzir os efeitos sonoros
+    open_dwCallback     dd ?
+    open_wDeviceID     dd ?
+    open_lpstrDeviceType  dd ?
+    open_lpstrElementName  dd ?
+    open_lpstrAlias     dd ?
+    generic_dwCallback   dd ?
+    play_dwCallback     dd ?
+    play_dwFrom       dd ?
+    play_dwTo        dd ?
 
 
 
@@ -97,26 +106,30 @@ TETROMINO ends
     perdeuTxt       db "Perdeu!", 10, "Deseja jogar novamente?",0
     temaTxt         db "Mudar o tema? O jogo vai reiniciar",0
 
-    CommandLine     dd 0  ; parametros passados pela linha de comando (ponteiro)
-    hWnd            dd 0  ; Handle principal do programa no windows
-    hInstance       dd 0  ; instancia do programa
-    hHeap           dd 0
-    hbmp            dd 0 ; handler 
-    paintParam      db 0
-    perdeu          db 0
-    pecaGuardada    db 7 
-    jaGuardou       db 0 ; variavel de controle 
-    nivel           db 0,0 ;
-    linhas          db 0 ;
-    linhasAux       db 0
-    pontuacao       dd 0,0 ;
-    posAtual        dd 500
-    telaDesenhada   db 0
-    desenhandoTetromino  db 0
+    CommandLine         dd 0  ; parametros passados pela linha de comando (ponteiro)
+    hWnd                dd 0  ; Handle principal do programa no windows
+    hInstance           dd 0  ; instancia do programa
+    hHeap               dd 0
+    hbmp                dd 0 ; handler 
+    paintParam          db 0
+    perdeu              db 0
+    pecaGuardada        db 7 
+    jaGuardou           db 0 ; variavel de controle 
+    nivel               db 0,0 ;
+    linhas              db 0 ;
+    linhasAux           db 0
+    pontuacao           dd 0,0 ;
+    posAtual            dd 500
+    telaDesenhada       db 0
+    desenhandoTetromino db 0
 
+
+    ;variaveis para debbugar o programa no desenvolvimento
     txt             dd 97,0
     txtb            db 0,0
     txtw            word 0,0
+
+    
     mapa            MATRIZ <>
     ;todos 9 menos o ultimo (16)
     pecas               db  1,0,0,1,1,1,0,0,0 ;azul
@@ -157,33 +170,34 @@ TETROMINO ends
     bloco           TETROMINO <>
     fantasma        TETROMINO <>
 
-    ThreadDescer  dd 0
-	ExitCode 	  dd 0
-	hThread 	  dd 0
-	hEventStart   dd 0
-    hBmp          dd 0
-    velocidade    dd 500
-    vetorPecas    db 0,1,2,3,4,5,6
-    pecaAtual     db 0
-    expoente      dd 0
+    ThreadDescer        dd 0
+	ExitCode 	        dd 0
+	hThread 	        dd 0
+	hEventStart         dd 0
+    hBmp                dd 0
+    velocidade          dd 500
+    vetorPecas          db 0,1,2,3,4,5,6
+    pecaAtual           db 0
     formatacaoNivel     db "Nivel: %d", 0
     formatacaoPontuacao db "Pontuacao: %d", 0
-    buffer        db 20 dup(0)
-    tema          db 2
-    FontName db "script",0
-    reproduzindoMusica db 0
+    buffer              db 20 dup(0)
+    tema                db 2
+    FontName            db "script",0
 
 .const
-    WM_DESCER equ WM_USER+100h
-    AZUL     db 0
-    LARANJA  db 1
-    AMARELO  db 2
-    VERDE    db 3
-    ROXO     db 4
-    VERMELHO db 5
-    CIANO    db 6
-    NADA     db 7
-    GHOST    db 8
+    WM_DESCER         equ WM_USER+100h
+    ;constantes que definem a cor das peças
+    AZUL              db 0
+    LARANJA           db 1
+    AMARELO           db 2
+    VERDE             db 3
+    ROXO              db 4
+    VERMELHO          db 5
+    CIANO             db 6
+    NADA              db 7
+    GHOST             db 8
+
+    ;constantes para saber qual parte do paint deverá ser feito
     PP_DESENHAR       db 0
     PP_DESCER         db 1
     PP_ROTACIONAR     db 2
@@ -192,7 +206,8 @@ TETROMINO ends
     PP_REFAZER        db 5
     PP_CAIR_TUDO      db 6
     PP_MUDAR_TEMA     db 7
-    BUTTON_ID equ 100
+
+    BUTTON_ID         equ 100
     EXPLICACAO_TITULO db "CONTROLES",0
     EXPLICACAO_TEXTO  db "-->      Mover para a direita",10
                       db "<--      Mover para a esquerda",10
@@ -202,5 +217,8 @@ TETROMINO ends
                       db "[H]      Segurar tetromino",10
                       db "[T]      Mudar o tema do jogo",0
     
-    CAMINHO_MUSICA db "tetris_theme.wav", 0
-    CAMINHO_CAINDO db "fall.wav", 0
+
+    ;caminhos dos efeitos sonoros e música do jogo
+    CAMINHO_MUSICA    db "tetris_theme.wav", 0
+    CAMINHO_LINHA     db "clear.wav", 0
+    CAMINHO_GAME      db "gameover.wav", 0

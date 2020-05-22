@@ -9,7 +9,8 @@ WndProc proc hWin   :DWORD,
     invoke GetProcessHeap
     mov hHeap, eax
     .if uMsg == WM_CREATE
-        invoke MessageBox, hWin, addr EXPLICACAO_TEXTO, addr EXPLICACAO_TITULO, MB_OK
+        invoke MessageBox, hWin, addr EXPLICACAO_TEXTO, addr EXPLICACAO_TITULO, MB_OK ; logo no inicio do jogo uma caixa com informações sobre as teclas irá aparecer
+        
         invoke montarTetromino, OFFSET bloco, CIANO
         invoke montarTetromino, OFFSET fantasma, GHOST
 
@@ -19,7 +20,7 @@ WndProc proc hWin   :DWORD,
         invoke CreateThread, NULL, NULL, ecx, ADDR mapa, NORMAL_PRIORITY_CLASS, ADDR ThreadDescer
         mov hThread, eax
         
-        invoke comecarJogo, hWin
+        invoke comecarJogo, hWin        ;aqui o jogo se inicia
 
     .elseif uMsg == WM_COMMAND
         mov eax, wParam
@@ -28,28 +29,28 @@ WndProc proc hWin   :DWORD,
         .endif
     
     .elseif uMsg == WM_KEYDOWN
-        .if wParam == 40
+        .if wParam == 40        ; se a tecla apretada for seta para baixo, enquanto está estiver apertada a velocidade da queda muda
             mov velocidade, 50
-        .elseif wParam == 32
+        .elseif wParam == 32    ; caso seja o espaço a peça cairá completamente
             pintar PP_CAIR_TUDO
         .endif
 
     .elseif uMsg == WM_KEYUP
-        .if wParam == VK_UP
+        .if wParam == VK_UP     ; seta para cima significa girar a peça no sentido horário
             pintar PP_ROTACIONAR
-        .elseif wParam == 39
+        .elseif wParam == 39    ; a peça anda para a direita quando a seta da direita é apertada
             pintar PP_MOVER_DIREITA
-        .elseif wParam == 37
+        .elseif wParam == 37    ; a peça anda para a esquerda quando a seta da esquerda é apertada
             pintar PP_MOVER_ESQUERDA
-        .elseif wParam == 40
+        .elseif wParam == 40    ; caso a seta para baixo seja solta a velocidade volta ao normal
             mov velocidade, 500
-        .elseif wParam == 72
+        .elseif wParam == 72    ; caso o H seja pressionado a peça será trocada pela prox ou se já tiver outra guardada será trocada por essa
             pintar PP_REFAZER
-        .elseif wParam == 84
+        .elseif wParam == 84    ; caso o T seja pressionado o tema do tetris será alterado
             pintar PP_MUDAR_TEMA
         .endif
 
-    .elseif uMsg == WM_PAINT
+    .elseif uMsg == WM_PAINT ;  LOLO COMENTE
         cmp desenhandoTetromino, 1
         je fim
         cmp perdeu, 1
@@ -85,20 +86,7 @@ WndProc proc hWin   :DWORD,
 WndProc endp
 
 comecarJogo proc hWin:DWORD
-    invoke PlaySound, OFFSET CAMINHO_MUSICA,NULL,SND_ASYNC or SND_LOOP
-    ;LOCAL op:MCI_OPEN_PARMS
-    ;LOCAL pp:MCI_PLAY_PARMS
-    ;mov op.dwCallback, 0
-    ;mov op.lpstrDeviceType, MCI_ALL_DEVICE_ID
-    ;mov op.lpstrElementName, OFFSET CAMINHO_MUSICA
-    ;mov op.lpstrAlias, 0
-
-    ;invoke mciSendCommandA, NULL, MCI_OPEN,  MCI_OPEN_ELEMENT or MCI_WAIT or MCI_OPEN_TYPE or MCI_OPEN_TYPE_ID, op
-    ; Play command
-    ;mov pp.dwCallback, 0
-    ;mov pp.dwFrom, 0
-    ;invoke mciSendCommandA, op.wDeviceID, MCI_PLAY or MCI_NOTIFY or MCI_FROM, OFFSET pp
-
+    invoke PlaySound, OFFSET CAMINHO_MUSICA,NULL,SND_ASYNC or SND_LOOP ; a música de fundo começa a tocar
 
     mov mapa.altura, 26     ; defininmos a altura do mapa
     mov mapa.largura, 16    ; definimos a largura do mapa

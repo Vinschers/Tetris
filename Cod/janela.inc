@@ -112,6 +112,8 @@ TopXY proc wDim:DWORD, sDim:DWORD
 TopXY endp
 
 
+; SALIM SUA PARTE
+
 randomizarVetor proc vet:DWORD
     mov esi, vet
     xor ecx, ecx   

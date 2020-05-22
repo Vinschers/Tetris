@@ -14,20 +14,22 @@ desenharTela proc hWin:DWORD, hdc:DWORD
     LOCAL corDeFundoRect:BYTE
     LOCAL corTxt:BYTE
     LOCAL hfont:HFONT
-    mov corDeFundo, 0
-    mov corDeFundoRect, 255
-    mov corTxt, 20
 
-    .if tema == 0
+
+    mov corDeFundo, 0       ; cor de fundo da tela
+    mov corDeFundoRect, 255 ; cor de fundo dos retangulos de peças
+    mov corTxt, 20          ; cor de fundo dos textos
+
+    .if tema == 0               ; se o tema for claro
         mov corDeFundoRect, 255
         mov corDeFundo, 240
-    .else
+    .else                       ; se o tema for escuro
         mov corDeFundoRect, 33
         mov corDeFundo, 20
         mov corTxt, 255
     .endif
     
-
+    ; mapa
     mov rect.top, 0
     mov rect.left, 0
     mov rect.bottom, 700
@@ -36,7 +38,7 @@ desenharTela proc hWin:DWORD, hdc:DWORD
     invoke CreateSolidBrush, eax
     invoke FillRect, hdc, OFFSET rect, eax
 
-    ;configuração das posições
+    ; peça segurada retangulo
 	mov rect.top, 10
 	mov rect.bottom, 652
 	mov rect.left, 10
@@ -46,6 +48,7 @@ desenharTela proc hWin:DWORD, hdc:DWORD
     invoke CreateSolidBrush, eax
     invoke FillRect, hdc, OFFSET rect, eax
 
+    ; peça segurada texto, nesse trecho configura a cor da fonte e do background para todos os textos da janela
     invoke SelectObject, hdc, eax
     mov    hfont,eax
     RGB    corTxt,corTxt,corTxt
@@ -55,6 +58,8 @@ desenharTela proc hWin:DWORD, hdc:DWORD
     invoke TextOut,hdc,400,20,ADDR pecaSeguradaTxt,SIZEOF pecaSeguradaTxt
     invoke SelectObject,hdc, hfont
 
+
+    ; proxima peça retangulo
 	mov rect.top, 50
 	mov rect.bottom, 210
 	mov rect.left, 390
@@ -64,17 +69,11 @@ desenharTela proc hWin:DWORD, hdc:DWORD
     invoke CreateSolidBrush, eax
     invoke FillRect, hdc, OFFSET rect, eax
 
+    ; proxima peça texto
 	invoke  lstrlen, ADDR proxPecaTxt
 	invoke  TextOut, hdc, 400, 250, ADDR proxPecaTxt, eax
 
-	mov rect.top, 280
-	mov rect.bottom, 450
-	mov rect.left, 390
-	mov rect.right, 582
-	RGB corDeFundoRect, corDeFundoRect, corDeFundoRect
-    invoke CreateSolidBrush, eax
-    invoke FillRect, hdc, OFFSET rect, eax
-
+    ; texto do nível
     xor eax, eax
     mov al, nivel
 
@@ -89,6 +88,7 @@ desenharTela proc hWin:DWORD, hdc:DWORD
     mov rect.bottom, 500
     invoke DrawText, hdc, ADDR buffer, -1, ADDR rect, DT_SINGLELINE
 
+    ; texto da pontuação
     mov eax, pontuacao
 
 
@@ -106,6 +106,7 @@ desenharTela proc hWin:DWORD, hdc:DWORD
 desenharTela endp
 
 ;P + Tcol + Tlin*16
+;SCHERER
 desenharTetromino proc hWin:DWORD, hDC:DWORD, pTetromino:DWORD, cor:BYTE
     mov edx, pTetromino
     mov edx, (TETROMINO ptr[edx]).mat
@@ -119,7 +120,7 @@ desenharTetromino proc hWin:DWORD, hDC:DWORD, pTetromino:DWORD, cor:BYTE
     mov edx, pTetromino
     mov edx, (TETROMINO ptr[edx]).mat
     mov edx, (MATRIZ ptr[edx]).ponteiro
-    ;limpas os registradores
+    ;limpa os registradores
     xor ebx, ebx
     xor ecx, ecx
 
@@ -180,6 +181,7 @@ desenharTetromino proc hWin:DWORD, hDC:DWORD, pTetromino:DWORD, cor:BYTE
     ret
 desenharTetromino endp
 
+;LOLO
 ThreadProcDescer PROC USES ecx Param:DWORD
     invoke WaitForSingleObject,hEventStart, velocidade
         .IF eax == WAIT_TIMEOUT
@@ -190,18 +192,7 @@ ThreadProcDescer PROC USES ecx Param:DWORD
             jmp ThreadProcDescer
         .endif
     ret
-ThreadProcDescer ENDP
-
-
-ThreadProcMusica PROC USES ecx Param:dword
-    .if reproduzindoMusica == 1
-        invoke PlaySound, OFFSET CAMINHO_MUSICA,NULL,NULL
-    .else
-        invoke PlaySound, NULL, NULL, NULL
-    .endif
-    jmp ThreadProcMusica
-    ret
-ThreadProcMusica ENDP
+ThreadProcDescer endp
 
 desenharBloco proc hWin:DWORD, hDC:DWORD, cor:BYTE, posicao:WORD
 
@@ -241,7 +232,7 @@ desenharBloco proc hWin:DWORD, hDC:DWORD, cor:BYTE, posicao:WORD
 desenharBloco endp
 
 apagarTetromino proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD
-	invoke desenharTetromino, hWin, hdc, pTetromino, NADA
+	invoke desenharTetromino, hWin, hdc, pTetromino, NADA   ; chama desenharTetromino passando como tipo de peça NADA, assim apenas apaga da parte visual o tetromino
     ret
 apagarTetromino endp
 
@@ -251,21 +242,24 @@ getPixel proc pos:WORD
     ; limpa registradores
     xor edx, edx
     xor eax, eax
-    mov ax, pos
-    mov ecx, 16
-    div ecx
-    sub eax, 3
+
+    mov ax, pos ; posição é onde do vetor o dado está, mas precisamos saber onde em na matriz visual o bloco deve estar, para isso extraimos a linha e a coluna da posicao
+    mov ecx, 16 ; 16 colunas
+    div ecx     ; divide posição pelo número de colunas, resto é o número de linhas
+    sub eax, 3  ; como a matriz lógica tem 3 linhas e 3 colunas a mais sempre se diminui 3 das duas direções para termos os valores na matriz visual
     sub edx, 3
 
-    shl eax, 5
-    shl edx, 5
-    add eax, 11
+    shl eax, 5  ; são 32 pixels por bloco, e como usamos o método para ter a posição visual é necessário multiplicar o número de linhas e de colunas
+    shl edx, 5  ; por 32
+    add eax, 11 ; o mapa começa na posição x = 11 e y = 11, então esses valores são adicionados a linha e coluna
     add edx, 11
-    shl eax, 16
-    mov ax, dx
+    shl eax, 16 ; o valor da coluna vai 16 bits para a esquerda para colocar a linha nas outras 16
+    mov ax, dx  ; o registrador eax fica com a linha e a coluna
     ret
 getPixel endp
 
+
+; FALTA COMENTAR
 paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD, vetPecas:DWORD, atual:DWORD
 	LOCAL copiaTetromino:DWORD
 	LOCAL copiaMatriz:DWORD
@@ -394,10 +388,10 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
             .else
                 mov tema, 0
             .endif
-            invoke comecarJogo, hWin
-            invoke desenharTela, hWin,hdc
             mov pontuacao, 0
             mov nivel, 0
+            invoke comecarJogo, hWin
+            invoke desenharTela, hWin,hdc
             mov edx, pTetromino
             mov cl, (TETROMINO ptr[edx]).tipo
             invoke desenharTetromino, hWin, hdc, pTetromino, cl
@@ -444,8 +438,6 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
         .else
             invoke atribuirTetromino, pTetromino, copiaTetromino
         .endif
-        ;invoke PlaySound, OFFSET CAMINHO_CAINDO,NULL,NULL
-        ;invoke PlaySound, OFFSET CAMINHO_MUSICA,NULL,SND_ASYNC or SND_LOOP
 
     .endif
 
@@ -469,6 +461,12 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
     mov al, paintParam
     .if colidiu == 1
         .if al == PP_DESCER || al == PP_CAIR_TUDO
+
+            ;mov   open_lpstrDeviceType, 0h         ;fill MCI_OPEN_PARMS structure
+            ;mov   open_lpstrElementName,OFFSET CAMINHO_CAINDO
+            ;invoke mciSendCommand,0,MCI_OPEN, MCI_OPEN_ELEMENT ,offset open_dwCallback 
+            ;invoke mciSendCommand,open_wDeviceID,MCI_PLAY,MCI_FROM or MCI_NOTIFY,offset play_dwCallback
+
             mov jaGuardou, 0
         	mov esi, pTetromino
         	mov ecx, (TETROMINO ptr[esi]).posicao
@@ -567,6 +565,7 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
 	ret
 paint endp
 
+; N SEI
 esperarDesenho proc
     comparar:
     cmp desenhandoTetromino, 1
@@ -574,13 +573,20 @@ esperarDesenho proc
     ret
 esperarDesenho endp
 
+
+
 perder proc hWin:DWORD, hdc:DWORD
-    invoke PlaySound,NULL,NULL,SND_ASYNC
-    invoke MessageBox,hWin, addr perdeuTxt, NULL, MB_YESNO
-    mov pontuacao, 0
+    invoke PlaySound,NULL,NULL,SND_ASYNC    ; para de tocar a música de fundo
+    mov   open_lpstrDeviceType, 0h         
+    mov   open_lpstrElementName,OFFSET CAMINHO_GAME
+    invoke mciSendCommand,0,MCI_OPEN, MCI_OPEN_ELEMENT,offset open_dwCallback 
+    invoke mciSendCommand,open_wDeviceID,MCI_PLAY,MCI_FROM or MCI_NOTIFY,offset play_dwCallback ; inicia a tocar a música de gameover
+    invoke MessageBox,hWin, addr perdeuTxt, NULL, MB_YESNO  ; avisa que perdeu e se deseja continuar
+    invoke mciSendCommandA,open_wDeviceID,MCI_STOP,MCI_FROM or MCI_NOTIFY,offset play_dwCallback
+    mov pontuacao, 0    ; pontuacao e nivel recebem 0
     mov nivel, 0
-    .if eax == IDYES
-        invoke comecarJogo, hWin
+    .if eax == IDYES    ; caso queira continuar o jogo é reiniciado
+        invoke comecarJogo, hWin    
     .else
         invoke ExitProcess,0
     .endif
@@ -588,10 +594,12 @@ perder proc hWin:DWORD, hdc:DWORD
 perder endp
 
 trabalharComLinhas proc hWin:DWORD, hdc:DWORD, pMapa:DWORD
+
     LOCAL retanguloTextoPontuacao:RECT
     LOCAL corTxt:BYTE
     LOCAL corDeFundoRect:BYTE
     LOCAL hfont:HFONT
+
     mov corDeFundoRect, 255
     mov corTxt, 0
 
@@ -601,14 +609,14 @@ trabalharComLinhas proc hWin:DWORD, hdc:DWORD, pMapa:DWORD
     mov corDeFundoRect, 33
     mov corTxt, 255
     temaClaro:
-        invoke acharLinhas, hWin ,pMapa
+        invoke acharLinhas, hWin ,pMapa ; procura linhas completas
         mov esi, pMapa
         mov esi, (MATRIZ ptr[esi]).ponteiro
         xor ecx, ecx; limpa registrador
         forAchados:
             cmp ecx, 8
             je fimAchados
-            cmp word ptr[eax], 0
+            cmp word ptr[eax], 0    ; caso a posição do vetor de linhas achadas for 0 acabou as linhas encontradas
             je fimAchados
 
             push esi
@@ -616,14 +624,14 @@ trabalharComLinhas proc hWin:DWORD, hdc:DWORD, pMapa:DWORD
             push eax
 
             mov dx, word ptr[eax]
-            invoke limparLinha, hWin, hdc, pMapa, dx
+            invoke limparLinha, hWin, hdc, pMapa, dx    ; limpa a linha e a tira da matriz visual e lógica
             inc linhasAux 
 
             pop eax
             push eax
 
             mov dx, word ptr[eax]
-            invoke descerMatriz, hWin, hdc, pMapa, dx
+            invoke descerMatriz, hWin, hdc, pMapa, dx   ; desce toda a matriz visual e lógica que sobrou
 
             pop eax
             pop ecx
@@ -635,6 +643,7 @@ trabalharComLinhas proc hWin:DWORD, hdc:DWORD, pMapa:DWORD
 
     fimAchados:
         xor ecx, ecx; limpa registrador
+        ; aumenta a pontuação de acordo com o número de linhas e o nível do usuário (foi usado um sistema de pontuação do tetris nintendo)
         mov cl, linhasAux
         cmp cl, 0
         je retornar
@@ -660,6 +669,7 @@ trabalharComLinhas proc hWin:DWORD, hdc:DWORD, pMapa:DWORD
         push ecx
         push edx
 
+        ;atualiza a pontuação na tela
         mov eax, pontuacao
 
 
@@ -689,16 +699,21 @@ trabalharComLinhas proc hWin:DWORD, hdc:DWORD, pMapa:DWORD
         add linhas, cl
 
         xor ecx, ecx ; limpa registrador
+        ; caso tiver completado 10 linhas feitas naquele nível o usuário sobre de nível
         mov cl, linhas
         cmp ecx, 10
         jl retornar
 
         inc bl
         mov nivel, bl
+
         push eax
         push ebx
         push ecx
         push edx
+
+        ; atualiza o nível na tela
+
         xor eax, eax
         mov al, nivel
 
@@ -728,7 +743,7 @@ trabalharComLinhas proc hWin:DWORD, hdc:DWORD, pMapa:DWORD
         pop eax
 
         mov linhas, 0
-
+        ; aumenta a velocidade a cada nível subido
         mov edx, velocidade
         sub edx, 60
         mov velocidade, edx
@@ -737,13 +752,20 @@ trabalharComLinhas proc hWin:DWORD, hdc:DWORD, pMapa:DWORD
         ret
 trabalharComLinhas endp
 
-limparLinha proc hWin:DWORD, hdc:DWORD, pMapa:DWORD, indice:WORD 
-    xor edx, edx; limpa registrador
-    add dx, indice
 
+;PAREI AQUI
+limparLinha proc hWin:DWORD, hdc:DWORD, pMapa:DWORD, indice:WORD 
+
+    mov   open_lpstrDeviceType, 0h
+    mov   open_lpstrElementName, OFFSET CAMINHO_LINHA
+    invoke mciSendCommand,0,MCI_OPEN, MCI_OPEN_ELEMENT,offset open_dwCallback 
+    invoke mciSendCommand,open_wDeviceID,MCI_PLAY,MCI_FROM or MCI_NOTIFY,offset play_dwCallback
+    invoke mciSendCommand,0,MCI_CLOSE,MCI_FROM or MCI_NOTIFY,offset play_dwCallback ; efeito de linha completa
+
+
+    add dx, indice
     mov ecx, edx
     add ecx, 10
-
     forLimpar:
         cmp edx, ecx
         je fimForLimpar
