@@ -151,7 +151,7 @@ desenharTetromino proc hWin:DWORD, hDC:DWORD, pTetromino:DWORD, cor:BYTE
 
     mov esi, edx
 
-    mov ebx, 16
+    mov ebx, 16 ; multiplica a linha pelo número de colunas do mapa
     mul ebx
 
     mov edx, esi
@@ -259,7 +259,7 @@ getPixel proc pos:WORD
 getPixel endp
 
 
-; FALTA COMENTAR
+
 paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD, vetPecas:DWORD, atual:DWORD
 	LOCAL copiaTetromino:DWORD
 	LOCAL copiaMatriz:DWORD
@@ -282,11 +282,12 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
     
     invoke colocarMatrizLogica, pTetromino, pMapa, 0
 
+    ; variaveis necessárias são guardadas em registradores já que quando o if é efetuado os valores das variaveis se perdem
     mov al, paintParam
     mov dl, pecaGuardada
     mov cl, jaGuardou
 
-    .if al == PP_DESENHAR
+    .if al == PP_DESENHAR           ; N COMENTEI
         invoke desenharTela, hWin ,hdc
         mov cl, NADA
         add cl, tema
@@ -300,15 +301,15 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
     .elseif al == PP_DESCER
         mov cl, NADA
         add cl, tema
-        invoke desenharTetromino, hWin, hdc, pTetromino, cl
+        invoke desenharTetromino, hWin, hdc, pTetromino, cl ; o tetromino é apagado da posição atual
         mov esi, pTetromino
-        add (TETROMINO ptr[esi]).posicao, 16
+        add (TETROMINO ptr[esi]).posicao, 16    ; moviementa a peça 1 linha para baixo
 
     .elseif al == PP_ROTACIONAR
-        mov cl, NADA
+        mov cl, NADA    
         add cl, tema
-        invoke desenharTetromino, hWin, hdc, pTetromino, cl
-        mov esi, pTetromino
+        invoke desenharTetromino, hWin, hdc, pTetromino, cl ; o tetromino é apagado da posição atual
+        mov esi, pTetromino                                 ; SCHERER
         invoke rotacionarMatriz, (TETROMINO ptr[esi]).mat
         mov esi, pTetromino
         add (TETROMINO ptr[esi]).rotacao, 1
@@ -321,23 +322,25 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
     .elseif al == PP_MOVER_DIREITA
         mov cl, NADA
         add cl, tema
-        invoke desenharTetromino, hWin, hdc, pTetromino, cl
+        invoke desenharTetromino, hWin, hdc, pTetromino, cl ; o tetromino é apagado da posição atual
         mov esi, pTetromino
-        inc (TETROMINO ptr[esi]).posicao
+        inc (TETROMINO ptr[esi]).posicao                    ; é incrementado um a sua posição(movimenta uma posição a direita)
 
     .elseif al == PP_MOVER_ESQUERDA
         mov cl, NADA
         add cl, tema
-        invoke desenharTetromino, hWin, hdc, pTetromino, cl
+        invoke desenharTetromino, hWin, hdc, pTetromino, cl ; o tetromino é apagado da posição atual
         mov esi, pTetromino
-        dec (TETROMINO ptr[esi]).posicao
+        dec (TETROMINO ptr[esi]).posicao                    ; é retirado um a sua posição(movimenta uma posição para a esquerda)
 
-    .elseif al == PP_REFAZER
+    .elseif al == PP_REFAZER                                ; caso necessite trocar uma peça pela próxima ou por uma já guardada
         cmp cl, 0
         jne fimRefazer 
         
         push ecx
         push edx
+
+        ; forma o retangulo de peça guardada novamente
         mov rect.top, 50
 	    mov rect.bottom, 210
 	    mov rect.left, 390
@@ -352,14 +355,14 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
         push edx
         mov cl, NADA
         add cl, tema
-        invoke desenharTetromino, hWin, hdc, pTetromino, cl
+        invoke desenharTetromino, hWin, hdc, pTetromino, cl ; apaga o tetromino da posição atual
         mov cl, NADA
         add cl, tema
-        invoke desenharTetromino, hWin, hdc, pFantasma, cl
+        invoke desenharTetromino, hWin, hdc, pFantasma, cl ; apaga o fantasma da peça atual
         mov esi, pTetromino
         mov bl, (TETROMINO ptr[esi]).tipo ; bl recebeu o tipo da peça que será guardada 
         mov pecaGuardada, bl
-        invoke desenharTetrominoGuardado, hWin, hdc, pTetromino, bl
+        invoke desenharTetrominoGuardado, hWin, hdc, pTetromino, bl ; desenha a peça guardada
         mov esi, pTetromino
         pop edx
         cmp dl, 7
@@ -367,31 +370,33 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
         jmp proximaPeca
 
         jaTemGuardada:
-            invoke refazerTetrominoTipo, pTetromino, dl
+            invoke refazerTetrominoTipo, pTetromino, dl    ; muda o tipo da peça do mapa
         fimRefazer:
+
     .elseif al == PP_CAIR_TUDO
         mov cl, NADA
         add cl, tema
-        invoke desenharTetromino, hWin, hdc, pTetromino, cl
-        invoke descerTudo, pTetromino, pMapa
-        mov colidiu, 1
+        invoke desenharTetromino, hWin, hdc, pTetromino, cl ; apaga o tetromino da posição atual
+        invoke descerTudo, pTetromino, pMapa                ; N SEI
+        mov colidiu, 1                                      ; a peça chegou ao fim então ela colidiu
         jmp atualizarVariaveis
 
     .elseif al == PP_MUDAR_TEMA
-        mov perdeu, 1
+        mov perdeu, 1                                       ; se for mudar o tema a pessoa perde a música para e o jogo reinicia
         invoke PlaySound,NULL,NULL,SND_ASYNC
         invoke MessageBox,hWin, addr temaTxt, NULL, MB_YESNO
 
         .if eax == IDYES
-            .if tema == 0
+            .if tema == 0   ; troca o tema atual pelo outro tema 
                 mov tema, 2
             .else
                 mov tema, 0
             .endif
-            mov pontuacao, 0
+            mov pontuacao, 0        ; zera a pontuacao e o nivel e recomeça o jogo
             mov nivel, 0
             invoke comecarJogo, hWin
             invoke desenharTela, hWin,hdc
+
             mov edx, pTetromino
             mov cl, (TETROMINO ptr[edx]).tipo
             invoke desenharTetromino, hWin, hdc, pTetromino, cl
@@ -404,7 +409,7 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
             mov cl, byte ptr[ecx]
             invoke desenharTetrominoProx, hWin, hdc, cl
         .else
-            mov perdeu, 0
+            mov perdeu, 0           ; senão quiser alterar o tema a pessoa volta a jogar
             invoke PlaySound, OFFSET CAMINHO_MUSICA,NULL,SND_ASYNC or SND_LOOP
         .endif
 
@@ -461,12 +466,6 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
     mov al, paintParam
     .if colidiu == 1
         .if al == PP_DESCER || al == PP_CAIR_TUDO
-
-            ;mov   open_lpstrDeviceType, 0h         ;fill MCI_OPEN_PARMS structure
-            ;mov   open_lpstrElementName,OFFSET CAMINHO_CAINDO
-            ;invoke mciSendCommand,0,MCI_OPEN, MCI_OPEN_ELEMENT ,offset open_dwCallback 
-            ;invoke mciSendCommand,open_wDeviceID,MCI_PLAY,MCI_FROM or MCI_NOTIFY,offset play_dwCallback
-
             mov jaGuardou, 0
         	mov esi, pTetromino
         	mov ecx, (TETROMINO ptr[esi]).posicao
@@ -490,7 +489,7 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
                 mov cl, byte ptr [ebx]
                 invoke refazerTetrominoVetor, pTetromino, vetPecas, cl
                 invoke atualizarFantasma, pFantasma, pTetromino, pMapa
-                pontuacaoPecaCaida:
+                pontuacaoPecaCaida: ; a cada peça caída a pontuação aumenta 100*nivel do jogador
                     push eax
                     push ebx
                     push ecx
@@ -510,6 +509,8 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
 
                     mov eax, pontuacao
 
+
+                    ; exibe a pontuação atualizada
                     invoke wsprintf, OFFSET buffer, OFFSET formatacaoPontuacao, eax
                     invoke GetClientRect, hWin, ADDR rect
                     
@@ -572,8 +573,6 @@ esperarDesenho proc
     je comparar
     ret
 esperarDesenho endp
-
-
 
 perder proc hWin:DWORD, hdc:DWORD
     invoke PlaySound,NULL,NULL,SND_ASYNC    ; para de tocar a música de fundo
@@ -753,7 +752,7 @@ trabalharComLinhas proc hWin:DWORD, hdc:DWORD, pMapa:DWORD
 trabalharComLinhas endp
 
 
-;PAREI AQUI
+
 limparLinha proc hWin:DWORD, hdc:DWORD, pMapa:DWORD, indice:WORD 
 
     mov   open_lpstrDeviceType, 0h
@@ -767,20 +766,20 @@ limparLinha proc hWin:DWORD, hdc:DWORD, pMapa:DWORD, indice:WORD
     mov ecx, edx
     add ecx, 10
     forLimpar:
-        cmp edx, ecx
+        cmp edx, ecx    ; caso já tenha apagado 10 blocos (equivalente a uma linha)
         je fimForLimpar
 
         push ecx
         push edx
 
-        mov ecx, pMapa
+        mov ecx, pMapa                      ; apaga o dado da posição do bloco na matriz lógica
         mov ecx, (MATRIZ ptr[ecx]).ponteiro
-        mov byte ptr[edx + ecx], 0
+        mov byte ptr[edx + ecx], 0  
 
-        mov cl, NADA
+        mov cl, NADA                        ; apaga o bloco da matriz visual
         add cl, tema
         invoke desenharBloco, hWin, hdc, cl, dx
-        invoke Sleep, 75
+        invoke Sleep, 75                    ; espera 75 milisegundos para apagar o prox, cria o efeito
 
         pop edx
         pop ecx
@@ -791,8 +790,8 @@ limparLinha proc hWin:DWORD, hdc:DWORD, pMapa:DWORD, indice:WORD
         ret
 limparLinha endp
 
+;ESQUECI
 descerMatriz proc hWin:DWORD, hdc:DWORD, pMapa:DWORD, indice:WORD
-   
     mov edx, pMapa
     mov esi, (MATRIZ ptr[edx]).ponteiro
     xor ecx, ecx; limpa registrador
@@ -807,10 +806,8 @@ descerMatriz proc hWin:DWORD, hdc:DWORD, pMapa:DWORD, indice:WORD
         mov ebx, ecx
         add ebx, 10
         forPercorreLinha:
-            ;invoke strMatriz, hWin, pMapa 
             cmp ecx, ebx
             je fimForPercorreLinha
-            ;sub ecx, 16
             mov dl, byte ptr[esi + ecx]
             add ecx, 16
             mov byte ptr[esi + ecx], dl
@@ -850,8 +847,9 @@ descerMatriz proc hWin:DWORD, hdc:DWORD, pMapa:DWORD, indice:WORD
 
 descerMatriz endp
 
+;ESQUECI PT 2   
 acharLinhas proc hWin:DWORD, pMapa:DWORD
-    invoke GlobalAlloc, 0, 8
+    invoke GlobalAlloc, 0, 8    ; cria um vetor com 4 posições 
     push eax
     mov dword ptr[eax], 0
     add eax, 4
@@ -901,11 +899,15 @@ acharLinhas endp
 ;P + Tcol + Tlin*6
 ;procedimento que desenha na matriz o tetromino que foi guardado pelo usuário
 desenharTetrominoGuardado proc hWin:DWORD, hDC:DWORD, pTetromino:DWORD, cor:BYTE
+
     mov edx, pTetromino
     mov edx, (TETROMINO ptr[edx]).mat
+
+
     ;limpa registradores
     xor eax, eax
     xor ecx, ecx
+
     mov al, (MATRIZ ptr[edx]).largura
     mov cl, (MATRIZ ptr[edx]).altura
     mul ecx ; eax tem o valor de posições da matriz do tetronimo, é usado para percorrer
@@ -913,60 +915,61 @@ desenharTetrominoGuardado proc hWin:DWORD, hDC:DWORD, pTetromino:DWORD, cor:BYTE
     mov edx, pTetromino
     mov edx, (TETROMINO ptr[edx]).mat
     mov edx, (MATRIZ ptr[edx]).ponteiro
+
     ;limpa registradores
     xor ebx, ebx
     xor ecx, ecx
 
     forT:
-    cmp ebx, eax
-    je fim
+        cmp ebx, eax    ; enquanto o contador(ebx) não tiver percorrido todo o vetor do tetromino
+        je fim
 
-    mov cl, byte ptr[edx]
-    cmp cl, 0
-    je cont
+        mov cl, byte ptr[edx]   ; verifica se na posição atual o valor é 0, se for não precisa desenhar nada
+        cmp cl, 0
+        je cont
 
-    push eax
-    push ebx
-    push ecx
-    push edx
+        push eax
+        push ebx
+        push ecx
+        push edx
 
-    xor eax, eax; limpa registrador
-    mov al, bl ;al tem o contador
-    xor ebx, ebx; limpa registrador
+        xor eax, eax    ; limpa registrador
+        mov al, bl      ; al tem o contador
+        xor ebx, ebx    ; limpa registrador
 
-    mov edx, pTetromino
-    mov edx, (TETROMINO ptr[edx]).mat
-    mov bl, (MATRIZ ptr[edx]).largura  ;bl tem a largura
+        mov edx, pTetromino
+        mov edx, (TETROMINO ptr[edx]).mat
+        mov bl, (MATRIZ ptr[edx]).largura  ; bl tem a largura
 
-    xor edx, edx; limpa registrador
+        xor edx, edx ; limpa registrador
 
-    div ebx   ;al tem a linha
+        div ebx   ; al tem a linha e edx tem a coluna
 
-    mov esi, edx
+        mov esi, edx    ; esi recebe a coluna
 
-    mov ebx, 6
-    mul ebx
+        mov ebx, 6      ; multiplica a linha por 6 que é o tamanho em largura da matriz visual de peça segurada 
+        mul ebx
 
-    mov edx, esi
+        mov edx, esi
 
-    add ax, dx
+        add ax, dx  ; eax tem a posição em forma de vetor de onde o bloco deve ser desenhado 
 
-    xor ecx,ecx; limpa registrador
-    mov edx, pTetromino
+        xor ecx,ecx; limpa registrador
+        mov edx, pTetromino
 
-    mov cl, cor
-    
-    invoke desenharBlocoGuardado, hWin, hDC, cl, ax
+        mov cl, cor
+        
+        invoke desenharBlocoGuardado, hWin, hDC, cl, ax     ; desenha o bloco da peça na região delimitada para a peça guardada
 
-    pop edx
-    pop ecx
-    pop ebx
-    pop eax
+        pop edx
+        pop ecx
+        pop ebx
+        pop eax
 
     cont:
-    inc ebx
-    inc edx
-    jmp forT
+        inc ebx
+        inc edx
+        jmp forT
 
     fim:
     ret
@@ -1011,15 +1014,17 @@ getPixelGuardado proc pos:WORD
     ; limpa registradores
     xor edx, edx
     xor eax, eax
+
     mov ax, pos
-    mov ecx, 6
+    mov ecx, 6  ; recebe o tamanho em colunas da parte visual
     div ecx
 
-    shl eax, 5
-    shl edx, 5
-    add eax, 51
-    add edx, 451
-    shl eax, 16
+    shl eax, 5  ; são 32 pixels por bloco, e como usamos o método para ter a posição visual é necessário multiplicar o número de linhas e de colunas
+    shl edx, 5  ; por 32
+
+    add eax, 51 ; inicio x do retangulo delimitado para a peça guardada
+    add edx, 451    ; inicio y do retangulo delimitado para a peça guardada
+    shl eax, 16     ; linha fica nos primeiros 16 bits e a coluna nos últimos 16 bits de eax
     mov ax, dx
     
     ret
@@ -1041,6 +1046,7 @@ desenharTetrominoProx proc hWin:DWORD, hDC:DWORD, cor:BYTE
     invoke GlobalAlloc, 0, sizeof TETROMINO
     mov pTetromino, eax
 
+    ; desenha a caixa de prox peça
     mov rect.top, 280
 	mov rect.bottom, 450
 	mov rect.left, 390
@@ -1050,7 +1056,7 @@ desenharTetrominoProx proc hWin:DWORD, hDC:DWORD, cor:BYTE
     invoke FillRect, hDC, OFFSET rect, eax
 
 
-
+    ; monta o tetrimino que será a prox peça
     invoke montarTetromino, pTetromino, cor
     mov edx, pTetromino
     mov edx, (TETROMINO ptr[edx]).mat
@@ -1095,7 +1101,7 @@ desenharTetrominoProx proc hWin:DWORD, hDC:DWORD, cor:BYTE
 
     mov esi, edx
 
-    mov ebx, 6
+    mov ebx, 6 ; número da linha é multiplicado pelo número de colunas da caixa da próxima peça
     mul ebx
 
     mov edx, esi
@@ -1107,7 +1113,7 @@ desenharTetrominoProx proc hWin:DWORD, hDC:DWORD, cor:BYTE
 
     mov cl, cor
     
-    invoke desenharBlocoProx, hWin, hDC, cl, ax
+    invoke desenharBlocoProx, hWin, hDC, cl, ax ; desenha o bloco na posição da proxima peça
 
     pop edx
     pop ecx
@@ -1161,19 +1167,22 @@ desenharBlocoProx endp
 
 getPixelProx proc pos:WORD
     ; limpa registradores
+   ; limpa registradores
     xor edx, edx
     xor eax, eax
+
     mov ax, pos
-    mov ecx, 6
+    mov ecx, 6  ; recebe o tamanho em colunas da parte visual
     div ecx
 
-    shl eax, 5
-    shl edx, 5
-    add eax, 321
-    add edx, 451
-    shl eax, 16
+    shl eax, 5  ; são 32 pixels por bloco, e como usamos o método para ter a posição visual é necessário multiplicar o número de linhas e de colunas
+    shl edx, 5  ; por 32
+
+    add eax, 321 ; inicio x do retangulo delimitado para a peça guardada
+    add edx, 451    ; inicio y do retangulo delimitado para a peça guardada
+    shl eax, 16     ; linha fica nos primeiros 16 bits e a coluna nos últimos 16 bits de eax
     mov ax, dx
-    
+
     ret
 
 getPixelProx endp
