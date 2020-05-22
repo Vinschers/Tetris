@@ -761,6 +761,7 @@ limparLinha proc hWin:DWORD, hdc:DWORD, pMapa:DWORD, indice:WORD
     invoke mciSendCommand,open_wDeviceID,MCI_PLAY,MCI_FROM or MCI_NOTIFY,offset play_dwCallback
     invoke mciSendCommand,0,MCI_CLOSE,MCI_FROM or MCI_NOTIFY,offset play_dwCallback ; efeito de linha completa
 
+    xor edx,edx
 
     add dx, indice
     mov ecx, edx
