@@ -5,7 +5,7 @@
 ;18343 Lorenna Joanna Leal Nunes 
 ;18190 Maria Eduarda Elias Rocha
 ;para o prof Sergio na matéria 'linguagem de montagem'
-;todos direitos reservados -- 2019  ©
+;todos direitos reservados -- 2020  ©
 ;//////////////////////////////////////////////////////////////////////////////////
 
 bitmap equ 111
