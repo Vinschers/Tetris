@@ -181,7 +181,7 @@ TETROMINO ends
     formatacaoNivel     db "Nivel: %d", 0
     formatacaoPontuacao db "Pontuacao: %d", 0
     buffer              db 20 dup(0)
-    tema                db 2
+    tema                db 0
     FontName            db "script",0
 
 .const

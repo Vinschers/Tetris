@@ -48,6 +48,7 @@ destruirTetromino proc pTetromino:DWORD
     ret
 destruirTetromino endp
 
+;refaz o tetromino baseado em um tipo
 refazerTetrominoTipo proc pTetromino:DWORD, tipo:BYTE
 
     invoke refazerTetromino, pTetromino, tipo
@@ -55,6 +56,7 @@ refazerTetrominoTipo proc pTetromino:DWORD, tipo:BYTE
 
 refazerTetrominoTipo endp
 
+;refaz o tetromino baseado no vetor de tipos e a posição atual
 refazerTetrominoVetor proc pTetromino:DWORD, vetor:DWORD, pos:BYTE
 
     mov eax, vetor
@@ -173,7 +175,7 @@ adicionarMatrizLogica proc pTetromino:DWORD, pMapa:DWORD
     xor eax, eax
     xor ecx, ecx
 
-    forLinha:
+    forLinha: ;percorre a matriz do tetromino
         cmp cl, tetroAltura
         je fim
 
@@ -184,6 +186,7 @@ adicionarMatrizLogica proc pTetromino:DWORD, pMapa:DWORD
             push ecx
             push edx
 
+            ;calcula onde a posição atual da matriz do tetromino estaria na matriz lógica do mapa
             xor eax, eax
             xor ebx, ebx
             mov al, cl
@@ -197,9 +200,12 @@ adicionarMatrizLogica proc pTetromino:DWORD, pMapa:DWORD
 
             add eax, ebx
 
-            mov cl, byte ptr[esi + edx]
+            mov cl, byte ptr[esi + edx] ;cl tem o valor da posição atual da matriz do tetromino
             
-            add byte ptr[edi + eax], cl
+            add byte ptr[edi + eax], cl ;cl é adicionado na posição respectiva na matriz lógica
+
+            ;por exemplo, se na posição atual da matriz do tetromino há o número 1 e na posição atual da matriz lógica há o número 1,
+            ;a matriz lógica terá na sua respectiva posição atual o valor 1+1, ou seja, 2
 
             pop ecx
 
@@ -210,13 +216,9 @@ adicionarMatrizLogica proc pTetromino:DWORD, pMapa:DWORD
         xor ch, ch
         xor eax, eax
         mov al, mapaLargura
-        cbw
-        cwde
         add edx, eax
         xor eax, eax
         mov al, tetroLargura
-        cbw
-        cwde
         sub edx, eax
         inc cl
         jmp forLinha
@@ -226,6 +228,8 @@ adicionarMatrizLogica endp
 
 ;coloca o valor passado na matriz lógica na posição do tetromino
 colocarMatrizLogica proc pTetromino:DWORD, pMapa:DWORD, valor:BYTE
+    ;é basicamente igual ao procedimento adicionarMatrizLogica, mas ao invés de adicionar os valores, os valores da matriz do tetromino são atribuidos a suas respectivas
+    ;posições na matriz lógica
     LOCAL mapaLargura:BYTE
     LOCAL mapaAltura:BYTE
     LOCAL tetroLargura:BYTE
@@ -562,6 +566,7 @@ testarRotacao proc pTetromino:DWORD, pMapa:DWORD, x:BYTE, y:BYTE
 
     mov esi, pMapa
 
+    ;mudanças no eixo x e y são aplicadas em copiaT para verificar colisao
     xor eax, eax
     xor ecx, ecx
     mov al, y
@@ -588,7 +593,7 @@ testarRotacao proc pTetromino:DWORD, pMapa:DWORD, x:BYTE, y:BYTE
 
     mov result, eax
 
-    .if result == 0
+    .if result == 0 ;se não houve colisão, tetromino recebe copiaT
         mov edi, copiaT
         mov ebx, (TETROMINO ptr[edi]).posicao
         mov edi, pTetromino
@@ -597,7 +602,7 @@ testarRotacao proc pTetromino:DWORD, pMapa:DWORD, x:BYTE, y:BYTE
 
     invoke destruirTetromino, copiaT
 
-    .if result == 0
+    .if result == 0 ;se não houve colisão, o resultado do procedimento é positivo
         mov result, 1
     .elseif result == 1
         mov result, 0
@@ -630,7 +635,8 @@ descerTudo proc pTetro:DWORD, pMapa:DWORD
 
     xor eax, eax
     
-    forDescer:
+    forDescer: ;desce o tetromino uma posição até colidir. copiaT é uma copia do tetromino atual e estará sempre uma posição abaixo do tetromino original.
+               ;se copiaT colidir com algo, significa que abaixo do tetromino há um obstáculo e, portanto, ele deve parar de descer
         cmp eax, 1
         je fim
 

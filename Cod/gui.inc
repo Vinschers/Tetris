@@ -5,7 +5,7 @@
 ;18343 Lorenna Joanna Leal Nunes 
 ;18190 Maria Eduarda Elias Rocha
 ;para o prof Sergio na matéria 'linguagem de montagem'
-;todos direitos reservados -- 2019  ©
+;todos direitos reservados -- 2020  ©
 ;//////////////////////////////////////////////////////////////////////////////////
 
 ;procedimento que desenha a janela 
@@ -105,8 +105,7 @@ desenharTela proc hWin:DWORD, hdc:DWORD
 	ret
 desenharTela endp
 
-;P + Tcol + Tlin*16
-;SCHERER
+;esse procedimento desenha o tetromino passado por parâmetro em sua posição específica
 desenharTetromino proc hWin:DWORD, hDC:DWORD, pTetromino:DWORD, cor:BYTE
     mov edx, pTetromino
     mov edx, (TETROMINO ptr[edx]).mat
@@ -124,19 +123,20 @@ desenharTetromino proc hWin:DWORD, hDC:DWORD, pTetromino:DWORD, cor:BYTE
     xor ebx, ebx
     xor ecx, ecx
 
-    forT:
+    forT: ;percorre a matriz lógica do desenho de cada tetromino
     cmp ebx, eax
     je fim
 
     mov cl, byte ptr[edx]
-    cmp cl, 0
+    cmp cl, 0 ;só é necessário desenhar algo se houver 1 na posição atual da matriz do tetromino. Se o valor atual for 0, o for continua para a próxima posição
     je cont
 
-    push eax
+    push eax ;registradores são salvos
     push ebx
     push ecx
     push edx
 
+    ;as operações abaixo calculam a posição da matriz lógica onde o "pixel" atual do tetromino ficaria
     xor eax, eax
     mov al, bl ;al tem o contador
     xor ebx, ebx
@@ -163,11 +163,13 @@ desenharTetromino proc hWin:DWORD, hDC:DWORD, pTetromino:DWORD, cor:BYTE
     mov ecx, (TETROMINO ptr[edx]).posicao
     add eax, ecx
 
+    ;ax tem a posição onde o pixel deve ser desenhado
+
     mov cl, cor
     
-    invoke desenharBloco, hWin, hDC, cl, ax
+    invoke desenharBloco, hWin, hDC, cl, ax ;desenho do pixel
 
-    pop edx
+    pop edx ;registradores são restorados
     pop ecx
     pop ebx
     pop eax
@@ -566,7 +568,8 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
 	ret
 paint endp
 
-; N SEI
+;a variável desenhandoTetromino controla o estado de desenho da GUI. Se o valor dela for 1, o programa está executando um evento paint.
+;se outro evento paint for requisitado enquanto o anterior ainda não acabou, esse procedimento faz o código esperar o evento paint "ficar disponível"
 esperarDesenho proc
     comparar:
     cmp desenhandoTetromino, 1
@@ -791,17 +794,17 @@ limparLinha proc hWin:DWORD, hdc:DWORD, pMapa:DWORD, indice:WORD
         ret
 limparLinha endp
 
-;ESQUECI
+;se uma linha for preenchida, a matriz lógica e visual deve descer uma posição
 descerMatriz proc hWin:DWORD, hdc:DWORD, pMapa:DWORD, indice:WORD
     mov edx, pMapa
     mov esi, (MATRIZ ptr[edx]).ponteiro
     xor ecx, ecx; limpa registrador
     mov cx, indice
-    sub ecx, 16
+    sub ecx, 16 ;ecx aponta para o início da linha anterior da preenchida
     ; limpa registradores
     xor ebx,ebx
     xor edx,edx
-    forLinhas:
+    forLinhas: ;percorre todas as linhas de baixa para cima. Para cada uma, o conteúdo da linha atual é copiado para a linha de baixo
         cmp ecx, 51
         jle fimForLinhas
         mov ebx, ecx
@@ -822,13 +825,15 @@ descerMatriz proc hWin:DWORD, hdc:DWORD, pMapa:DWORD, indice:WORD
     fimForLinhas:
         mov ecx, 51
         mov ebx, 61
-        forParaLimparPrimeira:
+        forParaLimparPrimeira: ;por conta do modo de como as paredes da matriz lógica foram contruídas, ao descer a matriz lógica, a linha visual mais acima
+                               ;necessariamente estará preenchida com 1. Por isso, deve-se limpar essa linha
             cmp ecx, ebx
             je fimForParaLimparPrimeira
             mov byte ptr[esi + ecx], 0
             inc ecx
             jmp forParaLimparPrimeira
         fimForParaLimparPrimeira:
+            ;o código abaixo copia o retângulo visual acima da linha preenchida para baixo. Basicamente, isso faz todo o jogo descer uma linha visualmente falando
             mov rectParaApagar.top, 11
             mov rectParaApagar.left, 11
             invoke getPixel, indice
@@ -844,56 +849,54 @@ descerMatriz proc hWin:DWORD, hdc:DWORD, pMapa:DWORD, indice:WORD
             invoke BitBlt, hdc, 11, 43, 320, ecx, hdc, 11, 11, SRCCOPY
             ret
     
-
-
 descerMatriz endp
 
-;ESQUECI PT 2   
+
 acharLinhas proc hWin:DWORD, pMapa:DWORD
-    invoke GlobalAlloc, 0, 8    ; cria um vetor com 4 posições 
+    invoke GlobalAlloc, 0, 8    ; cria um vetor com 4 posições, com 2 bytes cada
     push eax
-    mov dword ptr[eax], 0
+    mov dword ptr[eax], 0 ;os primeiros 4 bytes são zerados
     add eax, 4
-    mov dword ptr[eax], 0
+    mov dword ptr[eax], 0 ;os últimos 4 bytes são zerados
     sub eax, 4
     mov edx, pMapa
     mov esi, (MATRIZ ptr[edx]).ponteiro
     xor ecx, ecx; limpa registrador
-    mov ecx, 51
+    mov ecx, 51 ;a matriz visual começa na posição 51 da matriz lógica
     ; limpa registradores
     xor ebx,ebx
     xor edx,edx
     forLinhas:
-        cmp edx, 0
+        cmp edx, 0      ;se o edx estiver vazio, o for deve continuar sem adicionar nada ao vetor
         je continuarForLinhas
-        mov word ptr[eax], dx
-        add eax, 2
+        mov word ptr[eax], dx ;coloca edx na posição atual do vetor
+        add eax, 2 ;move o eax para a próxima posição do vetor (cada posição tem 2 bytes)
         continuarForLinhas:
-            cmp ecx, 365
-            jge fimForLinhas
+            cmp ecx, 365 ;a matriz visual termina na posiçãp 365 da matriz lógica
+            jge fimForLinhas ;se a matriz visual acabar, o for termina
             mov ebx, ecx
-            add ebx, 10
-            forPercorreLinha:
-                cmp ecx, ebx
-                je achouLinha
+            add ebx, 10 ;ebx aponta para o final da linha visual atual
+            forPercorreLinha: ;esse for percorre a linha atual da esquerda para a direita. Quando o ecx chegar ao fim, a linha visual acabou
+                cmp ecx, ebx ;se ecx chegar ao final da linha, significa que a linha está preenchida
+                je achouLinha ;achou-se uma linha preenchida
                 xor edx, edx; limpa registrador
-                mov dl,  byte ptr[esi + ecx]
-                cmp dl, 0
+                mov dl,  byte ptr[esi + ecx]  ;como edx foi limpo, edx tem o valor da posição atual da matriz lógica
+                cmp dl, 0 ;se houver 0 na matriz lógica, não há peça na matriz visual e, portanto, a linha não está preenchida
                 je voltarAbruptamente
-                inc ecx
+                inc ecx ;ecx é incrementado para continuar percorrendo a linha
                 jmp forPercorreLinha
-                voltarAbruptamente:
-                    mov ecx, ebx
-                    add ecx, 6
-                    xor edx,edx; limpa registrador
-                    jmp forLinhas
+                voltarAbruptamente: ;o fluxo de execução chega aqui se a linha não estiver completamente preenchida
+                    mov ecx, ebx ;ecx vai para o final da linha
+                    add ecx, 6 ;com mais 6, ecx agora aponta para o início da próxima linha
+                    xor edx,edx; limpa edx
+                    jmp forLinhas ;volta para o for linha para executar a próxima linha
                 achouLinha:
-                    mov edx, ecx
-                    sub edx, 10
-                    add ecx, 6
+                    mov edx, ecx ;edx aponta para o fim da linha preenchida
+                    sub edx, 10 ;edx aponta para o início da linha preenchida
+                    add ecx, 6 ;ecx aponta para o início da próxima linha
                     jmp forLinhas
     fimForLinhas:
-        pop eax
+        pop eax ;com isso, o retorno desse procedimento é o endereço do vetor contendo o endereço de início das linhas preenchidas
         ret
 acharLinhas endp
 
