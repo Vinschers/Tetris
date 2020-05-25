@@ -115,8 +115,10 @@ TopXY endp
 ; SALIM SUA PARTE
 
 randomizarVetor proc vet:DWORD
-    mov esi, vet
-    xor ecx, ecx   
+    mov esi, vet    ; atribuímos o vetor ao registrador esi
+    xor ecx, ecx    ; limpamos o registrador ecx 
+
+    ; agora completamos todas as posições do vetor com o número 8
     completarVetor:
         mov byte ptr[esi+ecx], 8
         inc ecx
@@ -124,60 +126,70 @@ randomizarVetor proc vet:DWORD
         cmp ecx, 7
         jne completarVetor
 
-    xor ecx, ecx    ; contador do for menor
+    xor ecx, ecx    ; usaremos ecx como contador do for abaixo
+
+    ; neste for colocaremos valores não aleatórios em cada posição do vetor
     for1:
+        cmp ecx, 7  ; caso ecx, o contador, seja igual a 7,
+        je final    ; vamos para o final do método
 
-        cmp ecx, 7
-        je final
-
-        push esi 
+        ; chamamos o método que retorna um número aleatório no intervalo de 0 a 6
+        push esi    
         push ecx
         call randomizar
         pop ecx
         pop esi
 
+        ; verificamos se o valor gerado já existe no vetor
         push esi
         push ecx
         push eax
         invoke verificarTipoNoVetor, esi, al
         xor edx, edx
-        mov dl, al
+        mov dl, al  ; salvamos o valor de el em dl para que não seja perdido
         pop eax
         pop ecx
         pop esi
         
-        cmp edx, 1
-        je for1
+        cmp edx, 1  ; caso edx seja igual a 1, significa que o tipo já existe no vetor
+        je for1     ; então retornamos ao começo do for1
 
-        mov byte ptr [esi + ecx], al
-        inc ecx
-        jmp for1
+        mov byte ptr [esi + ecx], al    ; atribuimos o valor aleatório à posição atual do vetor
+        inc ecx     ; incrementamos o contador ecx 
+        jmp for1    ; voltamos ao começo do for1
         
     final:
-        ret
+        ret 
 
 randomizarVetor endp 
 
-
+; procedure que verifica que o tipo passado como parâmetro já existe no vetor
 verificarTipoNoVetor proc vet:DWORD, tipo:BYTE
+; vet é o vetor com os tipos de peças e tipo é o que queremos verificar
+
+    ; atribuímos o vetor ao registrador ebx
     mov ebx, vet
+
+    ; limpamos os registradores a serem usados
     xor ecx, ecx
     xor eax, eax
+
+    ; loop para verificação da existência do tipo
     for1:
-        cmp cl, 7
-        je final
+        cmp cl, 7   ; caso cl, o contador, seja igual a 7,
+        je final    ; vamos para o final do método
 
-        mov ch, tipo
-        cmp byte ptr[ebx], ch
-        jne nExiste
+        mov ch, tipo        
+        cmp byte ptr[ebx], ch   ; caso o tipo da posição atual do vetor seja igual ao passado como parâmetro
+        jne nExiste             ; quer dizer que não achamos ainda
 
-        mov eax, 1
-        jmp final
+        mov eax, 1   ; atribuimos 1 a eax, porque o tipo já existe no vetor
+        jmp final    ; e vamos para o final do método
 
         nExiste:
-            inc ecx
-            inc ebx
-            jmp for1
+            inc ecx     ; incrementamos o contador
+            inc ebx     ; avançamos uma posição no vetor
+            jmp for1    ; retornamos ao começo do for1
 
     final:    
         ret
@@ -185,9 +197,10 @@ verificarTipoNoVetor proc vet:DWORD, tipo:BYTE
 verificarTipoNoVetor endp 
 
 
-randomizar proc
+; procedure que gera um número inteiro aleatório dentro de um intervalo de 0 a 6
+randomizar proc     
     
-    invoke Dns_GetRandomXid, 0          ; Argument not used -> AX = random WORD
+    invoke Dns_GetRandomXid, 0          
     mov ecx, 7
     xor edx, edx
     div ecx
