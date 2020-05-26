@@ -289,7 +289,7 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
     mov dl, pecaGuardada
     mov cl, jaGuardou
 
-    .if al == PP_DESENHAR           ; N COMENTEI
+    .if al == PP_DESENHAR           ; atualiza a tela
         invoke desenharTela, hWin ,hdc
         mov cl, NADA
         add cl, tema
@@ -379,7 +379,7 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
         mov cl, NADA
         add cl, tema
         invoke desenharTetromino, hWin, hdc, pTetromino, cl ; apaga o tetromino da posição atual
-        invoke descerTudo, pTetromino, pMapa                ; N SEI
+        invoke descerTudo, pTetromino, pMapa                
         mov colidiu, 1                                      ; a peça chegou ao fim então ela colidiu
         jmp atualizarVariaveis
 
@@ -450,7 +450,7 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
 
     atualizarVariaveis:
 
-    invoke destruirTetromino, copiaTetromino
+    invoke destruirTetromino, copiaTetromino    ; da free nos ponteiros que fazem referência ao tetromino
 
     mov cl, NADA
     add cl, tema
@@ -460,10 +460,10 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
     mov cl, (TETROMINO ptr[esi]).tipo
     invoke desenharTetromino, hWin, hdc, pFantasma, cl
 
-    invoke colocarMatrizLogica, pTetromino, pMapa, 1
+    invoke colocarMatrizLogica, pTetromino, pMapa, 1        ; coloca o novo tetromino na matriz lógica
     mov esi, pTetromino
     mov cl, (TETROMINO ptr[esi]).tipo
-    invoke desenharTetromino, hWin, hdc, pTetromino, cl
+    invoke desenharTetromino, hWin, hdc, pTetromino, cl     ; desenha o tetromino atualizado
 
     mov al, paintParam
     .if colidiu == 1
@@ -471,14 +471,14 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
             mov jaGuardou, 0
         	mov esi, pTetromino
         	mov ecx, (TETROMINO ptr[esi]).posicao
-            .if ecx < 67
+            .if ecx < 67            ; se a posição for acima do tabuleiro significa que perdeu
                 mov perdeu, 1
                 invoke perder, hWin, hdc
                 invoke desenharTela, hWin,hdc
                 invoke atualizarFantasma, pFantasma, pTetromino, pMapa
                 jmp desenharProximaPeca
             .else
-                invoke trabalharComLinhas, hWin, hdc, pMapa
+                invoke trabalharComLinhas, hWin, hdc, pMapa ; verifica se alguma linha foi preenchida, se foi limpa e tira da matriz lógica
                 mov velocidade, 500
                 proximaPeca:
                 mov ebx, atual
@@ -552,7 +552,7 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
                 invoke randomizarVetor, vetPecas
                 mov cl, 0
 
-                atualizarProx:
+                atualizarProx: ; pega o proximo tipo do vetor de tipos e atualiza o tetromino
                 mov edx, vetPecas
                 mov cl, byte ptr[edx + ecx]
                 invoke desenharTetrominoProx, hWin, hdc, cl
@@ -683,6 +683,8 @@ trabalharComLinhas proc hWin:DWORD, hdc:DWORD, pMapa:DWORD
         mov retanguloTextoPontuacao.top, 530
         mov retanguloTextoPontuacao.right, 650
         mov retanguloTextoPontuacao.bottom, 550
+
+
         invoke SelectObject, hdc, eax
         mov    hfont,eax
         RGB    corTxt,corTxt,corTxt
@@ -691,6 +693,8 @@ trabalharComLinhas proc hWin:DWORD, hdc:DWORD, pMapa:DWORD
         invoke SetBkColor,hdc,eax
         invoke DrawText, hdc, ADDR buffer, -1, ADDR retanguloTextoPontuacao, DT_SINGLELINE
         invoke SelectObject,hdc, hfont
+
+
         pop edx
         pop ecx
         pop ebx
