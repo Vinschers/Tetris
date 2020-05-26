@@ -10,26 +10,26 @@
 
 ;procedimento que desenha a janela 
 desenharTela proc hWin:DWORD, hdc:DWORD
+    ;variáveis locais
     LOCAL corDeFundo:BYTE
     LOCAL corDeFundoRect:BYTE
     LOCAL corTxt:BYTE
     LOCAL hfont:HFONT
 
-
     mov corDeFundo, 0       ; cor de fundo da tela
     mov corDeFundoRect, 255 ; cor de fundo dos retangulos de peças
     mov corTxt, 20          ; cor de fundo dos textos
 
-    .if tema == 0               ; se o tema for claro
+    .if tema == 0               ; configura se o tema for claro
         mov corDeFundoRect, 255
         mov corDeFundo, 240
-    .else                       ; se o tema for escuro
+    .else                       ; configura se o tema for escuro
         mov corDeFundoRect, 33
         mov corDeFundo, 20
         mov corTxt, 255
     .endif
     
-    ; mapa
+    ; configuração do mapa
     mov rect.top, 0
     mov rect.left, 0
     mov rect.bottom, 700
@@ -38,7 +38,7 @@ desenharTela proc hWin:DWORD, hdc:DWORD
     invoke CreateSolidBrush, eax
     invoke FillRect, hdc, OFFSET rect, eax
 
-    ; peça segurada retangulo
+    ; espaço que será mostrado a peça segurada
 	mov rect.top, 10
 	mov rect.bottom, 652
 	mov rect.left, 10
@@ -57,7 +57,6 @@ desenharTela proc hWin:DWORD, hdc:DWORD
     invoke SetBkColor,hdc,eax
     invoke TextOut,hdc,400,20,ADDR pecaSeguradaTxt,SIZEOF pecaSeguradaTxt
     invoke SelectObject,hdc, hfont
-
 
     ; proxima peça retangulo
 	mov rect.top, 50
@@ -183,18 +182,18 @@ desenharTetromino proc hWin:DWORD, hDC:DWORD, pTetromino:DWORD, cor:BYTE
     ret
 desenharTetromino endp
 
-;LOLO
+;Tarefa assíncrona que fara o tetromino descer na matriz
 ThreadProcDescer PROC USES ecx Param:DWORD
-    invoke WaitForSingleObject,hEventStart, velocidade
-        .IF eax == WAIT_TIMEOUT
-            pintar PP_DESCER
-            jmp ThreadProcDescer
+    invoke WaitForSingleObject,hEventStart, velocidade ; aguada os objetos
+        .IF eax == WAIT_TIMEOUT ; verifica se o tetrimino já desceu o máximo e pode descer o próximo
+            pintar PP_DESCER ; desce o tretromino
+            jmp ThreadProcDescer ; continua com a tarefa assíncrona
         .ENDIF
-        .if perdeu != 1
-            jmp ThreadProcDescer
+        .if perdeu != 1 ; verifica se o usuário não perdeu 
+            jmp ThreadProcDescer ; continua com a tarefa assíncrona
         .endif
     ret
-ThreadProcDescer endp
+ThreadProcDescer endp ; final da tarefa
 
 desenharBloco proc hWin:DWORD, hDC:DWORD, cor:BYTE, posicao:WORD
 
@@ -466,13 +465,16 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
     invoke desenharTetromino, hWin, hdc, pTetromino, cl     ; desenha o tetromino atualizado
 
     mov al, paintParam
-    .if colidiu == 1
+    .if colidiu == 1 ; verifia se o tetromino que esta decendo encontrou com outro
         .if al == PP_DESCER || al == PP_CAIR_TUDO
-            mov jaGuardou, 0
+            mov jaGuardou, 0 ; não haverá a peça guardada
         	mov esi, pTetromino
-        	mov ecx, (TETROMINO ptr[esi]).posicao
-            .if ecx < 67            ; se a posição for acima do tabuleiro significa que perdeu
-                mov perdeu, 1
+
+        	mov ecx, (TETROMINO ptr[esi]).posicao ; guarda a posição do tetromino
+            .if ecx < 67 ; verifica se a matriz do jogo foi preenchida verticalmente
+                mov perdeu, 1 ; se sim, o jogo acabou
+
+                ; atualiza a tela 
                 invoke perder, hWin, hdc
                 invoke desenharTela, hWin,hdc
                 invoke atualizarFantasma, pFantasma, pTetromino, pMapa
@@ -480,7 +482,8 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
             .else
                 invoke trabalharComLinhas, hWin, hdc, pMapa ; verifica se alguma linha foi preenchida, se foi limpa e tira da matriz lógica
                 mov velocidade, 500
-                proximaPeca:
+                ; configura o próximo tetromino que irá descer
+                proximaPeca: 
                 mov ebx, atual
                 inc byte ptr [ebx]
                 mov cl, byte ptr [ebx]
@@ -489,21 +492,25 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
                     mov byte ptr [ebx], 0
                 .endif 
                 mov cl, byte ptr [ebx]
-                invoke refazerTetrominoVetor, pTetromino, vetPecas, cl
-                invoke atualizarFantasma, pFantasma, pTetromino, pMapa
-                pontuacaoPecaCaida: ; a cada peça caída a pontuação aumenta 100*nivel do jogador
+                invoke refazerTetrominoVetor, pTetromino, vetPecas, cl ; a nova peça será guardada no vetor
+                invoke atualizarFantasma, pFantasma, pTetromino, pMapa ; a sombra será atualizada para o tetromino escolhido
+
+                ; a cada peça caída a pontuação aumenta 100*nivel do jogador
+                pontuacaoPecaCaida: 
+                    ;gurda as informações na pilha
                     push eax
                     push ebx
                     push ecx
                     push edx
-
-                    xor ebx,ebx
-                    mov bl, nivel
-                    inc ebx
-                    mov eax, 100
-                    mul ebx
-
-                    add pontuacao, eax
+                    ; 
+                    xor ebx,ebx ; limpa o registrador
+                    mov bl, nivel ; guarda o nível em que está
+                    inc ebx       ; aumenta o nível
+                    mov eax, 100  ; aumenta a pontuação
+                    mul ebx       ; atualiza o nível 
+                    
+                    add pontuacao, eax ; guarda a pontuação na variável
+                    ; guarda as informações na pilha
                     push eax
                     push ebx
                     push ecx
@@ -511,12 +518,10 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
 
                     mov eax, pontuacao
 
-
                     ; exibe a pontuação atualizada
                     invoke wsprintf, OFFSET buffer, OFFSET formatacaoPontuacao, eax
                     invoke GetClientRect, hWin, ADDR rect
-                    
-                    
+                     
                     mov rect.left, 400
                     mov rect.top, 530
                     mov rect.right, 650
@@ -531,6 +536,7 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
                     invoke DrawText, hdc, ADDR buffer, -1, ADDR rect, DT_SINGLELINE
                     invoke SelectObject,hdc, hfont
 
+                    ; desempilha as informações
                     pop edx
                     pop ecx
                     pop ebx
@@ -540,25 +546,26 @@ paint proc hWin:DWORD, hdc:DWORD, pTetromino:DWORD, pMapa:DWORD, pFantasma:DWORD
                     pop ebx
                     pop eax
 
+                ; vê se já chegou no final do vetor de peças e sortea novamente
                 desenharProximaPeca:
                 mov ebx, atual
-                xor ecx, ecx; limpa registrador
+                xor ecx, ecx ; limpa registrador
                 mov cl, byte ptr [ebx]
                 inc cl 
 
-                cmp cl, 7 
-                jne atualizarProx
+                cmp cl, 7 ; verifica se já chegou no final do vetor de peças
+                jne atualizarProx ; sortea novamente
 
                 invoke randomizarVetor, vetPecas
                 mov cl, 0
 
                 atualizarProx: ; pega o proximo tipo do vetor de tipos e atualiza o tetromino
                 mov edx, vetPecas
-                mov cl, byte ptr[edx + ecx]
-                invoke desenharTetrominoProx, hWin, hdc, cl
-                mov esi, pFantasma
+                mov cl, byte ptr[edx + ecx] ; seleciona uma peça 
+                invoke desenharTetrominoProx, hWin, hdc, cl ; desenha
+                mov esi, pFantasma 
                 mov cl, (TETROMINO ptr[esi]).tipo
-                invoke desenharTetromino, hWin, hdc, pFantasma, cl
+                invoke desenharTetromino, hWin, hdc, pFantasma, cl ; desenha a sombra
                 mov esi, pTetromino
 			    mov cl, (TETROMINO ptr[esi]).tipo
 			    invoke desenharTetromino, hWin, hdc, pTetromino, cl
